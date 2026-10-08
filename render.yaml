@@ -1,8 +1,9 @@
 services:
   - type: web
-    name: pwfb-financial-potal
+    name: pwfb-financial-potal-web
     runtime: node
     plan: free
+    rootDir: web
     buildCommand: npm install && npm run build
-    startCommand: npm start
+    startCommand: npm run preview -- --host 0.0.0.0 --port $PORT
     autoDeploy: true
