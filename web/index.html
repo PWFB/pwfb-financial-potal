@@ -476,12 +476,12 @@
 
         // 2. TRANSPORT DATASET
         const defaultTransport = [
-            { code: '000017', bank: 'Wema/ALAT', acc: '0280064037', name: 'JOSEPH ANIEBIET RAPHEAL', amount: 257620, narration: 'BM AWOTAN', ref: '001' },
-            { code: '000017', bank: 'Wema/ALAT', acc: '0261295863', name: 'VICTORIA BUKOLA ABIOLA', amount: 195500, narration: 'AWOTAN', ref: '002' },
-            { code: '000014', bank: 'Access Bank', acc: '1455923913', name: 'NAFISAT ADEJOKE OLAOLUWA', amount: 195500, narration: 'AWOTAN', ref: '003' },
-            { code: '000017', bank: 'Wema/ALAT', acc: '0280145332', name: 'OLUWASEUN RACHEAL ADEBAYO', amount: 165500, narration: 'AWOTAN', ref: '004' },
-            { code: '000017', bank: 'Wema/ALAT', acc: '0279962919', name: 'PAULINA OLUWADAMILARE KAYODE', amount: 229520, narration: 'BM MONIYA 3', ref: '005' },
-            { code: '000010', bank: 'EcoBank', acc: '2280088175', name: 'AYORINDE DORCAS OYEKANMI', amount: 114600, narration: 'MONIYA 3', ref: '006' }
+            { region: 'DM 2', code: '000017', bank: 'Wema/ALAT', acc: '0280064037', name: 'JOSEPH ANIEBIET RAPHEAL', amount: 6000, narration: 'BM AWOTAN', ref: '001' },
+            { region: 'DM 2', code: '000017', bank: 'Wema/ALAT', acc: '0281295863', name: 'VICTORIA BUKOLA ABIOLA', amount: 6000, narration: 'AWOTAN', ref: '002' },
+            { region: 'DM 2', code: '000014', bank: 'Access Bank', acc: '1495923913', name: 'NAFISAT ADEJOKE OLAOLUWA', amount: 6000, narration: 'AWOTAN', ref: '003' },
+            { region: 'DM 2', code: '000017', bank: 'Wema/ALAT', acc: '0280145332', name: 'OLUWASEUN RACHEAL ADEBAYO', amount: 6000, narration: 'AWOTAN', ref: '004' },
+            { region: 'DM 2', code: '000017', bank: 'Wema/ALAT', acc: '0279962919', name: 'PAULINA OLUWADAMILARE KAYODE', amount: 6000, narration: 'BM MONIYA 3', ref: '005' },
+            { region: 'DM 2', code: '000010', bank: 'EcoBank', acc: '2280088175', name: 'AYORINDE DORCAS OYEKANMI', amount: 6000, narration: 'MONIYA 3', ref: '006' }
         ];
 
         // 3. COOPERATIVE DATASET
@@ -882,7 +882,7 @@ function setThemeMode(mode){if(!['dark','light','system'].includes(mode))mode='s
 function initAppearance(){var mode='system',folded=false;try{mode=localStorage.getItem(pwfbThemeKey)||'system';folded=localStorage.getItem(pwfbSidebarKey)==='folded';}catch(e){}pwfbSidebarCollapsed=folded;applySidebarState();setThemeMode(mode);}
 function pwfbEsc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function pwfbPersist(){try{localStorage.setItem(pwfbStorageKey,JSON.stringify({payroll:rawPayrollData,transport:defaultTransport,coop:baseCoopData,transfers:pwfbTransfers,salarySchedule:pwfbSalarySchedule}));}catch(e){}}
-function pwfbLoad(){try{var d=JSON.parse(localStorage.getItem(pwfbStorageKey)||'null');if(!d)return;if(Array.isArray(d.payroll))rawPayrollData.splice(0,rawPayrollData.length,...d.payroll);if(Array.isArray(d.transport))defaultTransport.splice(0,defaultTransport.length,...d.transport);if(Array.isArray(d.coop))baseCoopData.splice(0,baseCoopData.length,...d.coop);if(Array.isArray(d.transfers))pwfbTransfers=d.transfers;if(Array.isArray(d.salarySchedule))pwfbSalarySchedule=d.salarySchedule;}catch(e){}}
+function pwfbLoad(){try{var d=JSON.parse(localStorage.getItem(pwfbStorageKey)||'null');if(!d)return;if(Array.isArray(d.payroll))rawPayrollData.splice(0,rawPayrollData.length,...d.payroll);if(Array.isArray(d.transport))defaultTransport.splice(0,defaultTransport.length,...d.transport.map(function(row){return Object.assign({region:'DM 2'},row);}));if(Array.isArray(d.coop))baseCoopData.splice(0,baseCoopData.length,...d.coop);if(Array.isArray(d.transfers))pwfbTransfers=d.transfers;if(Array.isArray(d.salarySchedule))pwfbSalarySchedule=d.salarySchedule;}catch(e){}}
 function pwfbRenderTransfers(){var body=document.getElementById('transfer-tbody');if(!body)return;var total=0;body.innerHTML=pwfbTransfers.map(function(t,i){total+=Number(t.amount)||0;return '<tr class="border-b"><td class="p-3">'+pwfbEsc(t.date)+'</td><td class="p-3">'+pwfbEsc(t.from)+'</td><td class="p-3">'+pwfbEsc(t.to)+'</td><td class="p-3 text-right">₦'+(Number(t.amount)||0).toLocaleString()+'</td><td class="p-3">'+pwfbEsc(t.narration)+' '+pwfbEsc(t.ref||'')+'</td><td class="p-3"><button class="action-btn bg-blue-100 text-blue-700" onclick="pwfbEditTransfer('+i+')">Edit</button><button class="action-btn bg-red-100 text-red-700" onclick="pwfbDeleteTransfer('+i+')">Delete</button></td></tr>';}).join('');document.getElementById('transferCount').textContent=pwfbTransfers.length+' records';document.getElementById('transfer-tfoot').innerHTML='<tr><td colspan="3" class="p-3">TOTAL TRANSFERS</td><td class="p-3 text-right">₦'+total.toLocaleString()+'</td><td colspan="2"></td></tr>';}
 function pwfbEditTransfer(i){var t=pwfbTransfers[i];if(!t)return;var f=prompt('From:',t.from);if(f===null)return;var to=prompt('To:',t.to);if(to===null)return;var a=Number(prompt('Amount:',t.amount));if(!Number.isFinite(a)||a<=0){alert('Enter a valid amount');return;}var d=prompt('Date (YYYY-MM-DD):',t.date);if(d===null)return;var n=prompt('Narration:',t.narration||'');if(n===null)return;Object.assign(t,{from:f,to:to,amount:a,date:d,narration:n});pwfbPersist();pwfbRenderTransfers();pwfbSearch();}
 function pwfbDeleteTransfer(i){if(confirm('Delete this transfer?')){pwfbTransfers.splice(i,1);pwfbPersist();pwfbRenderTransfers();pwfbSearch();}}
