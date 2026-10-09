@@ -168,9 +168,7 @@ async function verifyOtp(client, phone, purpose, code) {
   const challenge = found.rows[0];
   if (!challenge || new Date(challenge.expires_at).getTime() <= Date.now() || challenge.attempts >= challenge.max_attempts) {
     if (challenge) await client.query("UPDATE pwfb_portal_otp_challenges SET consumed_at=NOW() WHERE id=$1", [challenge.id]);
-    const error = new Error("That code has expired. Request a new SMS code.");
-    error.status = 400;
-    throw error;
+    return { status: 400, message: "That code has expired. Request a new SMS code." };
   }
   const expected = challenge.otp_hash;
   const actual = hashText(phone + "|" + purpose + "|" + code);
@@ -181,11 +179,10 @@ async function verifyOtp(client, phone, purpose, code) {
       "UPDATE pwfb_portal_otp_challenges SET attempts=$2, consumed_at=CASE WHEN $2 >= max_attempts THEN NOW() ELSE consumed_at END WHERE id=$1",
       [challenge.id, attempts]
     );
-    const error = new Error(attempts >= challenge.max_attempts ? "Too many incorrect codes. Request a new code." : "The code is incorrect. Please try again.");
-    error.status = 400;
-    throw error;
+    return { status: 400, message: attempts >= challenge.max_attempts ? "Too many incorrect codes. Request a new code." : "The code is incorrect. Please try again." };
   }
   await client.query("UPDATE pwfb_portal_otp_challenges SET consumed_at=NOW() WHERE id=$1", [challenge.id]);
+  return null;
 }
 async function authenticatedUser(req) {
   const token = readCookie(req, sessionCookie);
@@ -208,6 +205,10 @@ app.get("/api/health", asyncRoute(async (_req, res) => {
 app.post("/api/auth/register/request", asyncRoute(async (req, res) => {
   const phone = normalizePhone(req.body?.phone);
   if (!phone) return res.status(400).json({ error: "Enter a valid Nigerian phone number." });
+  const adminPhone = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
+  if (!adminPhone || (phone !== adminPhone && process.env.PORTAL_ALLOW_REGISTRATION !== "true")) {
+    return res.status(403).json({ error: "Registration is restricted. Contact your PWFB portal administrator." });
+  }
   const existing = await pool.query("SELECT id FROM pwfb_portal_users WHERE phone_e164=$1", [phone]);
   if (existing.rowCount) return res.status(409).json({ error: "An account already exists for this phone number. Please log in." });
   await sendOtp(phone, "register", req);
@@ -225,7 +226,8 @@ app.post("/api/auth/register/verify", asyncRoute(async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await verifyOtp(client, phone, "register", code);
+    const otpError = await verifyOtp(client, phone, "register", code);
+    if (otpError) { await client.query("COMMIT"); return res.status(otpError.status).json({ error: otpError.message }); }
     const adminPhone = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
     const role = adminPhone && phone === adminPhone ? "admin" : "staff";
     const inserted = await client.query(
@@ -265,7 +267,8 @@ app.post("/api/auth/login/verify", asyncRoute(async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await verifyOtp(client, phone, "login", code);
+    const otpError = await verifyOtp(client, phone, "login", code);
+    if (otpError) { await client.query("COMMIT"); return res.status(otpError.status).json({ error: otpError.message }); }
     const result = await client.query(
       "SELECT id,full_name,phone_e164,role FROM pwfb_portal_users WHERE phone_e164=$1 AND disabled_at IS NULL FOR UPDATE",
       [phone]
@@ -302,7 +305,7 @@ app.post("/api/auth/logout", asyncRoute(async (req, res) => {
 
 app.use("/api", (_req, res) => res.status(404).json({ error: "API endpoint not found." }));
 app.use(express.static(path.join(__dirname, "dist"), { index: false, maxAge: "1h" }));
-app.get("*", (req, res, next) => {
+app.get(/.*/, (req, res, next) => {
   if (req.path.startsWith("/api/")) return next();
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
