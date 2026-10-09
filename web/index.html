@@ -799,11 +799,13 @@
         function toggleAccordion(branchName) {
             accordionStates[branchName] = !accordionStates[branchName];
             renderBranchAccordions();
+            if(typeof pwfbAddActions==='function')pwfbAddActions();
         }
 
         function toggleAllAccordions(openState) {
             rawPayrollData.forEach(item => accordionStates[item.branch] = openState);
             renderBranchAccordions();
+            if(typeof pwfbAddActions==='function')pwfbAddActions();
         }
 
         function filterTables() {
@@ -847,8 +849,7 @@ function pwfbAddActions(){
  [['payroll','#branch-accordion-list tbody'],['transport','#transport-tbody'],['coop','#coop-tbody']].forEach(function(x){
   document.querySelectorAll(x[1]).forEach(function(body){
    var table=body.closest('table'),head=table&&table.querySelector('thead tr');
-   if(head&&!head.querySelector('[data-pwfb-head]')){var th=document.createElement('th');th.className='p-3';th.textContent='Actions';th.setAttribute('data-pwfb-head','1');}
-   if(head&&!head.querySelector('[data-pwfb-head]')){var th2=document.createElement('th');th2.className='p-3';th2.textContent='Actions';th2.setAttribute('data-pwfb-head','1');head.appendChild(th2);}
+   if(head&&!head.querySelector('[data-pwfb-head]')){var th=document.createElement('th');th.className='p-3';th.textContent='Actions';th.setAttribute('data-pwfb-head','1');head.appendChild(th);}
    Array.from(body.rows).forEach(function(row,i){
     var old=row.querySelector('[data-pwfb-actions]');if(old)old.remove();
     var ix=i;
