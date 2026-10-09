@@ -1,5 +1,6 @@
 import {useEffect,useMemo,useState} from "react";
 import "./App.css";
+import "./auth.css";
 const payroll=[
 {region:"DM 1",branch:"ILORIN 2",name:"OGUNJEBE MICHEAL",gra:"83",gross:216000,bonus:0,coopS:0,coopL:0,dev:5400,tax:6480,offline:500,others:0,advance:0},
 {region:"DM 1",branch:"ILORIN 2",name:"OKANLAWON FAIDAT.O",gra:"325",gross:136400,bonus:0,coopS:0,coopL:0,dev:3410,tax:4100,offline:0,others:0,advance:0},
