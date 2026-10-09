@@ -15,7 +15,6 @@ const sessionSecret = process.env.SESSION_SECRET;
 const otpPepper = process.env.OTP_PEPPER || sessionSecret;
 const sessionCookie = "pwfb_portal_session";
 const sessionHours = 12;
-const otpMinutes = 5;
 const maxOtpAttempts = 5;
 
 if (!databaseUrl) throw new Error("DATABASE_URL is required");
@@ -149,7 +148,7 @@ async function sendOtp(phone, purpose, req) {
       signal: AbortSignal.timeout(12000)
     });
     const result = await response.json().catch(() => ({}));
-    if (!response.ok || result.code === "ok" && result.message?.toLowerCase().includes("fail")) {
+    if (!response.ok || (typeof result.message === "string" && /fail|error|invalid/i.test(result.message)) || (result.code && !["ok", "200", 200].includes(result.code))) {
       throw new Error("SMS provider rejected the request");
     }
   } catch (error) {
@@ -222,6 +221,10 @@ app.post("/api/auth/register/verify", asyncRoute(async (req, res) => {
   const code = String(req.body?.code || "").trim();
   if (!phone || name.length < 2 || name.length > 100 || !validPin(pin) || !/^[0-9]{6}$/.test(code)) {
     return res.status(400).json({ error: "Enter your name, valid phone number, 4–8 digit PIN, and 6-digit SMS code." });
+  }
+  const adminPhoneForRegistration = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
+  if (!adminPhoneForRegistration || (phone !== adminPhoneForRegistration && process.env.PORTAL_ALLOW_REGISTRATION !== "true")) {
+    return res.status(403).json({ error: "Registration is restricted. Contact your PWFB portal administrator." });
   }
   const client = await pool.connect();
   try {
