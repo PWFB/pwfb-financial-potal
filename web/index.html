@@ -203,30 +203,35 @@
                 <div id="grand-total-card" class="bg-brand-darkgreen text-white rounded-xl p-5 shadow-sm border border-brand-green/30 mt-6"></div>
             </section>
 
-            <!-- MODULE 2: TRANSPORT & SALARY SCHEDULE -->
+            <!-- MODULE 2: TRANSPORT SCHEDULE / BANK DISBURSEMENT -->
             <section id="tab-transport" class="tab-content hidden space-y-4">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                    <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
                         <div>
                             <h3 class="text-sm font-bold text-gray-800">Transport Schedule / Bank Disbursement Schedule</h3>
-                            <p class="text-xs text-gray-500">Transport and verified bank disbursement records</p>
+                            <p class="text-xs text-gray-500">Regional records, account details, references and scheduled amounts</p>
                         </div>
-                        <span id="transport-badge" class="text-xs bg-orange-100 text-brand-orange font-semibold px-2.5 py-1 rounded-full">Total: ₦11,948,980.00</span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-xs font-bold text-gray-600 uppercase">Region:</span>
+                            <button id="region-btn-all" type="button" onclick="filterTransportRegion('ALL')" class="region-filter bg-brand-green text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">All Records</button>
+                            <button id="region-btn-dm1" type="button" onclick="filterTransportRegion('DM 1')" class="region-filter bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300">DM 1 Schedule</button>
+                            <button id="region-btn-dm2" type="button" onclick="filterTransportRegion('DM 2')" class="region-filter bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300">DM 2 Schedule</button>
+                        </div>
                     </div>
-
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex flex-wrap gap-2 justify-between items-center">
+                        <div>
+                            <h3 id="transport-region-title" class="text-sm font-bold text-gray-800">All Scheduled Disbursements</h3>
+                            <p class="text-xs text-gray-500">Transport and bank disbursement records</p>
+                        </div>
+                        <span id="transport-badge" class="text-xs bg-orange-100 text-brand-orange font-semibold px-2.5 py-1 rounded-full">Total: ₦0.00</span>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-gray-100/70 border-b border-gray-200 text-gray-700 uppercase font-semibold">
-                                    <th class="p-3">Bank Code</th>
-                                    <th class="p-3">Destination Bank</th>
-                                    <th class="p-3">Account No</th>
-                                    <th class="p-3">Account Name</th>
-                                    <th class="p-3 text-right">Amount (₦)</th>
-                                    <th class="p-3">Narration</th>
-                                    <th class="p-3 text-center">Ref</th>
-                                </tr>
-                            </thead>
+                            <thead><tr class="bg-gray-100/70 border-b border-gray-200 text-gray-700 uppercase font-semibold">
+                                <th class="p-3">Ref</th><th class="p-3">Region</th><th class="p-3">Bank Code</th><th class="p-3">Destination Bank</th><th class="p-3">Account No</th><th class="p-3">Account Name</th><th class="p-3 text-right">Amount (₦)</th><th class="p-3">Narration</th>
+                            </tr></thead>
                             <tbody id="transport-tbody" class="divide-y divide-gray-200"></tbody>
                             <tfoot id="transport-tfoot" class="bg-gray-900 text-white font-bold text-xs"></tfoot>
                         </table>
@@ -666,31 +671,43 @@
         function renderTransport() {
             const tbody = document.getElementById('transport-tbody');
             const tfoot = document.getElementById('transport-tfoot');
-            tbody.innerHTML = '';
+            if (!tbody || !tfoot) return;
+            const filtered = defaultTransport.filter(row => currentTransportRegion === 'ALL' || row.region === currentTransportRegion);
             let total = 0;
-
-            defaultTransport.forEach(row => {
-                total += row.amount;
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b border-gray-100">
-                        <td class="p-3 font-mono text-gray-500">${row.code}</td>
-                        <td class="p-3 font-medium text-gray-800">${row.bank}</td>
-                        <td class="p-3 font-mono text-gray-700">${row.acc}</td>
-                        <td class="p-3 font-bold text-gray-900">${row.name}</td>
-                        <td class="p-3 text-right font-semibold text-brand-darkgreen">₦${row.amount.toLocaleString()}</td>
-                        <td class="p-3 text-gray-600">${row.narration}</td>
-                        <td class="p-3 text-center text-gray-400 font-mono">${row.ref}</td>
-                    </tr>
-                `;
+            tbody.innerHTML = filtered.map(row => {
+                const amount = Number(row.amount) || 0;
+                total += amount;
+                return `<tr class="hover:bg-gray-50 border-b border-gray-100">
+                    <td class="p-3 text-center text-gray-400 font-mono">${pwfbEsc(row.ref)}</td>
+                    <td class="p-3 font-semibold ${row.region === 'DM 1' ? 'text-blue-700' : row.region === 'DM 2' ? 'text-purple-700' : 'text-gray-600'}">${pwfbEsc(row.region || 'Unassigned')}</td>
+                    <td class="p-3 font-mono text-gray-500">${pwfbEsc(row.code)}</td>
+                    <td class="p-3 font-medium text-gray-800">${pwfbEsc(row.bank)}</td>
+                    <td class="p-3 font-mono text-gray-700">${pwfbEsc(row.acc)}</td>
+                    <td class="p-3 font-bold text-gray-900">${pwfbEsc(row.name)}</td>
+                    <td class="p-3 text-right font-semibold text-brand-darkgreen">₦${amount.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                    <td class="p-3 text-gray-600">${pwfbEsc(row.narration)}</td>
+                </tr>`;
+            }).join('');
+            const title = currentTransportRegion === 'ALL' ? 'All Scheduled Disbursements (DM 1 & DM 2)' : currentTransportRegion + ' Scheduled Disbursements';
+            const badge = document.getElementById('transport-badge');
+            const titleEl = document.getElementById('transport-region-title');
+            if (titleEl) titleEl.textContent = title;
+            if (badge) badge.textContent = filtered.length + ' records · Total: ₦' + total.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});
+            tfoot.innerHTML = `<tr><td colspan="6" class="p-3 uppercase">Total Scheduled Disbursement (${currentTransportRegion})</td><td class="p-3 text-right text-brand-orange font-bold">₦${total.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td></td></tr>`;
+            if (typeof pwfbAddActions === 'function') pwfbAddActions();
+        }
+        function filterTransportRegion(region) {
+            currentTransportRegion = ['ALL','DM 1','DM 2'].includes(region) ? region : 'ALL';
+            ['all','dm1','dm2'].forEach(function(key) {
+                const btn = document.getElementById('region-btn-' + key);
+                if (!btn) return;
+                const active = (key === 'all' && currentTransportRegion === 'ALL') || (key === 'dm1' && currentTransportRegion === 'DM 1') || (key === 'dm2' && currentTransportRegion === 'DM 2');
+                btn.className = active
+                    ? 'region-filter bg-brand-green text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm'
+                    : 'region-filter bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300';
             });
-
-            tfoot.innerHTML = `
-                <tr>
-                    <td colspan="4" class="p-3 uppercase">Total Scheduled Disbursement</td>
-                    <td class="p-3 text-right text-brand-orange font-bold">₦${total.toLocaleString()}</td>
-                    <td colspan="2"></td>
-                </tr>
-            `;
+            renderTransport();
+            pwfbSearch();
         }
 
         // RENDER COOP TAB WITH MONTH SELECTOR
@@ -817,7 +834,33 @@
         }
 
         function exportCurrentTabCSV() {
-            alert('Exporting active table data to CSV format...');
+            const section = document.getElementById('tab-' + currentTab);
+            if (!section) { alert('Choose a module to export.'); return; }
+            const rows = [];
+            const tables = Array.from(section.querySelectorAll('table'));
+            tables.forEach(function(table) {
+                const header = Array.from(table.querySelectorAll('thead th')).map(function(th){return th.innerText.trim();}).filter(function(v){return v !== 'Actions';});
+                if (!header.length) return;
+                rows.push(header);
+                Array.from(table.querySelectorAll('tbody tr')).forEach(function(tr) {
+                    if (tr.style.display === 'none') return;
+                    const cells = Array.from(tr.cells).filter(function(td){return !td.hasAttribute('data-pwfb-actions');}).map(function(td){return td.innerText.trim().replace(/\s+/g,' ');});
+                    if (cells.length) rows.push(cells.slice(0,header.length));
+                });
+                Array.from(table.querySelectorAll('tfoot tr')).forEach(function(tr) {
+                    const cells = Array.from(tr.cells).map(function(td){return td.innerText.trim().replace(/\s+/g,' ');});
+                    if (cells.length) rows.push(cells);
+                });
+            });
+            if (currentTab === 'salary' && typeof salaryExportCsv === 'function') { salaryExportCsv(); return; }
+            if (!rows.length) { alert('There is no table data to export in this module.'); return; }
+            const csv = rows.map(function(row){return row.map(function(value){return '"' + String(value == null ? '' : value).replace(/"/g,'""') + '"';}).join(',');}).join('\r\n');
+            const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pwfb-' + currentTab + '-' + new Date().toISOString().slice(0,10) + '.csv';
+            document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -829,6 +872,7 @@
 
 <script>
 var pwfbSidebarCollapsed=false, pwfbTransfers=[];
+var currentTransportRegion='ALL';
 var pwfbSalarySchedule=[];
 var pwfbSalaryEditingId=null;
 var pwfbStorageKey='pwfb-financial-portal-v2', pwfbThemeKey='pwfb-financial-portal-theme-v1', pwfbSidebarKey='pwfb-financial-portal-sidebar-v1';
