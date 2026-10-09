@@ -37,7 +37,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #005c37;
         }
-    </style>
+    #sidebar.sidebar-collapsed{width:4.5rem}#sidebar.sidebar-collapsed .sidebar-label,#sidebar.sidebar-collapsed .sidebar-brand-copy,#sidebar.sidebar-collapsed .sidebar-section-label,#sidebar.sidebar-collapsed .sidebar-footer-copy{display:none}#sidebar.sidebar-collapsed .sidebar-brand{justify-content:center;padding-left:.75rem;padding-right:.75rem}#sidebar.sidebar-collapsed nav{padding-left:.5rem;padding-right:.5rem}.action-btn{padding:.3rem .5rem;border-radius:.35rem;font-size:10px;font-weight:700;margin:0 .1rem}</style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
 
@@ -45,7 +45,7 @@
     <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between z-40 transition-all duration-300">
         <div>
             <!-- LOGO & BRAND -->
-            <div class="p-5 border-b border-gray-100 flex items-center space-x-3">
+            <div class="sidebar-brand p-5 border-b border-gray-100 flex items-center space-x-3">
                 <svg class="h-10 w-10 flex-shrink-0" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect width="300" height="300" rx="40" fill="#005C37"/>
                     <rect x="10" y="10" width="280" height="280" rx="30" fill="#F8FAFC"/>
@@ -54,7 +54,7 @@
                     <path d="M150 70C180 70 180 120 150 120C120 120 120 70 150 70Z" fill="#F58220"/>
                     <path d="M140 130H160L170 250H130L140 130Z" fill="#F58220"/>
                 </svg>
-                <div class="overflow-hidden">
+                <div class="sidebar-brand-copy overflow-hidden">
                     <h1 class="text-base font-bold text-gray-900 leading-tight truncate">PWFB Portal</h1>
                     <p class="text-[10px] text-brand-orange font-bold tracking-wider uppercase truncate">Microfinance Systems</p>
                 </div>
@@ -62,22 +62,23 @@
 
             <!-- NAVIGATION MENU -->
             <nav class="p-4 space-y-1">
-                <div class="px-3 py-2 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Financial Modules</div>
+                <div class="sidebar-section-label px-3 py-2 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Financial Modules</div>
                 
                 <button id="nav-payroll" onclick="switchTab('payroll')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition text-white bg-brand-green shadow-sm">
                     <i class="fa-solid fa-money-check-dollar w-5 text-center"></i>
-                    <span>Monthly Payroll</span>
+                    <span class="sidebar-label">Monthly Payroll</span>
                 </button>
 
                 <button id="nav-transport" onclick="switchTab('transport')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
                     <i class="fa-solid fa-bus w-5 text-center"></i>
-                    <span>Transport Schedule</span>
+                    <span class="sidebar-label">Transport Schedule</span>
                 </button>
 
                 <button id="nav-coop" onclick="switchTab('coop')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
                     <i class="fa-solid fa-piggy-bank w-5 text-center"></i>
-                    <span>Cooperative Ledger</span>
+                    <span class="sidebar-label">Cooperative Ledger</span>
                 </button>
+                <button id="nav-transfer" onclick="switchTab('transfer')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"><i class="fa-solid fa-right-left w-5 text-center"></i><span class="sidebar-label">Transfers</span></button>
             </nav>
         </div>
 
@@ -87,7 +88,7 @@
                 <div class="w-8 h-8 rounded-full bg-brand-green/10 text-brand-green font-bold flex items-center justify-center text-xs">
                     PW
                 </div>
-                <div class="text-xs overflow-hidden">
+                <div class="sidebar-footer-copy text-xs overflow-hidden">
                     <p class="font-bold text-gray-800 truncate">Admin Portal</p>
                     <p class="text-[10px] text-gray-500 truncate">v2026.09 Active</p>
                 </div>
@@ -101,6 +102,7 @@
         <!-- TOP BAR -->
         <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between z-30">
             <div class="flex items-center space-x-4">
+                <button id="sidebarToggle" onclick="toggleSidebar()" title="Fold/unfold sidebar" class="w-9 h-9 rounded-lg border border-gray-200 hover:bg-gray-100 text-gray-700"><i class="fa-solid fa-bars"></i></button>
                 <h2 id="current-module-title" class="text-lg font-bold text-gray-900">Monthly Payroll Management</h2>
             </div>
 
@@ -176,6 +178,19 @@
                 </div>
             </section>
 
+            <section id="tab-transfer" class="tab-content hidden space-y-4">
+              <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200"><h3 class="text-sm font-bold mb-3">Create Transfer</h3>
+                <form id="transferForm" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                  <label class="text-xs font-semibold">From<input id="transferFrom" required placeholder="Source account / branch" class="mt-1 w-full border rounded-lg p-2 text-sm"></label>
+                  <label class="text-xs font-semibold">To<input id="transferTo" required placeholder="Destination account / branch" class="mt-1 w-full border rounded-lg p-2 text-sm"></label>
+                  <label class="text-xs font-semibold">Amount (₦)<input id="transferAmount" required type="number" min="0.01" step="0.01" class="mt-1 w-full border rounded-lg p-2 text-sm"></label>
+                  <label class="text-xs font-semibold">Transfer date<input id="transferDate" required type="date" class="mt-1 w-full border rounded-lg p-2 text-sm"></label>
+                  <label class="text-xs font-semibold md:col-span-2">Narration / reference<input id="transferNarration" placeholder="Purpose or reference" class="mt-1 w-full border rounded-lg p-2 text-sm"></label>
+                  <div class="flex items-end"><button type="submit" class="bg-brand-green text-white px-4 py-2 rounded-lg text-sm font-bold">Add transfer</button></div>
+                </form><p class="text-xs text-gray-500 mt-3">Edits are saved in this browser on this device.</p>
+              </div>
+              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"><div class="p-4 border-b flex justify-between"><h3 class="font-bold text-sm">Transfer Register</h3><span id="transferCount" class="text-xs text-gray-500"></span></div><div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-gray-100 uppercase"><tr><th class="p-3">Date</th><th class="p-3">From</th><th class="p-3">To</th><th class="p-3 text-right">Amount</th><th class="p-3">Narration / Ref</th><th class="p-3">Actions</th></tr></thead><tbody id="transfer-tbody"></tbody><tfoot id="transfer-tfoot" class="bg-gray-900 text-white font-bold"></tfoot></table></div></div>
+            </section>
             <!-- MODULE 3: COOPERATIVE LEDGER -->
             <section id="tab-coop" class="tab-content hidden space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
@@ -648,7 +663,8 @@
             const titleMap = {
                 'payroll': 'Monthly Payroll Management',
                 'transport': 'Transport & Salary Schedule',
-                'coop': 'Cooperative Ledger'
+                'coop': 'Cooperative Ledger',
+                'transfer': 'Transfers (From → To)'
             };
             document.getElementById('current-module-title').innerText = titleMap[tab];
         }
@@ -681,6 +697,25 @@
             renderCoop();
         });
     </script>
+
+<script>
+var pwfbSidebarCollapsed=false, pwfbTransfers=[];
+var pwfbStorageKey='pwfb-financial-portal-v2';
+function toggleSidebar(){pwfbSidebarCollapsed=!pwfbSidebarCollapsed;document.getElementById('sidebar').classList.toggle('sidebar-collapsed',pwfbSidebarCollapsed);document.getElementById('sidebarToggle').innerHTML='<i class="fa-solid '+(pwfbSidebarCollapsed?'fa-angles-right':'fa-bars')+'"></i>';}
+function pwfbEsc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function pwfbPersist(){try{localStorage.setItem(pwfbStorageKey,JSON.stringify({payroll:rawPayrollData,transport:defaultTransport,coop:baseCoopData,transfers:pwfbTransfers}));}catch(e){}}
+function pwfbLoad(){try{var d=JSON.parse(localStorage.getItem(pwfbStorageKey)||'null');if(!d)return;if(Array.isArray(d.payroll))rawPayrollData.splice(0,rawPayrollData.length,...d.payroll);if(Array.isArray(d.transport))defaultTransport.splice(0,defaultTransport.length,...d.transport);if(Array.isArray(d.coop))baseCoopData.splice(0,baseCoopData.length,...d.coop);if(Array.isArray(d.transfers))pwfbTransfers=d.transfers;}catch(e){}}
+function pwfbRenderTransfers(){var body=document.getElementById('transfer-tbody');if(!body)return;var total=0;body.innerHTML=pwfbTransfers.map(function(t,i){total+=Number(t.amount)||0;return '<tr class="border-b"><td class="p-3">'+pwfbEsc(t.date)+'</td><td class="p-3">'+pwfbEsc(t.from)+'</td><td class="p-3">'+pwfbEsc(t.to)+'</td><td class="p-3 text-right">₦'+(Number(t.amount)||0).toLocaleString()+'</td><td class="p-3">'+pwfbEsc(t.narration)+' '+pwfbEsc(t.ref||'')+'</td><td class="p-3"><button class="action-btn bg-blue-100 text-blue-700" onclick="pwfbEditTransfer('+i+')">Edit</button><button class="action-btn bg-red-100 text-red-700" onclick="pwfbDeleteTransfer('+i+')">Delete</button></td></tr>';}).join('');document.getElementById('transferCount').textContent=pwfbTransfers.length+' records';document.getElementById('transfer-tfoot').innerHTML='<tr><td colspan="3" class="p-3">TOTAL TRANSFERS</td><td class="p-3 text-right">₦'+total.toLocaleString()+'</td><td colspan="2"></td></tr>';}
+function pwfbEditTransfer(i){var t=pwfbTransfers[i];if(!t)return;var f=prompt('From:',t.from);if(f===null)return;var to=prompt('To:',t.to);if(to===null)return;var a=Number(prompt('Amount:',t.amount));if(!Number.isFinite(a)||a<=0){alert('Enter a valid amount');return;}var d=prompt('Date (YYYY-MM-DD):',t.date);if(d===null)return;var n=prompt('Narration:',t.narration||'');if(n===null)return;Object.assign(t,{from:f,to:to,amount:a,date:d,narration:n});pwfbPersist();pwfbRenderTransfers();pwfbSearch();}
+function pwfbDeleteTransfer(i){if(confirm('Delete this transfer?')){pwfbTransfers.splice(i,1);pwfbPersist();pwfbRenderTransfers();pwfbSearch();}}
+function pwfbEditRecord(type,i){var a=type==='payroll'?rawPayrollData:type==='transport'?defaultTransport:baseCoopData;var o=a[i];if(!o)return;var c=Object.assign({},o);for(var k of Object.keys(c)){var v=prompt('Edit '+k+':',c[k]);if(v===null)return;if(['gross','bonus','coopS','coopL','dev','tax','offline','others','advance','amount','sn','junSav','julColl','julWT','julLoanBal','julLoanColl'].includes(k)){v=Number(v);if(!Number.isFinite(v)||v<0){alert('Enter a valid non-negative number');return;}}c[k]=v;}a[i]=c;pwfbPersist();pwfbRenderAll();}
+function pwfbDeleteRecord(type,i){var a=type==='payroll'?rawPayrollData:type==='transport'?defaultTransport:baseCoopData;if(!a[i]||!confirm('Delete this '+type+' record?'))return;a.splice(i,1);pwfbPersist();pwfbRenderAll();}
+function pwfbRenderAll(){renderBranchAccordions();renderTransport();renderCoop();pwfbRenderTransfers();pwfbAddActions();pwfbSearch();}
+function pwfbAddActions(){[['payroll','#branch-accordion-list tbody'],['transport','#transport-tbody'],['coop','#coop-tbody']].forEach(function(x){document.querySelectorAll(x[1]).forEach(function(body){Array.from(body.rows).forEach(function(row,i){if(row.querySelector('[data-pwfb-actions]'))return;var td=document.createElement('td');td.className='p-3 whitespace-nowrap';td.setAttribute('data-pwfb-actions','1');td.innerHTML='<button class="action-btn bg-blue-100 text-blue-700" onclick="pwfbEditRecord(\''+x[0]+'\','+i+')">Edit</button><button class="action-btn bg-red-100 text-red-700" onclick="pwfbDeleteRecord(\''+x[0]+'\','+i+')">Delete</button>';row.appendChild(td);});});});}
+function pwfbSearch(){var el=document.getElementById('searchInput');if(!el)return;var q=el.value.trim().toLowerCase();document.querySelectorAll('.tab-content tbody tr').forEach(function(r){r.style.display=!q||r.innerText.toLowerCase().includes(q)?'':'none';});if(currentTab==='payroll')document.querySelectorAll('#branch-accordion-list > div').forEach(function(card){var m=!q||card.innerText.toLowerCase().includes(q);card.style.display=m?'':'none';if(q&&m){var table=card.querySelector('div.overflow-x-auto');if(table)table.classList.remove('hidden');}});}
+document.addEventListener('DOMContentLoaded',function(){pwfbLoad();renderBranchAccordions();renderTransport();renderCoop();pwfbRenderTransfers();pwfbAddActions();var search=document.getElementById('searchInput');if(search)search.addEventListener('input',pwfbSearch);var date=document.getElementById('transferDate');if(date)date.value=new Date().toISOString().slice(0,10);var form=document.getElementById('transferForm');if(form)form.addEventListener('submit',function(e){e.preventDefault();var amount=Number(document.getElementById('transferAmount').value);if(!Number.isFinite(amount)||amount<=0){alert('Enter an amount greater than zero');return;}pwfbTransfers.push({date:date.value,from:document.getElementById('transferFrom').value.trim(),to:document.getElementById('transferTo').value.trim(),amount:amount,narration:document.getElementById('transferNarration').value.trim(),ref:'TRF-'+Date.now().toString().slice(-8)});pwfbPersist();form.reset();date.value=new Date().toISOString().slice(0,10);pwfbRenderTransfers();pwfbSearch();});});
+</script>
+
 </body>
 </html>
 
