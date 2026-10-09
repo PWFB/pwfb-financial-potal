@@ -847,6 +847,7 @@
                 'transfer': 'Transfers (From → To)'
             };
             document.getElementById('current-module-title').innerText = titleMap[tab];
+            if(tab==='payment' && typeof paymentRender==='function') paymentRender();
         }
 
         function toggleAccordion(branchName) {
