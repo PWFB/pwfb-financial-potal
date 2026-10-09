@@ -1,13 +1,686 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>web</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWFB-microfinance Financial Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            green: '#008751',
+                            darkgreen: '#005c37',
+                            orange: '#F58220',
+                            lightgreen: '#E6F4ED'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #008751;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #005c37;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
+
+    <!-- LEFT SIDEBAR -->
+    <aside id="sidebar" class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between z-40 transition-all duration-300">
+        <div>
+            <!-- LOGO & BRAND -->
+            <div class="p-5 border-b border-gray-100 flex items-center space-x-3">
+                <svg class="h-10 w-10 flex-shrink-0" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="300" height="300" rx="40" fill="#005C37"/>
+                    <rect x="10" y="10" width="280" height="280" rx="30" fill="#F8FAFC"/>
+                    <path d="M140 160C100 120 40 110 30 180C20 250 110 290 140 210Z" fill="#008751"/>
+                    <path d="M160 160C200 120 260 110 270 180C280 250 190 290 160 210Z" fill="#2E6B12"/>
+                    <path d="M150 70C180 70 180 120 150 120C120 120 120 70 150 70Z" fill="#F58220"/>
+                    <path d="M140 130H160L170 250H130L140 130Z" fill="#F58220"/>
+                </svg>
+                <div class="overflow-hidden">
+                    <h1 class="text-base font-bold text-gray-900 leading-tight truncate">PWFB Portal</h1>
+                    <p class="text-[10px] text-brand-orange font-bold tracking-wider uppercase truncate">Microfinance Systems</p>
+                </div>
+            </div>
+
+            <!-- NAVIGATION MENU -->
+            <nav class="p-4 space-y-1">
+                <div class="px-3 py-2 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Financial Modules</div>
+                
+                <button id="nav-payroll" onclick="switchTab('payroll')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition text-white bg-brand-green shadow-sm">
+                    <i class="fa-solid fa-money-check-dollar w-5 text-center"></i>
+                    <span>Monthly Payroll</span>
+                </button>
+
+                <button id="nav-transport" onclick="switchTab('transport')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
+                    <i class="fa-solid fa-bus w-5 text-center"></i>
+                    <span>Transport Schedule</span>
+                </button>
+
+                <button id="nav-coop" onclick="switchTab('coop')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
+                    <i class="fa-solid fa-piggy-bank w-5 text-center"></i>
+                    <span>Cooperative Ledger</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- SIDEBAR FOOTER -->
+        <div class="p-4 border-t border-gray-100 bg-gray-50/50">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full bg-brand-green/10 text-brand-green font-bold flex items-center justify-center text-xs">
+                    PW
+                </div>
+                <div class="text-xs overflow-hidden">
+                    <p class="font-bold text-gray-800 truncate">Admin Portal</p>
+                    <p class="text-[10px] text-gray-500 truncate">v2026.09 Active</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- RIGHT MAIN CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <!-- TOP BAR -->
+        <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between z-30">
+            <div class="flex items-center space-x-4">
+                <h2 id="current-module-title" class="text-lg font-bold text-gray-900">Monthly Payroll Management</h2>
+            </div>
+
+            <!-- SEARCH & EXPORT TOP ACTIONS -->
+            <div class="flex items-center space-x-3">
+                <div class="relative w-64 md:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+                    <input type="text" id="searchInput" onkeyup="filterTables()" placeholder="Search staff, branch, bank, or month..." class="w-full pl-9 pr-4 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-gray-50/50">
+                </div>
+
+                <button onclick="exportCurrentTabCSV()" class="bg-brand-orange hover:bg-orange-600 text-white text-xs font-semibold py-1.5 px-3.5 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                </button>
+            </div>
+        </header>
+
+        <!-- DYNAMIC PAGE BODY -->
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+
+            <!-- MODULE 1: MONTHLY PAYROLL ACCORDION -->
+            <section id="tab-payroll" class="tab-content space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-800">PERFECT WISDOM FOR BF (DIVISION 1)</h3>
+                        <p class="text-xs text-gray-500">Grouped Branch-by-Branch Accordions</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleAllAccordions(true)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-1.5 px-3 rounded-lg border border-gray-300 transition">
+                            <i class="fa-solid fa-angles-down mr-1"></i> Expand All
+                        </button>
+                        <button onclick="toggleAllAccordions(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-1.5 px-3 rounded-lg border border-gray-300 transition">
+                            <i class="fa-solid fa-angles-up mr-1"></i> Collapse All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BRANCH ACCORDION LIST -->
+                <div id="branch-accordion-list" class="space-y-3"></div>
+
+                <!-- CUMULATIVE DIVISION GRAND TOTAL CARD -->
+                <div id="grand-total-card" class="bg-brand-darkgreen text-white rounded-xl p-5 shadow-sm border border-brand-green/30 mt-6"></div>
+            </section>
+
+            <!-- MODULE 2: TRANSPORT & SALARY SCHEDULE -->
+            <section id="tab-transport" class="tab-content hidden space-y-4">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-800">Bank Disbursement Schedule</h3>
+                            <p class="text-xs text-gray-500">Verified Bank Accounts & Transfers</p>
+                        </div>
+                        <span id="transport-badge" class="text-xs bg-orange-100 text-brand-orange font-semibold px-2.5 py-1 rounded-full">Total: ₦11,948,980.00</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-100/70 border-b border-gray-200 text-gray-700 uppercase font-semibold">
+                                    <th class="p-3">Bank Code</th>
+                                    <th class="p-3">Destination Bank</th>
+                                    <th class="p-3">Account No</th>
+                                    <th class="p-3">Account Name</th>
+                                    <th class="p-3 text-right">Amount (₦)</th>
+                                    <th class="p-3">Narration</th>
+                                    <th class="p-3 text-center">Ref</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transport-tbody" class="divide-y divide-gray-200"></tbody>
+                            <tfoot id="transport-tfoot" class="bg-gray-900 text-white font-bold text-xs"></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODULE 3: COOPERATIVE LEDGER -->
+            <section id="tab-coop" class="tab-content hidden space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <div>
+                        <h3 id="coop-period-title" class="text-sm font-bold text-gray-800">Co-operative Savings & Loan Ledger</h3>
+                        <p class="text-xs text-gray-500">Multi-Month Cycle Reporting & Full Payment Tracking</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <label for="monthSelect" class="text-xs font-bold text-gray-600 uppercase">Cycle Period:</label>
+                        <select id="monthSelect" onchange="renderCoop()" class="border border-gray-300 rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-800 focus:ring-2 focus:ring-brand-green outline-none bg-gray-50">
+                            <option value="JULY">July 2026 (Sheet 8)</option>
+                            <option value="AUGUST">August 2026 Cycle</option>
+                            <option value="SEPTEMBER" selected>September 2026 Cycle</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-gray-100/70 border-b border-gray-200 text-gray-700 uppercase font-semibold">
+                                    <th class="p-3">S/N</th>
+                                    <th class="p-3">Member Name</th>
+                                    <th class="p-3 text-right">Opening Savings</th>
+                                    <th class="p-3 text-right">Savings Coll.</th>
+                                    <th class="p-3 text-right">Savings WT</th>
+                                    <th class="p-3 text-right bg-green-50/70 font-bold">Ending Savings</th>
+                                    <th class="p-3 text-right">Opening Loan</th>
+                                    <th class="p-3 text-right">Loan Payment</th>
+                                    <th class="p-3 text-right bg-red-50/70 font-bold">Ending Loan</th>
+                                    <th class="p-3 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coop-tbody" class="divide-y divide-gray-200"></tbody>
+                            <tfoot id="coop-tfoot" class="bg-gray-900 text-white font-bold text-xs"></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        let currentTab = 'payroll';
+        let accordionStates = {};
+
+        // 1. PAYROLL DATASET (PAGES 1, 2, 3)
+        const rawPayrollData = [
+            // ILORIN 2
+            { branch: 'ILORIN 2', name: 'OGUNJEBE MICHEAL', gra: '83', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'ILORIN 2', name: 'OKANLAWON FAIDAT.O', gra: '325', gross: 136400, bonus: 0, coopS: 0, coopL: 0, dev: 3410, tax: 4100, offline: 0, others: 0, advance: 0 },
+            { branch: 'ILORIN 2', name: 'CLEMENT EFFIONG ASUKWO', gra: '569', gross: 148800, bonus: 40900, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+
+            // SANGO 2
+            { branch: 'SANGO 2', name: 'ADEBIYI OLUWAKEMI', gra: '56', gross: 216000, bonus: 0, coopS: 10000, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'SANGO 2', name: 'BAKRIN RAHANAT R.', gra: '126', gross: 163600, bonus: 0, coopS: 10000, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+            { branch: 'SANGO 2', name: 'LABA ADEWUMI OPEYEMI', gra: '152', gross: 163600, bonus: 0, coopS: 10000, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+            { branch: 'SANGO 2', name: 'ADEYEMI SHITTU', gra: '603', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 930, tax: 1115, offline: 0, others: 0, advance: 80000 },
+
+            // OGBOMOSH
+            { branch: 'OGBOMOSH', name: 'SAIBU AZEEZ O.', gra: '97', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'OGBOMOSH', name: 'BAMIGBOYE BLESSING', gra: '412', gross: 136400, bonus: 0, coopS: 5000, coopL: 65000, dev: 3410, tax: 4100, offline: 0, others: 0, advance: 0 },
+            { branch: 'OGBOMOSH', name: 'BAMIDELE OLOWOYO', gra: '405', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+
+            // IWO ROAD 1
+            { branch: 'IWO ROAD 1', name: 'BELLO WALIYAT', gra: '87', gross: 180000, bonus: 0, coopS: 0, coopL: 0, dev: 4500, tax: 5400, offline: 500, others: 0, advance: 0 },
+            { branch: 'IWO ROAD 1', name: 'ATILOLA EBUNOLUWA', gra: '121', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+            { branch: 'IWO ROAD 1', name: 'MURITALA ROFIAT', gra: '571', gross: 136400, bonus: 0, coopS: 0, coopL: 0, dev: 3410, tax: 4100, offline: 500, others: 0, advance: 0 },
+
+            // CHALLENGE
+            { branch: 'CHALLENGE', name: 'TOLANI TOSIN S.', gra: '158', gross: 216000, bonus: 54000, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'CHALLENGE', name: 'OYEBAMIRE OYENIKE HALIMA', gra: '531', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+            { branch: 'CHALLENGE', name: 'OLUSANYA OLUWATOSIN', gra: '604', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+            { branch: 'CHALLENGE', name: 'ADEBANJO AYOMIDE', gra: '606', gross: 148800, bonus: 40900, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+
+            // AYEYE 1
+            { branch: 'AYEYE 1', name: 'ADEPOJU ADETOLA', gra: '59', gross: 216000, bonus: 0, coopS: 5000, coopL: 66665, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'AYEYE 1', name: 'PRINCESS JUSTINA EMMANUEL', gra: '387', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 50000 },
+            { branch: 'AYEYE 1', name: 'ADEKOLA TEMITAYO RASIDAT', gra: '581', gross: 136400, bonus: 0, coopS: 0, coopL: 0, dev: 3410, tax: 4100, offline: 0, others: 0, advance: 0 },
+            { branch: 'AYEYE 1', name: 'MBAH IFE C.', gra: '346', gross: 136400, bonus: 0, coopS: 5000, coopL: 66665, dev: 12900, tax: 15490, offline: 500, others: 0, advance: 50000 },
+
+            // GBAGI
+            { branch: 'GBAGI', name: 'AJAH SUSSANAH', gra: '62', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'GBAGI', name: 'ADEKOLA IDOWU', gra: '273', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+            { branch: 'GBAGI', name: 'OLAOYE ADEOLA C.', gra: '299', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+            { branch: 'GBAGI', name: 'KAMILU OMOSALEWA', gra: '251', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+
+            // OYO 1
+            { branch: 'OYO 1', name: 'OGUNSILE FUNMILAYO', gra: '226', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'OYO 1', name: 'OLADEJO YEWANDE', gra: '482', gross: 136400, bonus: 0, coopS: 0, coopL: 0, dev: 3410, tax: 4100, offline: 0, others: 0, advance: 0 },
+            { branch: 'OYO 1', name: 'ABIODUN BUNMI DANIEL', gra: '584', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 48300 },
+            { branch: 'OYO 1', name: 'ADEREMI ADENIKE G.', gra: '357', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+
+            // SAKI 2
+            { branch: 'SAKI 2', name: 'GABRIEL OLANIKE', gra: '133', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'SAKI 2', name: 'ALABI SUNDAY', gra: '221', gross: 163600, bonus: 40900, coopS: 0, coopL: 0, dev: 4090, tax: 4465, offline: 0, others: 0, advance: 0 },
+            { branch: 'SAKI 2', name: 'ADEDIRAN KAOSARAT ABOSE', gra: '567', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+            { branch: 'SAKI 2', name: 'OLANIRAN ENIOLA OLAMIDE', gra: '450', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+
+            // BODIJA 1
+            { branch: 'BODIJA 1', name: 'EBEDI YETUNDE', gra: '103', gross: 180000, bonus: 0, coopS: 0, coopL: 0, dev: 4500, tax: 5400, offline: 500, others: 0, advance: 0 },
+            { branch: 'BODIJA 1', name: 'BAMIDELE AYOBAMI F.', gra: '354', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+            { branch: 'BODIJA 1', name: 'ATINUKE AKANO', gra: '628', gross: 74400, bonus: 2400, coopS: 0, coopL: 0, dev: 1860, tax: 2230, offline: 0, others: 0, advance: 0 },
+
+            // LANLATE
+            { branch: 'LANLATE', name: 'OLADIMEJI SAHEED OLAWUMI', gra: '626', gross: 216000, bonus: 0, coopS: 5000, coopL: 70000, dev: 5400, tax: 6480, offline: 0, others: 0, advance: 19050 },
+            { branch: 'LANLATE', name: 'ABDULLAHI HABEEB', gra: '576', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+            { branch: 'LANLATE', name: 'ADEPOJU OLAIDE O.', gra: '287', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 15000 },
+
+            // LALUPON
+            { branch: 'LALUPON', name: 'OMOLOLU OLADELE F.', gra: '68', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'LALUPON', name: 'OLATUNDE KEMI JIBIKE', gra: '357', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+            { branch: 'LALUPON', name: 'ASIMIYU KHADIJAT O.', gra: '434', gross: 136400, bonus: 0, coopS: 0, coopL: 0, dev: 3410, tax: 4100, offline: 0, others: 0, advance: 0 },
+            { branch: 'LALUPON', name: 'SOYEMI OLUWAFUNMIKE', gra: '436', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+
+            // IWO ROAD 2
+            { branch: 'IWO ROAD 2', name: 'ALIU ABIGAEL TAIWO', gra: '86', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 27500 },
+            { branch: 'IWO ROAD 2', name: 'INUEBIMI FAVOUR', gra: '183', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+            { branch: 'IWO ROAD 2', name: 'SUNDAY EDEBO', gra: '471', gross: 163600, bonus: 0, coopS: 0, coopL: 0, dev: 4090, tax: 4910, offline: 0, others: 0, advance: 0 },
+            { branch: 'IWO ROAD 2', name: 'TAIWO SELIMOT LAIDE', gra: '525', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+
+            // BODIJA 2
+            { branch: 'BODIJA 2', name: 'ADEOLA OLABISI', gra: '115', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 500, others: 0, advance: 0 },
+            { branch: 'BODIJA 2', name: 'ABIRI RUTH OLUWAYEMISI', gra: '560', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+            { branch: 'BODIJA 2', name: 'AYORINDE MOJOYINOLUWA', gra: '631', gross: 54100, bonus: 2400, coopS: 0, coopL: 0, dev: 1350, tax: 1625, offline: 0, others: 0, advance: 0 },
+            { branch: 'BODIJA 2', name: 'OLALEKAN KEHINDE', gra: '84', gross: 180000, bonus: 0, coopS: 0, coopL: 0, dev: 4500, tax: 5400, offline: 0, others: 0, advance: 41000 },
+
+            // TEDE
+            { branch: 'TEDE', name: 'ODESANMI OOUN TITILAYO', gra: '139', gross: 216000, bonus: 0, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 0, others: 0, advance: 0 },
+
+            // DM 1 AUX
+            { branch: 'DM 1 AUX', name: 'AKINYOOLA ADEOLA', gra: '594', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+            { branch: 'DM 1 AUX', name: 'AMOO BOSEDE', gra: '600', gross: 148800, bonus: 0, coopS: 0, coopL: 0, dev: 3720, tax: 4465, offline: 0, others: 0, advance: 0 },
+
+            // CHALLENGE 2
+            { branch: 'CHALLENGE 2', name: 'AFOLABI ADENIKE', gra: '52', gross: 366200, bonus: 0, coopS: 0, coopL: 0, dev: 9155, tax: 10990, offline: 0, others: 0, advance: 0 },
+            { branch: 'CHALLENGE 2', name: 'AJIBOYE OLUWABUKOLA', gra: '114', gross: 216000, bonus: 54000, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 0, others: 0, advance: 0 },
+            { branch: 'CHALLENGE 2', name: 'OSAJIN MARY', gra: '181', gross: 216000, bonus: 54000, coopS: 0, coopL: 0, dev: 5400, tax: 6480, offline: 0, others: 0, advance: 100000 },
+
+            // AREA MANAGEMENT
+            { branch: 'AREA MANAGEMENT', name: 'OMOTOSHO KOLAWOLE IDRIS', gra: '68', gross: 366200, bonus: 0, coopS: 0, coopL: 0, dev: 9155, tax: 10990, offline: 500, others: 0, advance: 100000 },
+            { branch: 'AREA MANAGEMENT', name: 'BOLANLE KEMI KADIJAT', gra: '14', gross: 366200, bonus: 0, coopS: 20000, coopL: 0, dev: 9155, tax: 10990, offline: 0, others: 0, advance: 0 },
+            { branch: 'AREA MANAGEMENT', name: 'OLAYIWOLA OLOLADE', gra: '23', gross: 366200, bonus: 0, coopS: 0, coopL: 0, dev: 9155, tax: 10990, offline: 500, others: 0, advance: 0 },
+            { branch: 'AREA MANAGEMENT', name: 'UCHE ABOSEDE', gra: '71', gross: 366200, bonus: 0, coopS: 10000, coopL: 0, dev: 9155, tax: 10990, offline: 500, others: 0, advance: 0 },
+            { branch: 'AREA MANAGEMENT', name: 'FAKUNLE OLUSEYE', gra: '15', gross: 366200, bonus: 0, coopS: 20000, coopL: 0, dev: 9155, tax: 10990, offline: 500, others: 0, advance: 0 },
+            { branch: 'AREA MANAGEMENT', name: 'WAHAB AJOKE', gra: '24', gross: 366200, bonus: 0, coopS: 20000, coopL: 0, dev: 9155, tax: 10990, offline: 500, others: 0, advance: 0 }
+        ];
+
+        // 2. TRANSPORT DATASET
+        const defaultTransport = [
+            { code: '000017', bank: 'Wema/ALAT', acc: '0280064037', name: 'JOSEPH ANIEBIET RAPHEAL', amount: 257620, narration: 'BM AWOTAN', ref: '001' },
+            { code: '000017', bank: 'Wema/ALAT', acc: '0261295863', name: 'VICTORIA BUKOLA ABIOLA', amount: 195500, narration: 'AWOTAN', ref: '002' },
+            { code: '000014', bank: 'Access Bank', acc: '1455923913', name: 'NAFISAT ADEJOKE OLAOLUWA', amount: 195500, narration: 'AWOTAN', ref: '003' },
+            { code: '000017', bank: 'Wema/ALAT', acc: '0280145332', name: 'OLUWASEUN RACHEAL ADEBAYO', amount: 165500, narration: 'AWOTAN', ref: '004' },
+            { code: '000017', bank: 'Wema/ALAT', acc: '0279962919', name: 'PAULINA OLUWADAMILARE KAYODE', amount: 229520, narration: 'BM MONIYA 3', ref: '005' },
+            { code: '000010', bank: 'EcoBank', acc: '2280088175', name: 'AYORINDE DORCAS OYEKANMI', amount: 114600, narration: 'MONIYA 3', ref: '006' }
+        ];
+
+        // 3. COOPERATIVE DATASET
+        const baseCoopData = [
+            { sn: 1, name: "BUSARI IDOWU", junSav: 15175, julColl: 5000, julWT: 0, julLoanBal: 3500000, julLoanColl: 291670 },
+            { sn: 2, name: "BUSARI ALABA", junSav: 38245, julColl: 50000, julWT: 0, julLoanBal: 666200, julLoanColl: 166700 },
+            { sn: 3, name: "BOLARINWA MOTUNRAYO", junSav: 120110, julColl: 10000, julWT: 0, julLoanBal: 4000000, julLoanColl: 266670 },
+            { sn: 4, name: "BABATUNDE FLORENCE", junSav: 205000, julColl: 0, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 5, name: "KAREEM ZAINAB", junSav: 256665, julColl: 5000, julWT: 0, julLoanBal: 1125000, julLoanColl: 125000 },
+            { sn: 6, name: "YUSUFF IDRIS O", junSav: 130000, julColl: 10000, julWT: 0, julLoanBal: 1949940, julLoanColl: 150000 },
+            { sn: 7, name: "BABALOLA TEMITOPE", junSav: 175000, julColl: 20000, julWT: 0, julLoanBal: 2027775, julLoanColl: 194445 },
+            { sn: 8, name: "AMOO GANIYAT", junSav: 118000, julColl: 10000, julWT: 0, julLoanBal: 5000000, julLoanColl: 333335 },
+            { sn: 9, name: "ADEOLA YETUNDE", junSav: 0, julColl: 0, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 10, name: "JOHNSON KEHINDE", junSav: 118000, julColl: 10000, julWT: 0, julLoanBal: 666200, julLoanColl: 166700 },
+            { sn: 11, name: "ISAAC IBIYEMI", junSav: 70000, julColl: 10000, julWT: 0, julLoanBal: 666200, julLoanColl: 166700 },
+            { sn: 12, name: "OLAWOYE BANKOLE", junSav: 300000, julColl: 10000, julWT: 0, julLoanBal: 750000, julLoanColl: 150000 },
+            { sn: 13, name: "AJAYI OMIDIORA TAIWO", junSav: 5000, julColl: 0, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 14, name: "BABATUNDE PETER", junSav: 230000, julColl: 0, julWT: 0, julLoanBal: 1050000, julLoanColl: 0 },
+            { sn: 15, name: "ADELANWA PETER GBENGA", junSav: 250000, julColl: 0, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 16, name: "AREMU DAMILOLA", junSav: 118000, julColl: 10000, julWT: 0, julLoanBal: 4000000, julLoanColl: 266670 },
+            { sn: 17, name: "OLUBIYI FUNMILADE", junSav: 75000, julColl: 15000, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 18, name: "BAKRIN RAHANAT R", junSav: 50000, julColl: 10000, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 19, name: "LABA ADEWUMI OPEYEMI", junSav: 50000, julColl: 10000, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 20, name: "GBOLAGADE KOYUM", junSav: 415000, julColl: 0, julWT: 0, julLoanBal: 750000, julLoanColl: 0 },
+            { sn: 21, name: "OLANIYAN RUKAYAT", junSav: 265000, julColl: 0, julWT: 265000, julLoanBal: 935000, julLoanColl: 100000 },
+            { sn: 22, name: "FABOYEDE AYODEJI", junSav: 295000, julColl: 10000, julWT: 0, julLoanBal: 750000, julLoanColl: 150000 },
+            { sn: 23, name: "OKESHOLA BUKOLA", junSav: 195000, julColl: 0, julWT: 0, julLoanBal: 375000, julLoanColl: 0 },
+            { sn: 24, name: "OLANIRAN ADEPOJU", junSav: 85000, julColl: 10000, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 25, name: "BUSARI ABIODUN", junSav: 60000, julColl: 10000, julWT: 0, julLoanBal: 1312500, julLoanColl: 262500 },
+            { sn: 26, name: "MUIBI SHERIF", junSav: 220000, julColl: 0, julWT: 0, julLoanBal: 250000, julLoanColl: 0 },
+            { sn: 27, name: "ASUQUO CHARLES", junSav: 1001670, julColl: 0, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 28, name: "MONSURU RASHEED", junSav: 160000, julColl: 30000, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 29, name: "OWONIKOKO VICTORIA", junSav: 90000, julColl: 30000, julWT: 0, julLoanBal: 0, julLoanColl: 0 },
+            { sn: 30, name: "WAHAB AJOKE", junSav: 190000, julColl: 5000, julWT: 0, julLoanBal: 100000, julLoanColl: 100000 },
+            { sn: 36, name: "SAIBU AZEEZ O.", junSav: 260000, julColl: 5000, julWT: 0, julLoanBal: 260000, julLoanColl: 65000 },
+            { sn: 46, name: "ALAGBE ABIGEAL", junSav: 220000, julColl: 5000, julWT: 0, julLoanBal: 420000, julLoanColl: 60000 },
+            { sn: 50, name: "IBRAHIM ADUNOLA", junSav: 260000, julColl: 5000, julWT: 0, julLoanBal: 800000, julLoanColl: 80000 },
+            { sn: 51, name: "AJIBOYE FUNMILAYO", junSav: 159835, julColl: 5000, julWT: 0, julLoanBal: 800000, julLoanColl: 80165 },
+            { sn: 52, name: "OLAWUNMI SAHEED", junSav: 180000, julColl: 5000, julWT: 0, julLoanBal: 280000, julLoanColl: 70000 },
+            { sn: 53, name: "KEHINDE MARIAM", junSav: 225000, julColl: 5000, julWT: 0, julLoanBal: 200000, julLoanColl: 100000 },
+            { sn: 54, name: "AMUSAN ADEOLA ABOSEDE", junSav: 120000, julColl: 5000, julWT: 0, julLoanBal: 360000, julLoanColl: 60000 },
+            { sn: 55, name: "OLABISI AKANGBE ELIZABETH", junSav: 120000, julColl: 5000, julWT: 0, julLoanBal: 360000, julLoanColl: 60000 }
+        ];
+
+        // RENDER ACCORDION BRANCHES
+        function renderBranchAccordions() {
+            const container = document.getElementById('branch-accordion-list');
+            container.innerHTML = '';
+
+            const grouped = {};
+            rawPayrollData.forEach((item, index) => {
+                if (!grouped[item.branch]) grouped[item.branch] = [];
+                grouped[item.branch].push({ ...item, originalIndex: index });
+            });
+
+            let grand = { gross: 0, bonus: 0, coopS: 0, coopL: 0, dev: 0, tax: 0, offline: 0, others: 0, advance: 0, totalDed: 0, netPay: 0 };
+
+            Object.keys(grouped).forEach(branchName => {
+                const staffList = grouped[branchName];
+                let bTotal = { gross: 0, bonus: 0, coopS: 0, coopL: 0, dev: 0, tax: 0, offline: 0, others: 0, advance: 0, totalDed: 0, netPay: 0 };
+
+                staffList.forEach(s => {
+                    const totalDed = s.coopS + s.coopL + s.dev + s.tax + s.offline + s.others + s.advance;
+                    const netPay = s.gross + s.bonus - totalDed;
+
+                    bTotal.gross += s.gross; bTotal.bonus += s.bonus; bTotal.coopS += s.coopS; bTotal.coopL += s.coopL;
+                    bTotal.dev += s.dev; bTotal.tax += s.tax; bTotal.offline += s.offline; bTotal.others += s.others;
+                    bTotal.advance += s.advance; bTotal.totalDed += totalDed; bTotal.netPay += netPay;
+                });
+
+                Object.keys(grand).forEach(k => grand[k] += bTotal[k]);
+                const isOpen = accordionStates[branchName] ?? false;
+
+                let tableRows = '';
+                staffList.forEach(s => {
+                    const totalDed = s.coopS + s.coopL + s.dev + s.tax + s.offline + s.others + s.advance;
+                    const netPay = s.gross + s.bonus - totalDed;
+
+                    tableRows += `
+                        <tr class="hover:bg-gray-50 border-b border-gray-100">
+                            <td class="p-3 font-bold text-gray-900">${s.name}</td>
+                            <td class="p-3 text-gray-500 font-mono">${s.gra}</td>
+                            <td class="p-3 text-right">₦${s.gross.toLocaleString()}</td>
+                            <td class="p-3 text-right">₦${s.bonus.toLocaleString()}</td>
+                            <td class="p-3 text-right">₦${s.coopS.toLocaleString()}</td>
+                            <td class="p-3 text-right">₦${s.coopL.toLocaleString()}</td>
+                            <td class="p-3 text-right">₦${s.dev.toLocaleString()}</td>
+                            <td class="p-3 text-right">₦${s.tax.toLocaleString()}</td>
+                            <td class="p-3 text-right">₦${s.offline.toLocaleString()}</td>
+                            <td class="p-3 text-right">₦${s.others.toLocaleString()}</td>
+                            <td class="p-3 text-right">₦${s.advance.toLocaleString()}</td>
+                            <td class="p-3 text-right font-semibold text-red-600">₦${totalDed.toLocaleString()}</td>
+                            <td class="p-3 text-right font-bold text-brand-darkgreen bg-green-50/70">₦${netPay.toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div onclick="toggleAccordion('${branchName}')" class="px-5 py-3.5 bg-gray-50/80 hover:bg-gray-100/80 cursor-pointer flex flex-col md:flex-row justify-between md:items-center border-b border-gray-200 transition">
+                            <div class="flex items-center space-x-3 mb-2 md:mb-0">
+                                <i class="fa-solid ${isOpen ? 'fa-chevron-down text-brand-orange' : 'fa-chevron-right text-gray-400'} text-xs transition-transform"></i>
+                                <span class="font-bold text-xs text-gray-900 uppercase tracking-wide">${branchName}</span>
+                                <span class="text-[10px] bg-brand-green/10 text-brand-darkgreen px-2 py-0.5 rounded-full font-bold">${staffList.length} Staff</span>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-4 text-xs font-semibold">
+                                <div class="text-gray-600">Gross: <span class="text-gray-900">₦${bTotal.gross.toLocaleString()}</span></div>
+                                <div class="text-red-600">Deductions: <span>₦${bTotal.totalDed.toLocaleString()}</span></div>
+                                <div class="text-brand-darkgreen bg-brand-green/10 px-2.5 py-1 rounded-md">Net: ₦${bTotal.netPay.toLocaleString()}</div>
+                            </div>
+                        </div>
+
+                        <div class="${isOpen ? '' : 'hidden'} overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-gray-100/60 border-b border-gray-200 text-gray-600 uppercase font-semibold">
+                                        <th class="p-3">Staff Name</th>
+                                        <th class="p-3">GRA</th>
+                                        <th class="p-3 text-right">Gross (1)</th>
+                                        <th class="p-3 text-right">Bonus (2)</th>
+                                        <th class="p-3 text-right">Coop.S (3)</th>
+                                        <th class="p-3 text-right">Coop.L (4)</th>
+                                        <th class="p-3 text-right">Dev 2.5% (5)</th>
+                                        <th class="p-3 text-right">Tax 3% (6)</th>
+                                        <th class="p-3 text-right">Offline (7)</th>
+                                        <th class="p-3 text-right">Others (8)</th>
+                                        <th class="p-3 text-right">Adv. (9)</th>
+                                        <th class="p-3 text-right">Total Ded (10)</th>
+                                        <th class="p-3 text-right bg-green-50/70 font-bold">Net Pay (11)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    ${tableRows}
+                                </tbody>
+                                <tfoot class="bg-gray-900 text-white font-bold text-xs">
+                                    <tr>
+                                        <td colspan="2" class="p-3 uppercase">Branch Total (${branchName})</td>
+                                        <td class="p-3 text-right">₦${bTotal.gross.toLocaleString()}</td>
+                                        <td class="p-3 text-right">₦${bTotal.bonus.toLocaleString()}</td>
+                                        <td class="p-3 text-right">₦${bTotal.coopS.toLocaleString()}</td>
+                                        <td class="p-3 text-right">₦${bTotal.coopL.toLocaleString()}</td>
+                                        <td class="p-3 text-right">₦${bTotal.dev.toLocaleString()}</td>
+                                        <td class="p-3 text-right">₦${bTotal.tax.toLocaleString()}</td>
+                                        <td class="p-3 text-right">₦${bTotal.offline.toLocaleString()}</td>
+                                        <td class="p-3 text-right">₦${bTotal.others.toLocaleString()}</td>
+                                        <td class="p-3 text-right">₦${bTotal.advance.toLocaleString()}</td>
+                                        <td class="p-3 text-right text-red-300">₦${bTotal.totalDed.toLocaleString()}</td>
+                                        <td class="p-3 text-right text-brand-orange font-extrabold bg-black">₦${bTotal.netPay.toLocaleString()}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('grand-total-card').innerHTML = `
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h4 class="text-sm font-extrabold text-brand-orange uppercase tracking-wide">CUMULATIVE DIVISION TOTAL</h4>
+                        <p class="text-xs text-gray-200">Exact Division Summary Matching Page 3</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-right">
+                        <div>
+                            <div class="text-[10px] text-gray-300 uppercase font-semibold">Total Gross</div>
+                            <div class="text-sm font-bold text-white">₦${grand.gross.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-300 uppercase font-semibold">Total Bonus</div>
+                            <div class="text-sm font-bold text-white">₦${grand.bonus.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-gray-300 uppercase font-semibold">Total Deductions</div>
+                            <div class="text-sm font-bold text-red-300">₦${grand.totalDed.toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] text-brand-orange uppercase font-bold">Cumulative Net Pay</div>
+                            <div class="text-base font-black text-brand-orange">₦${grand.netPay.toLocaleString()}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // RENDER TRANSPORT TAB
+        function renderTransport() {
+            const tbody = document.getElementById('transport-tbody');
+            const tfoot = document.getElementById('transport-tfoot');
+            tbody.innerHTML = '';
+            let total = 0;
+
+            defaultTransport.forEach(row => {
+                total += row.amount;
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 border-b border-gray-100">
+                        <td class="p-3 font-mono text-gray-500">${row.code}</td>
+                        <td class="p-3 font-medium text-gray-800">${row.bank}</td>
+                        <td class="p-3 font-mono text-gray-700">${row.acc}</td>
+                        <td class="p-3 font-bold text-gray-900">${row.name}</td>
+                        <td class="p-3 text-right font-semibold text-brand-darkgreen">₦${row.amount.toLocaleString()}</td>
+                        <td class="p-3 text-gray-600">${row.narration}</td>
+                        <td class="p-3 text-center text-gray-400 font-mono">${row.ref}</td>
+                    </tr>
+                `;
+            });
+
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="4" class="p-3 uppercase">Total Scheduled Disbursement</td>
+                    <td class="p-3 text-right text-brand-orange font-bold">₦${total.toLocaleString()}</td>
+                    <td colspan="2"></td>
+                </tr>
+            `;
+        }
+
+        // RENDER COOP TAB WITH MONTH SELECTOR
+        function renderCoop() {
+            const selectedMonth = document.getElementById('monthSelect').value;
+            const tbody = document.getElementById('coop-tbody');
+            const tfoot = document.getElementById('coop-tfoot');
+
+            document.getElementById('coop-period-title').innerText = `Co-operative Ledger (${selectedMonth} 2026)`;
+            tbody.innerHTML = '';
+            let totals = { openSav: 0, collSav: 0, wtSav: 0, endSav: 0, openLoan: 0, payLoan: 0, endLoan: 0 };
+
+            baseCoopData.forEach(m => {
+                let openSav, collSav, wtSav, endSav, openLoan, payLoan, endLoan;
+
+                const julEndSav = m.junSav + m.julColl - m.julWT;
+                const julEndLoan = Math.max(0, m.julLoanBal - m.julLoanColl);
+
+                const augCollSav = m.julColl;
+                const augEndSav = julEndSav + augCollSav;
+                const augPayLoan = m.julLoanColl;
+                const augEndLoan = Math.max(0, julEndLoan - augPayLoan);
+
+                const sepCollSav = m.julColl;
+                const sepEndSav = augEndSav + sepCollSav;
+                const sepPayLoan = m.julLoanColl;
+                const sepEndLoan = Math.max(0, augEndLoan - sepPayLoan);
+
+                if (selectedMonth === 'JULY') {
+                    openSav = m.junSav; collSav = m.julColl; wtSav = m.julWT; endSav = julEndSav;
+                    openLoan = m.julLoanBal; payLoan = m.julLoanColl; endLoan = julEndLoan;
+                } else if (selectedMonth === 'AUGUST') {
+                    openSav = julEndSav; collSav = augCollSav; wtSav = 0; endSav = augEndSav;
+                    openLoan = julEndLoan; payLoan = augPayLoan; endLoan = augEndLoan;
+                } else {
+                    openSav = augEndSav; collSav = sepCollSav; wtSav = 0; endSav = sepEndSav;
+                    openLoan = augEndLoan; payLoan = sepPayLoan; endLoan = sepEndLoan;
+                }
+
+                totals.openSav += openSav; totals.collSav += collSav; totals.wtSav += wtSav; totals.endSav += endSav;
+                totals.openLoan += openLoan; totals.payLoan += payLoan; totals.endLoan += endLoan;
+
+                const isFullyPaid = (openLoan === 0 && payLoan === 0) || endLoan === 0;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 border-b border-gray-100">
+                        <td class="p-3 font-mono text-gray-500">${m.sn}</td>
+                        <td class="p-3 font-bold text-gray-900">${m.name}</td>
+                        <td class="p-3 text-right">₦${openSav.toLocaleString()}</td>
+                        <td class="p-3 text-right">₦${collSav.toLocaleString()}</td>
+                        <td class="p-3 text-right">₦${wtSav.toLocaleString()}</td>
+                        <td class="p-3 text-right font-bold text-brand-darkgreen bg-green-50/70">₦${endSav.toLocaleString()}</td>
+                        <td class="p-3 text-right">₦${openLoan.toLocaleString()}</td>
+                        <td class="p-3 text-right">₦${payLoan.toLocaleString()}</td>
+                        <td class="p-3 text-right font-bold text-red-600 bg-red-50/70">₦${endLoan.toLocaleString()}</td>
+                        <td class="p-3 text-center">
+                            ${isFullyPaid 
+                                ? '<span class="bg-brand-green/10 text-brand-darkgreen text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-brand-green/30">FULL PAYMENT</span>'
+                                : '<span class="bg-orange-100 text-brand-orange text-[10px] font-bold px-2 py-0.5 rounded-full">ACTIVE</span>'
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="2" class="p-3 uppercase">Total Portfolio</td>
+                    <td class="p-3 text-right">₦${totals.openSav.toLocaleString()}</td>
+                    <td class="p-3 text-right">₦${totals.collSav.toLocaleString()}</td>
+                    <td class="p-3 text-right">₦${totals.wtSav.toLocaleString()}</td>
+                    <td class="p-3 text-right text-brand-orange font-bold">₦${totals.endSav.toLocaleString()}</td>
+                    <td class="p-3 text-right">₦${totals.openLoan.toLocaleString()}</td>
+                    <td class="p-3 text-right">₦${totals.payLoan.toLocaleString()}</td>
+                    <td class="p-3 text-right text-red-300 font-bold">₦${totals.endLoan.toLocaleString()}</td>
+                    <td></td>
+                </tr>
+            `;
+        }
+
+        // NAVIGATION SWITCHER
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-link').forEach(btn => {
+                btn.classList.remove('bg-brand-green', 'text-white', 'shadow-sm');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-100', 'hover:text-gray-900');
+            });
+
+            const activeBtn = document.getElementById('nav-' + tab);
+            activeBtn.classList.add('bg-brand-green', 'text-white', 'shadow-sm');
+            activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-100', 'hover:text-gray-900');
+
+            const titleMap = {
+                'payroll': 'Monthly Payroll Management',
+                'transport': 'Transport & Salary Schedule',
+                'coop': 'Cooperative Ledger'
+            };
+            document.getElementById('current-module-title').innerText = titleMap[tab];
+        }
+
+        function toggleAccordion(branchName) {
+            accordionStates[branchName] = !accordionStates[branchName];
+            renderBranchAccordions();
+        }
+
+        function toggleAllAccordions(openState) {
+            rawPayrollData.forEach(item => accordionStates[item.branch] = openState);
+            renderBranchAccordions();
+        }
+
+        function filterTables() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('tbody tr').forEach(tr => {
+                const text = tr.innerText.toLowerCase();
+                tr.style.display = text.includes(q) ? '' : 'none';
+            });
+        }
+
+        function exportCurrentTabCSV() {
+            alert('Exporting active table data to CSV format...');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBranchAccordions();
+            renderTransport();
+            renderCoop();
+        });
+    </script>
+</body>
 </html>
+
