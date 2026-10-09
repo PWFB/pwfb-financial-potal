@@ -37,7 +37,46 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #005c37;
         }
-    #sidebar.sidebar-collapsed{width:4.5rem}#sidebar.sidebar-collapsed .sidebar-label,#sidebar.sidebar-collapsed .sidebar-brand-copy,#sidebar.sidebar-collapsed .sidebar-section-label,#sidebar.sidebar-collapsed .sidebar-footer-copy{display:none}#sidebar.sidebar-collapsed .sidebar-brand{justify-content:center;padding-left:.75rem;padding-right:.75rem}#sidebar.sidebar-collapsed nav{padding-left:.5rem;padding-right:.5rem}.action-btn{padding:.3rem .5rem;border-radius:.35rem;font-size:10px;font-weight:700;margin:0 .1rem}</style>
+    #sidebar.sidebar-collapsed{width:4.5rem;min-width:4.5rem}
+    #sidebar.sidebar-collapsed .sidebar-label,#sidebar.sidebar-collapsed .sidebar-brand-copy,#sidebar.sidebar-collapsed .sidebar-section-label,#sidebar.sidebar-collapsed .sidebar-footer-copy{display:none}
+    #sidebar.sidebar-collapsed .sidebar-brand{justify-content:center;padding-left:.75rem;padding-right:.75rem}
+    #sidebar.sidebar-collapsed nav{padding-left:.5rem;padding-right:.5rem}
+    #sidebar.sidebar-collapsed .nav-link{justify-content:center;padding-left:.65rem;padding-right:.65rem}
+    .action-btn{padding:.3rem .5rem;border-radius:.35rem;font-size:10px;font-weight:700;margin:0 .1rem}
+    #themeMode{max-width:112px}
+    body{transition:background-color .2s ease,color .2s ease}
+    body[data-theme="dark"],body[data-theme="system"]{color-scheme:dark}
+    body[data-theme="light"]{color-scheme:light}
+    body[data-theme="dark"]{background:#111827!important;color:#e5e7eb!important}
+    body[data-theme="dark"] .bg-white{background-color:#1f2937!important}
+    body[data-theme="dark"] .bg-gray-50,body[data-theme="dark"] .bg-gray-50\\/50,body[data-theme="dark"] .bg-gray-50\\/80,body[data-theme="dark"] .bg-gray-100,body[data-theme="dark"] .bg-gray-100\\/60,body[data-theme="dark"] .bg-gray-100\\/80{background-color:#111827!important}
+    body[data-theme="dark"] .bg-green-50\\/70{background-color:#123b2b!important}
+    body[data-theme="dark"] .bg-red-50\\/70{background-color:#451a1a!important}
+    body[data-theme="dark"] .text-gray-900,body[data-theme="dark"] .text-gray-800,body[data-theme="dark"] .text-gray-700,body[data-theme="dark"] .text-gray-600,body[data-theme="dark"] .text-gray-500{color:#e5e7eb!important}
+    body[data-theme="dark"] .border-gray-100,body[data-theme="dark"] .border-gray-200,body[data-theme="dark"] .border-gray-300{border-color:#374151!important}
+    body[data-theme="dark"] .hover\\:bg-gray-50:hover,body[data-theme="dark"] .hover\\:bg-gray-100:hover{background-color:#374151!important}
+    body[data-theme="dark"] input,body[data-theme="dark"] select,body[data-theme="dark"] textarea{background-color:#111827!important;color:#f9fafb!important;border-color:#4b5563!important}
+    body[data-theme="dark"] input::placeholder,body[data-theme="dark"] textarea::placeholder{color:#9ca3af!important}
+    body[data-theme="dark"] .bg-orange-100{background-color:#65340f!important}
+    body[data-theme="dark"] .bg-blue-100{background-color:#1e3a8a!important}
+    body[data-theme="dark"] .bg-red-100{background-color:#7f1d1d!important}
+    body[data-theme="dark"] .text-blue-700,body[data-theme="dark"] .text-red-700{color:#dbeafe!important}
+    @media(prefers-color-scheme:dark){
+      body[data-theme="system"]{background:#111827!important;color:#e5e7eb!important}
+      body[data-theme="system"] .bg-white{background-color:#1f2937!important}
+      body[data-theme="system"] .bg-gray-50,body[data-theme="system"] .bg-gray-50\\/50,body[data-theme="system"] .bg-gray-50\\/80,body[data-theme="system"] .bg-gray-100,body[data-theme="system"] .bg-gray-100\\/60,body[data-theme="system"] .bg-gray-100\\/80{background-color:#111827!important}
+      body[data-theme="system"] .bg-green-50\\/70{background-color:#123b2b!important}
+      body[data-theme="system"] .bg-red-50\\/70{background-color:#451a1a!important}
+      body[data-theme="system"] .text-gray-900,body[data-theme="system"] .text-gray-800,body[data-theme="system"] .text-gray-700,body[data-theme="system"] .text-gray-600,body[data-theme="system"] .text-gray-500{color:#e5e7eb!important}
+      body[data-theme="system"] .border-gray-100,body[data-theme="system"] .border-gray-200,body[data-theme="system"] .border-gray-300{border-color:#374151!important}
+      body[data-theme="system"] .hover\\:bg-gray-50:hover,body[data-theme="system"] .hover\\:bg-gray-100:hover{background-color:#374151!important}
+      body[data-theme="system"] input,body[data-theme="system"] select,body[data-theme="system"] textarea{background-color:#111827!important;color:#f9fafb!important;border-color:#4b5563!important}
+      body[data-theme="system"] input::placeholder,body[data-theme="system"] textarea::placeholder{color:#9ca3af!important}
+      body[data-theme="system"] .bg-orange-100{background-color:#65340f!important}
+      body[data-theme="system"] .bg-blue-100{background-color:#1e3a8a!important}
+      body[data-theme="system"] .bg-red-100{background-color:#7f1d1d!important}
+      body[data-theme="system"] .text-blue-700,body[data-theme="system"] .text-red-700{color:#dbeafe!important}
+    }</style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
 
@@ -113,6 +152,12 @@
                     <input type="text" id="searchInput" onkeyup="filterTables()" placeholder="Search staff, branch, bank, or month..." class="w-full pl-9 pr-4 py-1.5 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none bg-gray-50/50">
                 </div>
 
+                <label class="sr-only" for="themeMode">Color theme</label>
+                <select id="themeMode" onchange="setThemeMode(this.value)" aria-label="Color theme" title="Choose dark, white, or system theme" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white text-gray-700">
+                    <option value="system">System</option>
+                    <option value="light">White mode</option>
+                    <option value="dark">Dark mode</option>
+                </select>
                 <button onclick="exportCurrentTabCSV()" class="bg-brand-orange hover:bg-orange-600 text-white text-xs font-semibold py-1.5 px-3.5 rounded-lg shadow-sm transition flex items-center gap-1.5">
                     <i class="fa-solid fa-file-csv"></i> Export CSV
                 </button>
@@ -700,8 +745,11 @@
 
 <script>
 var pwfbSidebarCollapsed=false, pwfbTransfers=[];
-var pwfbStorageKey='pwfb-financial-portal-v2';
-function toggleSidebar(){pwfbSidebarCollapsed=!pwfbSidebarCollapsed;document.getElementById('sidebar').classList.toggle('sidebar-collapsed',pwfbSidebarCollapsed);document.getElementById('sidebarToggle').innerHTML='<i class="fa-solid '+(pwfbSidebarCollapsed?'fa-angles-right':'fa-bars')+'"></i>';}
+var pwfbStorageKey='pwfb-financial-portal-v2', pwfbThemeKey='pwfb-financial-portal-theme-v1', pwfbSidebarKey='pwfb-financial-portal-sidebar-v1';
+function applySidebarState(){var side=document.getElementById('sidebar'),btn=document.getElementById('sidebarToggle');if(!side||!btn)return;side.classList.toggle('sidebar-collapsed',pwfbSidebarCollapsed);btn.innerHTML='<i class="fa-solid '+(pwfbSidebarCollapsed?'fa-angles-right':'fa-bars')+'"></i>';btn.setAttribute('aria-expanded',String(!pwfbSidebarCollapsed));btn.title=pwfbSidebarCollapsed?'Unfold sidebar':'Fold sidebar';}
+function toggleSidebar(){pwfbSidebarCollapsed=!pwfbSidebarCollapsed;applySidebarState();try{localStorage.setItem(pwfbSidebarKey,pwfbSidebarCollapsed?'folded':'unfolded');}catch(e){}}
+function setThemeMode(mode){if(!['dark','light','system'].includes(mode))mode='system';document.body.setAttribute('data-theme',mode);var picker=document.getElementById('themeMode');if(picker&&picker.value!==mode)picker.value=mode;try{localStorage.setItem(pwfbThemeKey,mode);}catch(e){}}
+function initAppearance(){var mode='system',folded=false;try{mode=localStorage.getItem(pwfbThemeKey)||'system';folded=localStorage.getItem(pwfbSidebarKey)==='folded';}catch(e){}pwfbSidebarCollapsed=folded;applySidebarState();setThemeMode(mode);}
 function pwfbEsc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function pwfbPersist(){try{localStorage.setItem(pwfbStorageKey,JSON.stringify({payroll:rawPayrollData,transport:defaultTransport,coop:baseCoopData,transfers:pwfbTransfers}));}catch(e){}}
 function pwfbLoad(){try{var d=JSON.parse(localStorage.getItem(pwfbStorageKey)||'null');if(!d)return;if(Array.isArray(d.payroll))rawPayrollData.splice(0,rawPayrollData.length,...d.payroll);if(Array.isArray(d.transport))defaultTransport.splice(0,defaultTransport.length,...d.transport);if(Array.isArray(d.coop))baseCoopData.splice(0,baseCoopData.length,...d.coop);if(Array.isArray(d.transfers))pwfbTransfers=d.transfers;}catch(e){}}
@@ -727,7 +775,7 @@ function pwfbAddActions(){
  });
 }
 function pwfbSearch(){var el=document.getElementById('searchInput');if(!el)return;var q=el.value.trim().toLowerCase();document.querySelectorAll('.tab-content tbody tr').forEach(function(r){r.style.display=!q||r.innerText.toLowerCase().includes(q)?'':'none';});if(currentTab==='payroll')document.querySelectorAll('#branch-accordion-list > div').forEach(function(card){var m=!q||card.innerText.toLowerCase().includes(q);card.style.display=m?'':'none';if(q&&m){var table=card.querySelector('div.overflow-x-auto');if(table)table.classList.remove('hidden');}});}
-document.addEventListener('DOMContentLoaded',function(){pwfbLoad();renderBranchAccordions();renderTransport();renderCoop();pwfbRenderTransfers();pwfbAddActions();var search=document.getElementById('searchInput');if(search)search.addEventListener('input',pwfbSearch);var date=document.getElementById('transferDate');if(date)date.value=new Date().toISOString().slice(0,10);var form=document.getElementById('transferForm');if(form)form.addEventListener('submit',function(e){e.preventDefault();var amount=Number(document.getElementById('transferAmount').value);if(!Number.isFinite(amount)||amount<=0){alert('Enter an amount greater than zero');return;}pwfbTransfers.push({date:date.value,from:document.getElementById('transferFrom').value.trim(),to:document.getElementById('transferTo').value.trim(),amount:amount,narration:document.getElementById('transferNarration').value.trim(),ref:'TRF-'+Date.now().toString().slice(-8)});pwfbPersist();form.reset();date.value=new Date().toISOString().slice(0,10);pwfbRenderTransfers();pwfbSearch();});});
+document.addEventListener('DOMContentLoaded',function(){initAppearance();pwfbLoad();renderBranchAccordions();renderTransport();renderCoop();pwfbRenderTransfers();pwfbAddActions();var search=document.getElementById('searchInput');if(search)search.addEventListener('input',pwfbSearch);var date=document.getElementById('transferDate');if(date)date.value=new Date().toISOString().slice(0,10);var form=document.getElementById('transferForm');if(form)form.addEventListener('submit',function(e){e.preventDefault();var amount=Number(document.getElementById('transferAmount').value);if(!Number.isFinite(amount)||amount<=0){alert('Enter an amount greater than zero');return;}pwfbTransfers.push({date:date.value,from:document.getElementById('transferFrom').value.trim(),to:document.getElementById('transferTo').value.trim(),amount:amount,narration:document.getElementById('transferNarration').value.trim(),ref:'TRF-'+Date.now().toString().slice(-8)});pwfbPersist();form.reset();date.value=new Date().toISOString().slice(0,10);pwfbRenderTransfers();pwfbSearch();});});
 </script>
 
 </body>
