@@ -1,0 +1,29 @@
+name: Portal auth build check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/termii-phone-pin-auth]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install dependencies
+        run: npm install
+      - name: Build frontend
+        run: npm run build
+      - name: Check server syntax
+        run: node --check server.js
