@@ -711,7 +711,21 @@ function pwfbDeleteTransfer(i){if(confirm('Delete this transfer?')){pwfbTransfer
 function pwfbEditRecord(type,i){var a=type==='payroll'?rawPayrollData:type==='transport'?defaultTransport:baseCoopData;var o=a[i];if(!o)return;var c=Object.assign({},o);for(var k of Object.keys(c)){var v=prompt('Edit '+k+':',c[k]);if(v===null)return;if(['gross','bonus','coopS','coopL','dev','tax','offline','others','advance','amount','sn','junSav','julColl','julWT','julLoanBal','julLoanColl'].includes(k)){v=Number(v);if(!Number.isFinite(v)||v<0){alert('Enter a valid non-negative number');return;}}c[k]=v;}a[i]=c;pwfbPersist();pwfbRenderAll();}
 function pwfbDeleteRecord(type,i){var a=type==='payroll'?rawPayrollData:type==='transport'?defaultTransport:baseCoopData;if(!a[i]||!confirm('Delete this '+type+' record?'))return;a.splice(i,1);pwfbPersist();pwfbRenderAll();}
 function pwfbRenderAll(){renderBranchAccordions();renderTransport();renderCoop();pwfbRenderTransfers();pwfbAddActions();pwfbSearch();}
-function pwfbAddActions(){[['payroll','#branch-accordion-list tbody'],['transport','#transport-tbody'],['coop','#coop-tbody']].forEach(function(x){document.querySelectorAll(x[1]).forEach(function(body){Array.from(body.rows).forEach(function(row,i){if(row.querySelector('[data-pwfb-actions]'))return;var td=document.createElement('td');td.className='p-3 whitespace-nowrap';td.setAttribute('data-pwfb-actions','1');td.innerHTML='<button class="action-btn bg-blue-100 text-blue-700" onclick="pwfbEditRecord(\''+x[0]+'\','+i+')">Edit</button><button class="action-btn bg-red-100 text-red-700" onclick="pwfbDeleteRecord(\''+x[0]+'\','+i+')">Delete</button>';row.appendChild(td);});});});}
+function pwfbAddActions(){
+ [['payroll','#branch-accordion-list tbody'],['transport','#transport-tbody'],['coop','#coop-tbody']].forEach(function(x){
+  document.querySelectorAll(x[1]).forEach(function(body){
+   var table=body.closest('table'), head=table&&table.querySelector('thead tr');
+   if(head&&!head.querySelector('[data-pwfb-head]')){var th=document.createElement('th');th.className='p-3';th.textContent='Actions';th.setAttribute('data-pwfb-head','1');head.appendChild(th);}
+   Array.from(body.rows).forEach(function(row,i){
+    if(row.querySelector('[data-pwfb-actions]'))return;
+    var ix=i;
+    if(x[0]==='payroll'){var name=row.cells[0]&&row.cells[0].innerText.trim();ix=rawPayrollData.findIndex(function(v){return v.name===name;});if(ix<0)return;}
+    var td=document.createElement('td');td.className='p-3 whitespace-nowrap';td.setAttribute('data-pwfb-actions','1');
+    td.innerHTML='<button class="action-btn bg-blue-100 text-blue-700" onclick="pwfbEditRecord(\\''+x[0]+'\\','+ix+')">Edit</button><button class="action-btn bg-red-100 text-red-700" onclick="pwfbDeleteRecord(\\''+x[0]+'\\','+ix+')">Delete</button>';row.appendChild(td);
+   });
+  });
+ });
+}
 function pwfbSearch(){var el=document.getElementById('searchInput');if(!el)return;var q=el.value.trim().toLowerCase();document.querySelectorAll('.tab-content tbody tr').forEach(function(r){r.style.display=!q||r.innerText.toLowerCase().includes(q)?'':'none';});if(currentTab==='payroll')document.querySelectorAll('#branch-accordion-list > div').forEach(function(card){var m=!q||card.innerText.toLowerCase().includes(q);card.style.display=m?'':'none';if(q&&m){var table=card.querySelector('div.overflow-x-auto');if(table)table.classList.remove('hidden');}});}
 document.addEventListener('DOMContentLoaded',function(){pwfbLoad();renderBranchAccordions();renderTransport();renderCoop();pwfbRenderTransfers();pwfbAddActions();var search=document.getElementById('searchInput');if(search)search.addEventListener('input',pwfbSearch);var date=document.getElementById('transferDate');if(date)date.value=new Date().toISOString().slice(0,10);var form=document.getElementById('transferForm');if(form)form.addEventListener('submit',function(e){e.preventDefault();var amount=Number(document.getElementById('transferAmount').value);if(!Number.isFinite(amount)||amount<=0){alert('Enter an amount greater than zero');return;}pwfbTransfers.push({date:date.value,from:document.getElementById('transferFrom').value.trim(),to:document.getElementById('transferTo').value.trim(),amount:amount,narration:document.getElementById('transferNarration').value.trim(),ref:'TRF-'+Date.now().toString().slice(-8)});pwfbPersist();form.reset();date.value=new Date().toISOString().slice(0,10);pwfbRenderTransfers();pwfbSearch();});});
 </script>
