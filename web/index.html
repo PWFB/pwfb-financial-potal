@@ -76,7 +76,14 @@
       body[data-theme="system"] .bg-blue-100{background-color:#1e3a8a!important}
       body[data-theme="system"] .bg-red-100{background-color:#7f1d1d!important}
       body[data-theme="system"] .text-blue-700,body[data-theme="system"] .text-red-700{color:#dbeafe!important}
-    }</style>
+    }    .balmz-fab{position:fixed;right:1.25rem;bottom:1.25rem;z-index:80;box-shadow:0 10px 28px #005c3740}
+    .balmz-panel{position:fixed;right:1.25rem;bottom:5.75rem;z-index:80;width:min(420px,calc(100vw - 2rem));max-height:min(76vh,680px);overflow:auto;box-shadow:0 18px 55px #0003}
+    .balmz-panel[hidden]{display:none}
+    body[data-theme="dark"] .balmz-panel,body[data-theme="dark"] .balmz-panel .balmz-surface{background:#1f2937!important;color:#f3f4f6!important;border-color:#374151!important}
+    body[data-theme="dark"] .balmz-panel .balmz-muted{color:#d1d5db!important}
+    @media(prefers-color-scheme:dark){body[data-theme="system"] .balmz-panel,body[data-theme="system"] .balmz-panel .balmz-surface{background:#1f2937!important;color:#f3f4f6!important;border-color:#374151!important}body[data-theme="system"] .balmz-panel .balmz-muted{color:#d1d5db!important}}
+    @media(max-width:640px){.balmz-panel{right:.5rem;bottom:5rem;width:calc(100vw - 1rem);max-height:75vh}.balmz-fab{right:.75rem;bottom:.75rem}}
+</style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
 
@@ -280,6 +287,41 @@
 
         </main>
     </div>
+
+    <!-- BALMZ AI: writing helper -->
+    <button id="balmzFab" type="button" class="balmz-fab bg-brand-green hover:bg-brand-darkgreen text-white rounded-full px-4 py-3 font-bold text-sm flex items-center gap-2" onclick="balmzToggle()" aria-controls="balmzPanel" aria-expanded="false">
+        <i class="fa-solid fa-wand-magic-sparkles"></i><span>BALMZ AI</span>
+    </button>
+    <section id="balmzPanel" class="balmz-panel balmz-surface bg-white border border-gray-200 rounded-2xl p-4" hidden aria-label="BALMZ AI writing assistant">
+        <div class="flex items-start justify-between gap-3 mb-3">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-xl bg-brand-green text-white flex items-center justify-center"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                <div><h3 class="font-extrabold text-gray-900 text-sm">BALMZ AI Writing Assistant</h3><p class="balmz-muted text-xs text-gray-500">Correct, polish, and type faster</p></div>
+            </div>
+            <button type="button" onclick="balmzToggle(false)" class="rounded-lg px-2 py-1 text-gray-500 hover:bg-gray-100" aria-label="Close BALMZ AI"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <label for="balmzInput" class="block text-xs font-bold text-gray-700 mb-1">What would you like to write or correct?</label>
+        <textarea id="balmzInput" rows="5" class="w-full border border-gray-300 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-brand-green" placeholder="Type or paste a message, report, narration, or note here…"></textarea>
+        <div class="flex flex-wrap gap-2 mt-2">
+            <button type="button" onclick="balmzProcess('correct')" class="bg-brand-green text-white rounded-lg px-3 py-2 text-xs font-bold"><i class="fa-solid fa-spell-check mr-1"></i>Correct text</button>
+            <button type="button" onclick="balmzProcess('professional')" class="bg-gray-100 text-gray-800 rounded-lg px-3 py-2 text-xs font-bold">Make professional</button>
+            <button type="button" onclick="balmzProcess('shorten')" class="bg-gray-100 text-gray-800 rounded-lg px-3 py-2 text-xs font-bold">Make concise</button>
+        </div>
+        <div class="mt-4">
+            <label for="balmzTemplate" class="block text-xs font-bold text-gray-700 mb-1">Quick-start template</label>
+            <div class="flex gap-2">
+                <select id="balmzTemplate" class="min-w-0 flex-1 border border-gray-300 rounded-lg px-2 py-2 text-xs">
+                    <option value="payment">Payment narration</option><option value="email">Professional message</option><option value="memo">Office memo</option><option value="followup">Follow-up reminder</option><option value="report">Financial report note</option>
+                </select>
+                <button type="button" onclick="balmzInsertTemplate()" class="border border-brand-green text-brand-green rounded-lg px-3 py-2 text-xs font-bold">Use template</button>
+            </div>
+        </div>
+        <div id="balmzStatus" class="balmz-muted text-xs text-gray-500 mt-3" role="status" aria-live="polite">Your text stays in this browser. Review corrections before using them.</div>
+        <div class="flex gap-2 mt-3">
+            <button type="button" onclick="balmzApply()" class="flex-1 bg-brand-orange hover:bg-orange-600 text-white rounded-lg px-3 py-2.5 text-xs font-extrabold"><i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>Insert into last field</button>
+            <button type="button" onclick="balmzCopy()" class="border border-gray-300 rounded-lg px-3 py-2.5 text-xs font-bold"><i class="fa-regular fa-copy mr-1"></i>Copy</button>
+        </div>
+    </section>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
@@ -775,6 +817,20 @@ function pwfbAddActions(){
  });
 }
 function pwfbSearch(){var el=document.getElementById('searchInput');if(!el)return;var q=el.value.trim().toLowerCase();document.querySelectorAll('.tab-content tbody tr').forEach(function(r){r.style.display=!q||r.innerText.toLowerCase().includes(q)?'':'none';});if(currentTab==='payroll')document.querySelectorAll('#branch-accordion-list > div').forEach(function(card){var m=!q||card.innerText.toLowerCase().includes(q);card.style.display=m?'':'none';if(q&&m){var table=card.querySelector('div.overflow-x-auto');if(table)table.classList.remove('hidden');}});}
+
+/* BALMZ AI writing helper: private, browser-local correction and templates. */
+var balmzLastField=null;
+function balmzToggle(force){var panel=document.getElementById('balmzPanel'),fab=document.getElementById('balmzFab');if(!panel||!fab)return;var show=typeof force==='boolean'?force:panel.hidden;panel.hidden=!show;fab.setAttribute('aria-expanded',String(show));if(show){var input=document.getElementById('balmzInput');if(input&&!input.value&&balmzLastField)input.value=balmzLastField.value||'';setTimeout(function(){input&&input.focus();},0);}}
+function balmzSetStatus(msg){var el=document.getElementById('balmzStatus');if(el)el.textContent=msg;}
+function balmzFixText(text){var s=String(text||'').replace(/\r\n?/g,'\n').replace(/[\t ]+/g,' ').replace(/ *\n */g,'\n').replace(/\n{3,}/g,'\n\n').trim();var fixes={"teh":"the","recieve":"receive","recieved":"received","adress":"address","ammount":"amount","transation":"transaction","tranfer":"transfer","reciept":"receipt","seperate":"separate","occured":"occurred","definately":"definitely","thier":"their","writting":"writing","succesful":"successful","sucessful":"successful","kindly do the needful":"please take the necessary action","as per your request":"as requested","i am writing to inform you":"I am writing to inform you"};Object.keys(fixes).forEach(function(k){s=s.replace(new RegExp('\\b'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\document.addEventListener('DOMContentLoaded',function(){initAppearance();')+'\\b','gi'),function(m){var v=fixes[k];return m===m.toUpperCase()?v.toUpperCase():m.charAt(0)===m.charAt(0).toUpperCase()?v.charAt(0).toUpperCase()+v.slice(1):v;});});s=s.replace(/\bi\b/g,'I').replace(/\s+([,.!?;:])/g,'$1').replace(/([,.!?;:])(?=[A-Za-z])/g,'$1 ').replace(/\b(ok|okey)\b/gi,'okay');s=s.replace(/(^|[.!?]\s+)([a-z])/g,function(_,a,b){return a+b.toUpperCase();});return s;}
+function balmzProcess(mode){var el=document.getElementById('balmzInput');if(!el)return;var s=balmzFixText(el.value);if(!s){balmzSetStatus('Type or paste some text first.');el.focus();return;}if(mode==='professional'){s=s.replace(/\bhey\b/gi,'Hello').replace(/\bhi\b/gi,'Hello').replace(/\bpls\b/gi,'please').replace(/\bplz\b/gi,'please').replace(/\bthx\b/gi,'thank you').replace(/\basap\b/gi,'as soon as possible');if(!/^(dear|hello|good morning|good afternoon|good evening)\b/i.test(s))s='Hello,\n\n'+s;if(!/(regards|thank you|sincerely|best regards)[,.!\s]*$/i.test(s))s+='\n\nThank you.';}else if(mode==='shorten'){s=s.replace(/\bI am writing to inform you that\b/gi,'Please note that').replace(/\bat this point in time\b/gi,'now').replace(/\bdue to the fact that\b/gi,'because').replace(/\bfor the purpose of\b/gi,'for').replace(/\bin order to\b/gi,'to').replace(/\bplease be informed that\b/gi,'please note that').replace(/\s{2,}/g,' ');}el.value=s;el.dispatchEvent(new Event('input',{bubbles:true}));balmzSetStatus('Text updated. Please review names, dates, figures, and meaning before inserting.');}
+function balmzInsertTemplate(){var t=document.getElementById('balmzTemplate').value,examples={payment:'Payment for [purpose] from [sender/account] to [recipient/account] on [date]. Reference: [reference].',email:'Hello [name],\n\nI am writing regarding [subject]. [Add the key details and requested action].\n\nThank you.\n[Your name]',memo:'OFFICE MEMO\nDate: [date]\nTo: [recipient/team]\nSubject: [subject]\n\nPurpose: [purpose]\nAction required: [action]\nDeadline: [date/time]\n\nPrepared by: [name]',followup:'Hello [name], this is a polite follow-up regarding [subject]. Kindly share an update by [date/time], if possible. Thank you.',report:'FINANCIAL REPORT NOTE\nReporting period: [start date] to [end date]\nBranch/account: [name]\nAmount: ₦[amount]\nStatus: [pending/completed/reconciled]\nNotes: [brief explanation]'};var el=document.getElementById('balmzInput');el.value=examples[t]||'';el.focus();el.dispatchEvent(new Event('input',{bubbles:true}));balmzSetStatus('Template inserted. Replace every item in [brackets] with verified details.');}
+function balmzApply(){var input=document.getElementById('balmzInput');if(!input||!input.value.trim()){balmzSetStatus('Write or correct some text first.');return;}if(!balmzLastField||!document.contains(balmzLastField)){balmzSetStatus('Tap a text field in the portal first, then reopen BALMZ AI and choose Insert into last field. You can use Copy meanwhile.');return;}var field=balmzLastField;if(field.disabled||field.readOnly){balmzSetStatus('The last field cannot be edited. Choose an editable text field.');return;}var text=input.value;try{var start=typeof field.selectionStart==='number'?field.selectionStart:field.value.length,end=typeof field.selectionEnd==='number'?field.selectionEnd:field.value.length;var value=field.value;field.value=value.slice(0,start)+text+value.slice(end);field.focus();if(field.setSelectionRange)field.setSelectionRange(start+text.length,start+text.length);field.dispatchEvent(new Event('input',{bubbles:true}));field.dispatchEvent(new Event('change',{bubbles:true}));balmzSetStatus('Text inserted into the last active field. Check it before saving.');}catch(e){balmzSetStatus('Could not insert into that field. Use Copy and paste the text instead.');}}
+function balmzCopy(){var el=document.getElementById('balmzInput');if(!el||!el.value.trim()){balmzSetStatus('There is no text to copy yet.');return;}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(el.value).then(function(){balmzSetStatus('Text copied.');}).catch(function(){balmzFallbackCopy(el);});}else balmzFallbackCopy(el);}
+function balmzFallbackCopy(el){el.focus();el.select();try{var ok=document.execCommand('copy');balmzSetStatus(ok?'Text copied.':'Select the text and copy it manually.');}catch(e){balmzSetStatus('Select the text and copy it manually.');}}
+document.addEventListener('focusin',function(e){var el=e.target;if(el&&/^(INPUT|TEXTAREA)$/.test(el.tagName)&&!['search','number','date','checkbox','radio','button','submit','file','password'].includes((el.type||'text').toLowerCase()))balmzLastField=el;});
+document.addEventListener('keydown',function(e){if(e.ctrlKey&&e.shiftKey&&e.code==='Space'){e.preventDefault();balmzToggle();}});
+
 document.addEventListener('DOMContentLoaded',function(){initAppearance();pwfbLoad();renderBranchAccordions();renderTransport();renderCoop();pwfbRenderTransfers();pwfbAddActions();var search=document.getElementById('searchInput');if(search)search.addEventListener('input',pwfbSearch);var date=document.getElementById('transferDate');if(date)date.value=new Date().toISOString().slice(0,10);var form=document.getElementById('transferForm');if(form)form.addEventListener('submit',function(e){e.preventDefault();var amount=Number(document.getElementById('transferAmount').value);if(!Number.isFinite(amount)||amount<=0){alert('Enter an amount greater than zero');return;}pwfbTransfers.push({date:date.value,from:document.getElementById('transferFrom').value.trim(),to:document.getElementById('transferTo').value.trim(),amount:amount,narration:document.getElementById('transferNarration').value.trim(),ref:'TRF-'+Date.now().toString().slice(-8)});pwfbPersist();form.reset();date.value=new Date().toISOString().slice(0,10);pwfbRenderTransfers();pwfbSearch();});});
 </script>
 
