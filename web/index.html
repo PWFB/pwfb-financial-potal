@@ -137,6 +137,16 @@
                     <span class="sidebar-label">Cooperative Ledger</span>
                 </button>
                 <button id="nav-transfer" onclick="switchTab('transfer')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition"><i class="fa-solid fa-right-left w-5 text-center"></i><span class="sidebar-label">Transfers</span></button>
+                <div class="pt-3 mt-3 border-t border-gray-100">
+                    <div class="sidebar-section-label px-3 py-2 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Downloads</div>
+                    <div class="px-1 space-y-2">
+                        <label class="sidebar-label block text-xs font-semibold text-gray-600" for="sidebarDownloadSelect"><i class="fa-solid fa-download mr-1 text-brand-green"></i>Download Files</label>
+                        <select id="sidebarDownloadSelect" aria-label="Download files list" title="Choose a downloadable file" class="sidebar-label w-full border border-gray-300 rounded-lg px-2 py-2 text-xs bg-white text-gray-700">
+                            <option value="payroll">Monthly Payroll.csv</option><option value="transport">Transport Schedule.csv</option><option value="salary">Salary Schedule.csv</option><option value="payment">Payments Register.csv</option><option value="coop">Cooperative Ledger.csv</option><option value="transfer">Transfers Register.csv</option><option value="all">All Financial Registers.csv</option>
+                        </select>
+                        <button type="button" onclick="exportCurrentTabCSV(document.getElementById('sidebarDownloadSelect').value)" class="sidebar-label w-full flex items-center justify-center gap-2 rounded-lg bg-brand-green text-white text-xs font-bold px-3 py-2 hover:bg-brand-darkgreen"><i class="fa-solid fa-file-arrow-down"></i> Download selected</button>
+                    </div>
+                </div>
             </nav>
         </div>
 
@@ -177,7 +187,11 @@
                     <option value="light">White mode</option>
                     <option value="dark">Dark mode</option>
                 </select>
-                <button onclick="exportCurrentTabCSV()" class="bg-brand-orange hover:bg-orange-600 text-white text-xs font-semibold py-1.5 px-3.5 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                <label class="sr-only" for="exportFileSelect">Choose CSV file to export</label>
+                <select id="exportFileSelect" aria-label="Choose CSV file to export" title="Choose downloadable CSV" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white text-gray-700 max-w-44">
+                    <option value="current">Current module CSV</option><option value="payroll">Monthly Payroll.csv</option><option value="transport">Transport Schedule.csv</option><option value="salary">Salary Schedule.csv</option><option value="payment">Payments Register.csv</option><option value="coop">Cooperative Ledger.csv</option><option value="transfer">Transfers Register.csv</option><option value="all">All Financial Registers.csv</option>
+                </select>
+                <button onclick="exportCurrentTabCSV(document.getElementById('exportFileSelect').value)" class="bg-brand-orange hover:bg-orange-600 text-white text-xs font-semibold py-1.5 px-3.5 rounded-lg shadow-sm transition flex items-center gap-1.5">
                     <i class="fa-solid fa-file-csv"></i> Export CSV
                 </button>
             </div>
@@ -870,34 +884,53 @@
             });
         }
 
-        function exportCurrentTabCSV() {
-            const section = document.getElementById('tab-' + currentTab);
-            if (!section) { alert('Choose a module to export.'); return; }
+        function pwfbCsvCell(value) { return '"' + String(value == null ? '' : value).replace(/"/g, '""') + '"'; }
+        function pwfbCsvRowsForTab(tab) {
+            const section = document.getElementById('tab-' + tab);
+            if (!section) return [];
             const rows = [];
-            const tables = Array.from(section.querySelectorAll('table'));
-            tables.forEach(function(table) {
+            Array.from(section.querySelectorAll('table')).forEach(function(table) {
                 const header = Array.from(table.querySelectorAll('thead th')).map(function(th){return th.innerText.trim();}).filter(function(v){return v !== 'Actions';});
                 if (!header.length) return;
+                if (rows.length) rows.push([]);
                 rows.push(header);
                 Array.from(table.querySelectorAll('tbody tr')).forEach(function(tr) {
                     if (tr.style.display === 'none') return;
-                    const cells = Array.from(tr.cells).filter(function(td){return !td.hasAttribute('data-pwfb-actions');}).map(function(td){return td.innerText.trim().replace(/\s+/g,' ');});
-                    if (cells.length) rows.push(cells.slice(0,header.length));
+                    const cells = Array.from(tr.cells).filter(function(td){return !td.hasAttribute('data-pwfb-actions') && !td.querySelector('button');}).map(function(td){return td.innerText.trim().replace(/\s+/g,' ');});
+                    if (cells.length) rows.push(cells.slice(0, header.length));
                 });
                 Array.from(table.querySelectorAll('tfoot tr')).forEach(function(tr) {
                     const cells = Array.from(tr.cells).map(function(td){return td.innerText.trim().replace(/\s+/g,' ');});
                     if (cells.length) rows.push(cells);
                 });
             });
-            if (currentTab === 'salary' && typeof salaryExportCsv === 'function') { salaryExportCsv(); return; }
-            if (!rows.length) { alert('There is no table data to export in this module.'); return; }
-            const csv = rows.map(function(row){return row.map(function(value){return '"' + String(value == null ? '' : value).replace(/"/g,'""') + '"';}).join(',');}).join('\r\n');
+            return rows;
+        }
+        function pwfbDownloadCsv(rows, filename) {
+            if (!rows || !rows.some(function(row){return row && row.length;})) { alert('There is no data available to export for this file yet.'); return; }
+            const csv = rows.map(function(row){return (row || []).map(pwfbCsvCell).join(',');}).join('\r\n');
             const blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8;'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'pwfb-' + currentTab + '-' + new Date().toISOString().slice(0,10) + '.csv';
-            document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+            const url = URL.createObjectURL(blob), a = document.createElement('a');
+            a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+        }
+        function exportCurrentTabCSV(selection) {
+            const choices = ['payroll','transport','salary','payment','coop','transfer'];
+            let target = selection || 'current';
+            if (target === 'current') target = currentTab;
+            const today = new Date().toISOString().slice(0,10);
+            if (target === 'salary' && typeof salaryExportCsv === 'function') { salaryExportCsv(); return; }
+            if (target === 'all') {
+                let allRows = [];
+                choices.forEach(function(tab) {
+                    const rows = pwfbCsvRowsForTab(tab);
+                    if (rows.length) { if (allRows.length) allRows.push([]); allRows.push([({payroll:'MONTHLY PAYROLL',transport:'TRANSPORT SCHEDULE',salary:'SALARY SCHEDULE',payment:'PAYMENTS REGISTER',coop:'COOPERATIVE LEDGER',transfer:'TRANSFERS REGISTER'})[tab]]); allRows = allRows.concat(rows); }
+                });
+                pwfbDownloadCsv(allRows, 'pwfb-all-financial-registers-' + today + '.csv'); return;
+            }
+            if (!choices.includes(target)) { alert('Choose a downloadable file from the list.'); return; }
+            const names = {payroll:'monthly-payroll',transport:'transport-schedule',salary:'salary-schedule',payment:'payments-register',coop:'cooperative-ledger',transfer:'transfers-register'};
+            pwfbDownloadCsv(pwfbCsvRowsForTab(target), 'pwfb-' + names[target] + '-' + today + '.csv');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
