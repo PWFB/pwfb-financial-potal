@@ -12,14 +12,17 @@ const app = express();
 const port = Number(process.env.PORT || 10000);
 const databaseUrl = process.env.DATABASE_URL;
 const sessionSecret = process.env.SESSION_SECRET;
-const otpPepper = process.env.OTP_PEPPER || sessionSecret;
+const otpPepper = process.env.OTP_PEPPER;
 const sessionCookie = "pwfb_portal_session";
 const sessionHours = 12;
 const maxOtpAttempts = 5;
 
 if (!databaseUrl) throw new Error("DATABASE_URL is required");
 if (!sessionSecret || sessionSecret.length < 32) throw new Error("SESSION_SECRET must contain at least 32 characters");
-if (!process.env.TERMII_API_KEY) console.warn("TERMII_API_KEY is not set; OTP delivery is disabled.");
+if (!otpPepper || otpPepper.length < 32) throw new Error("OTP_PEPPER must contain at least 32 characters and be different from SESSION_SECRET");
+if (otpPepper === sessionSecret) throw new Error("OTP_PEPPER and SESSION_SECRET must be different secrets");
+if (!process.env.TERMII_API_KEY) throw new Error("TERMII_API_KEY is required; refusing to start authentication without SMS delivery");
+if (!process.env.TERMII_SENDER_ID) throw new Error("TERMII_SENDER_ID is required; configure an approved sender ID");
 
 const pool = new Pool({
   connectionString: databaseUrl,
@@ -33,6 +36,7 @@ app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: "12kb" }));
+app.use("/api/auth", (_req, res, next) => { res.set("Cache-Control", "no-store"); next(); });
 app.use("/api/auth", rateLimit({ windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: "draft-8", legacyHeaders: false }));
 
 function normalizePhone(input) {
@@ -135,7 +139,7 @@ async function sendOtp(phone, purpose, req) {
   const smsBody = {
     api_key: process.env.TERMII_API_KEY,
     to: phoneForTermii(phone),
-    from: process.env.TERMII_SENDER_ID || "N-Alert",
+    from: process.env.TERMII_SENDER_ID,
     sms: `Your PWFB Financial Portal verification code is ${code}. It expires in 5 minutes. Do not share this code.`,
     type: "plain",
     channel: process.env.TERMII_CHANNEL || "dnd"
