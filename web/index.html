@@ -1093,11 +1093,24 @@ function setThemeMode(mode){if(!['dark','light','system'].includes(mode))mode='s
 function initAppearance(){var mode='system',folded=false;try{mode=localStorage.getItem(pwfbThemeKey)||'system';folded=localStorage.getItem(pwfbSidebarKey)==='folded';}catch(e){}pwfbSidebarCollapsed=folded;applySidebarState();setThemeMode(mode);}
 function pwfbEsc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function pwfbPersist(){try{localStorage.setItem(pwfbStorageKey,JSON.stringify({payroll:rawPayrollData,transport:defaultTransport,coop:baseCoopData,transfers:pwfbTransfers,salarySchedule:pwfbSalarySchedule,payments:pwfbPayments}));}catch(e){}}
+function pwfbDm2PercentAmount(gross, rate){
+ var amount=(Number(gross)||0)*rate;
+ // Match the DM 1 payroll convention: round percentage deductions to the nearest ₦5.
+ return Math.round(amount/5)*5;
+}
 function pwfbSyncDm2MonthlyPayroll(){
  pwfbDm2SalarySeed.forEach(function(seed){
   var existing=rawPayrollData.find(function(r){return r.dm2SeedRef===seed.ref||(r.branch==='DM 2'&&r.name===seed.name&&r.gra===seed.ref);});
-  if(!existing)rawPayrollData.push({branch:'DM 2',name:seed.name,gra:seed.ref,gross:Number(seed.gross)||0,bonus:0,coopS:0,coopL:0,dev:0,tax:0,offline:0,others:0,advance:0,dm2SeedRef:seed.ref,reviewStatus:'Needs review — corrections pending' });
-  else {existing.dm2SeedRef=seed.ref;existing.reviewStatus=existing.reviewStatus||'Needs review — corrections pending';}
+  if(!existing){
+   existing={branch:'DM 2',name:seed.name,gra:seed.ref,gross:Number(seed.gross)||0,bonus:0,coopS:0,coopL:0,dev:0,tax:0,offline:0,others:0,advance:0,dm2SeedRef:seed.ref,reviewStatus:'Needs review — corrections pending'};
+   rawPayrollData.push(existing);
+  } else {
+   existing.dm2SeedRef=seed.ref;
+   existing.reviewStatus=existing.reviewStatus||'Needs review — corrections pending';
+  }
+  var gross=Number(existing.gross)||0;
+  existing.dev=pwfbDm2PercentAmount(gross,0.025);
+  existing.tax=pwfbDm2PercentAmount(gross,0.03);
  });
 }
 function pwfbPayrollRowIssues(s){var issues=[];['gross','bonus','coopS','coopL','dev','tax','offline','others','advance'].forEach(function(k){var v=Number(s[k]||0);if(!Number.isFinite(v)||v<0)issues.push(k+' is invalid or negative');});if(s.dm2SeedRef&&Number(s.gross||0)===0)issues.push('DM 2 gross is zero and needs confirmation');return issues;}
