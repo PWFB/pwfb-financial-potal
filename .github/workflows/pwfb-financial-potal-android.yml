@@ -1,0 +1,53 @@
+name: PWFB Financial Potal Android APK and AAB
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "android/**"
+      - ".github/workflows/pwfb-financial-potal-android.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  android-build:
+    name: Build Android APK and AAB
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Build installable debug APK and release AAB
+        working-directory: android
+        run: |
+          gradle --no-daemon assembleDebug bundleRelease
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          test -s app/build/outputs/bundle/release/app-release.aab
+
+      - name: Rename build outputs
+        run: |
+          mkdir -p android-artifacts
+          cp android/app/build/outputs/apk/debug/app-debug.apk android-artifacts/PWFB-Financial-Potal-debug.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab android-artifacts/PWFB-Financial-Potal-release-unsigned.aab
+          sha256sum android-artifacts/* > android-artifacts/SHA256SUMS.txt
+
+      - name: Upload APK and AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: PWFB-Financial-Potal-Android
+          path: android-artifacts/*
+          if-no-files-found: error
+          retention-days: 30
