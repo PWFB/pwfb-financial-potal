@@ -239,14 +239,14 @@
                             <span class="text-xs font-bold text-gray-600 uppercase">Region:</span>
                             <button id="region-btn-all" type="button" onclick="filterTransportRegion('ALL')" class="region-filter bg-brand-green text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">All Records</button>
                             <button id="region-btn-dm1" type="button" onclick="filterTransportRegion('DM 1')" class="region-filter bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300">DM 1 Schedule</button>
-                            <button id="region-btn-dm2" type="button" onclick="filterTransportRegion('DM 2')" class="region-filter bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300">DM 2 Schedule</button>
+                            <button id="region-btn-dm2" type="button" onclick="filterTransportRegion('DM 2')" class="region-filter bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300">DM Two Schedule</button>
                         </div>
                     </div>
                 </div>
                 <div id="transport-data-integrity" class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-950" role="status" aria-live="polite">
                     <div class="font-bold text-sm">Transport data completeness check</div>
-                    <p id="transport-data-integrity-text" class="mt-1">Checking DM 1 and DM 2 record counts…</p>
-                    <p class="mt-1">Required full schedule: DM 1 = 66 records; DM 2 = 70 records; total = 136. Missing entries are not fabricated.</p>
+                    <p id="transport-data-integrity-text" class="mt-1">Checking DM 1 and DM Two record counts…</p>
+                    <p class="mt-1">Required full schedule: DM 1 = 66 records; DM Two = 70 records; total = 136. Missing entries are not fabricated.</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex flex-wrap gap-2 justify-between items-center">
@@ -259,7 +259,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse text-xs">
                             <thead><tr class="bg-gray-100/70 border-b border-gray-200 text-gray-700 uppercase font-semibold">
-                                <th class="p-3">Ref</th><th class="p-3">Region</th><th class="p-3">Bank Code</th><th class="p-3">Destination Bank</th><th class="p-3">Account No</th><th class="p-3">Account Name</th><th class="p-3 text-right">Amount (₦)</th><th class="p-3">Narration</th>
+                                <th class="p-3">Reference Number</th><th class="p-3">Destination Bank</th><th class="p-3">Bank Account Number</th><th class="p-3">Account Name</th><th class="p-3 text-right">Transport Payment Amount (₦)</th><th class="p-3">Branch or Staff Narration</th>
                             </tr></thead>
                             <tbody id="transport-tbody" class="divide-y divide-gray-200"></tbody>
                             <tfoot id="transport-tfoot" class="bg-gray-900 text-white font-bold text-xs"></tfoot>
@@ -755,8 +755,6 @@
                 total += amount;
                 return `<tr class="hover:bg-gray-50 border-b border-gray-100">
                     <td class="p-3 text-center text-gray-400 font-mono">${pwfbEsc(row.ref)}</td>
-                    <td class="p-3 font-semibold ${row.region === 'DM 1' ? 'text-blue-700' : row.region === 'DM 2' ? 'text-purple-700' : 'text-gray-600'}">${pwfbEsc(row.region || 'Unassigned')}</td>
-                    <td class="p-3 font-mono text-gray-500">${pwfbEsc(row.code)}</td>
                     <td class="p-3 font-medium text-gray-800">${pwfbEsc(row.bank)}</td>
                     <td class="p-3 font-mono text-gray-700">${pwfbEsc(row.acc)}</td>
                     <td class="p-3 font-bold text-gray-900">${pwfbEsc(row.name)}</td>
@@ -769,7 +767,7 @@
             const titleEl = document.getElementById('transport-region-title');
             if (titleEl) titleEl.textContent = title;
             if (badge) badge.textContent = filtered.length + ' records · Total: ₦' + total.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2});
-            tfoot.innerHTML = `<tr><td colspan="6" class="p-3 uppercase">Total Scheduled Disbursement (${currentTransportRegion})</td><td class="p-3 text-right text-brand-orange font-bold">₦${total.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td></td></tr>`;
+            tfoot.innerHTML = `<tr><td colspan="4" class="p-3 uppercase">Total Transport Payment — ${currentTransportRegion === 'ALL' ? 'DM 1 + DM Two' : currentTransportRegion === 'DM 2' ? 'DM Two' : currentTransportRegion}</td><td class="p-3 text-right text-brand-orange font-bold">₦${total.toLocaleString('en-NG',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td></td></tr>`;
             if (typeof pwfbAddActions === 'function') pwfbAddActions();
         }
         function filterTransportRegion(region) {
