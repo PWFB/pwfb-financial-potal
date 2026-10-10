@@ -83,6 +83,38 @@
     body[data-theme="dark"] .balmz-panel .balmz-muted{color:#d1d5db!important}
     @media(prefers-color-scheme:dark){body[data-theme="system"] .balmz-panel,body[data-theme="system"] .balmz-panel .balmz-surface{background:#1f2937!important;color:#f3f4f6!important;border-color:#374151!important}body[data-theme="system"] .balmz-panel .balmz-muted{color:#d1d5db!important}}
     @media(max-width:640px){.balmz-panel{right:.5rem;bottom:5rem;width:calc(100vw - 1rem);max-height:75vh}.balmz-fab{right:.75rem;bottom:.75rem}}
+
+/* Transport schedule dashboard refresh inspired by the supplied reference image. */
+#tab-transport{gap:1rem!important}
+#tab-transport>div:first-child{border:0;border-radius:0;background:transparent;box-shadow:none;padding:0}
+#tab-transport>div:first-child>div{align-items:center;background:linear-gradient(120deg,#fff 0%,#f5fbf9 100%);border:1px solid #dcece7;border-radius:16px;padding:1.15rem 1.25rem;box-shadow:0 5px 20px #064e3b0b}
+#tab-transport>div:first-child h3{font-size:clamp(1.15rem,2vw,1.55rem);font-weight:800;letter-spacing:-.035em;color:#064e3b}
+#tab-transport>div:first-child h3:before{content:"";display:inline-block;width:7px;height:1.55rem;border-radius:9px;background:#f58220;vertical-align:middle;margin-right:.75rem}
+#tab-transport .region-filter{padding:.55rem .9rem;border-radius:9px;transition:all .18s ease}
+#tab-transport .region-filter:hover{transform:translateY(-1px);box-shadow:0 4px 10px #064e3b18}
+#transport-data-integrity{border-radius:12px!important;box-shadow:0 3px 12px #92400e0b}
+#tab-transport>div:last-of-type{border:1px solid #dce7ec;border-radius:15px;box-shadow:0 10px 32px #0f34450d}
+#tab-transport>div:last-of-type>div:first-child{background:linear-gradient(110deg,#fff,#f4faf9);padding:1rem 1.2rem;border-bottom:1px solid #dce7ec}
+#transport-region-title{font-size:1rem;font-weight:800;color:#064e3b}
+#transport-badge{padding:.5rem .8rem;border-radius:9px;background:#fff4e9;color:#b45309}
+#tab-transport table{min-width:900px;font-size:11px}
+#tab-transport table thead tr{background:#075b61;color:#fff;border:0;text-transform:none;letter-spacing:0}
+#tab-transport table thead th{padding:.85rem .75rem;font-size:11px;white-space:nowrap;border-right:1px solid #ffffff1c}
+#tab-transport table tbody tr:nth-child(even){background:#f0f7fb}
+#tab-transport table tbody tr:nth-child(odd){background:#fff}
+#tab-transport table tbody tr:hover{background:#e4f5ee}
+#tab-transport table tbody td{padding:.55rem .75rem;border-right:1px solid #e4edf1;color:#24465a;vertical-align:middle}
+#tab-transport table tbody td:first-child{font-weight:800;color:#0f766e;white-space:nowrap}
+#tab-transport table tbody td:nth-child(5){text-align:right;font-weight:800;white-space:nowrap}
+#tab-transport table tfoot{background:#073e46;color:#fff}
+@media(max-width:640px){
+ #tab-transport>div:first-child>div{padding:.9rem}
+ #tab-transport>div:first-child h3{font-size:1.05rem}
+ #tab-transport .region-filter{font-size:11px;padding:.5rem .65rem}
+ #tab-transport>div:last-of-type>div:first-child{padding:.8rem}
+ #tab-transport table{min-width:850px}
+}
+
 </style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
