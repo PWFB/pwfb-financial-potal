@@ -215,6 +215,84 @@
   }
 }
 
+
+/* Color-theme audit: keep custom cards, tables, controls and search UI readable. */
+body[data-theme="light"] #themeMode{background:#fff!important;color:#374151!important}
+body[data-theme="light"] #sidebar{background:#fff!important;color:#1f2937}
+body[data-theme="light"] main{color:#1f2937}
+body[data-theme="dark"] #sidebar,
+body[data-theme="dark"] header,
+body[data-theme="dark"] main,
+body[data-theme="dark"] #themeMode{background-color:#1f2937!important;color:#e5e7eb!important}
+body[data-theme="dark"] #sidebar{border-color:#374151!important}
+body[data-theme="dark"] #sidebar .sidebar-brand,
+body[data-theme="dark"] #sidebar nav{border-color:#374151!important}
+body[data-theme="dark"] #sidebar .nav-link:not(.bg-brand-green){color:#d1d5db!important}
+body[data-theme="dark"] #sidebar .nav-link:hover{background:#374151!important;color:#fff!important}
+body[data-theme="dark"] header input,
+body[data-theme="dark"] header select,
+body[data-theme="dark"] #themeMode{background:#111827!important;color:#f9fafb!important;border-color:#4b5563!important}
+body[data-theme="dark"] #tab-transport>div:first-child>div,
+body[data-theme="dark"] #tab-transport>div:last-of-type>div:first-child{background:linear-gradient(120deg,#1f2937,#172b2a)!important;border-color:#374151!important}
+body[data-theme="dark"] #tab-transport>div:first-child h3,
+body[data-theme="dark"] #transport-region-title{color:#a7f3d0!important}
+body[data-theme="dark"] #tab-transport table tbody tr:nth-child(even){background:#1f2937!important}
+body[data-theme="dark"] #tab-transport table tbody tr:nth-child(odd){background:#111827!important}
+body[data-theme="dark"] #tab-transport table tbody tr:hover{background:#263c35!important}
+body[data-theme="dark"] #tab-transport table tbody td{color:#e5e7eb!important;border-color:#374151!important}
+body[data-theme="dark"] #transport-badge{background:#65340f!important;color:#fed7aa!important}
+body[data-theme="dark"] #transport-data-integrity{background:#292524!important;color:#f5f5f4!important;border-color:#57534e!important}
+body[data-theme="dark"] #tab-payroll .bg-white,
+body[data-theme="dark"] #tab-reconciliation .bg-white,
+body[data-theme="dark"] #tab-salary .bg-white,
+body[data-theme="dark"] #tab-payment .bg-white,
+body[data-theme="dark"] #tab-coop .bg-white,
+body[data-theme="dark"] #tab-transfer .bg-white{background-color:#1f2937!important}
+body[data-theme="dark"] table thead th{border-color:#374151}
+body[data-theme="dark"] table tbody tr{border-color:#374151!important}
+body[data-theme="dark"] .bg-yellow-50,body[data-theme="dark"] .bg-amber-50{background:#422006!important;color:#fef3c7!important}
+body[data-theme="dark"] .text-green-800,body[data-theme="dark"] .text-green-700{color:#a7f3d0!important}
+body[data-theme="dark"] .text-orange-800,body[data-theme="dark"] .text-orange-700{color:#fdba74!important}
+body[data-theme="dark"] .text-red-800{color:#fca5a5!important}
+body[data-theme="dark"] #themeMode option{background:#111827;color:#f9fafb}
+@media(prefers-color-scheme:dark){
+  body[data-theme="system"] #sidebar,
+  body[data-theme="system"] header,
+  body[data-theme="system"] main,
+  body[data-theme="system"] #themeMode{background-color:#1f2937!important;color:#e5e7eb!important}
+  body[data-theme="system"] #sidebar{border-color:#374151!important}
+  body[data-theme="system"] #sidebar .sidebar-brand,
+  body[data-theme="system"] #sidebar nav{border-color:#374151!important}
+  body[data-theme="system"] #sidebar .nav-link:not(.bg-brand-green){color:#d1d5db!important}
+  body[data-theme="system"] #sidebar .nav-link:hover{background:#374151!important;color:#fff!important}
+  body[data-theme="system"] header input,
+  body[data-theme="system"] header select,
+  body[data-theme="system"] #themeMode{background:#111827!important;color:#f9fafb!important;border-color:#4b5563!important}
+  body[data-theme="system"] #tab-transport>div:first-child>div,
+  body[data-theme="system"] #tab-transport>div:last-of-type>div:first-child{background:linear-gradient(120deg,#1f2937,#172b2a)!important;border-color:#374151!important}
+  body[data-theme="system"] #tab-transport>div:first-child h3,
+  body[data-theme="system"] #transport-region-title{color:#a7f3d0!important}
+  body[data-theme="system"] #tab-transport table tbody tr:nth-child(even){background:#1f2937!important}
+  body[data-theme="system"] #tab-transport table tbody tr:nth-child(odd){background:#111827!important}
+  body[data-theme="system"] #tab-transport table tbody tr:hover{background:#263c35!important}
+  body[data-theme="system"] #tab-transport table tbody td{color:#e5e7eb!important;border-color:#374151!important}
+  body[data-theme="system"] #transport-badge{background:#65340f!important;color:#fed7aa!important}
+  body[data-theme="system"] #transport-data-integrity{background:#292524!important;color:#f5f5f4!important;border-color:#57534e!important}
+  body[data-theme="system"] #tab-payroll .bg-white,
+  body[data-theme="system"] #tab-reconciliation .bg-white,
+  body[data-theme="system"] #tab-salary .bg-white,
+  body[data-theme="system"] #tab-payment .bg-white,
+  body[data-theme="system"] #tab-coop .bg-white,
+  body[data-theme="system"] #tab-transfer .bg-white{background-color:#1f2937!important}
+  body[data-theme="system"] table thead th{border-color:#374151}
+  body[data-theme="system"] table tbody tr{border-color:#374151!important}
+  body[data-theme="system"] .bg-yellow-50,body[data-theme="system"] .bg-amber-50{background:#422006!important;color:#fef3c7!important}
+  body[data-theme="system"] .text-green-800,body[data-theme="system"] .text-green-700{color:#a7f3d0!important}
+  body[data-theme="system"] .text-orange-800,body[data-theme="system"] .text-orange-700{color:#fdba74!important}
+  body[data-theme="system"] .text-red-800{color:#fca5a5!important}
+  body[data-theme="system"] #themeMode option{background:#111827;color:#f9fafb}
+}
+
 </style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
