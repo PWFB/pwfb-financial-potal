@@ -140,6 +140,15 @@
 @media(max-width:640px){#tab-transport>div:first-child>div{padding:.9rem}#tab-transport>div:first-child h3{font-size:1.05rem}#tab-transport .region-filter{font-size:11px;padding:.5rem .65rem}#tab-transport>div:last-of-type>div:first-child{padding:.8rem}#tab-transport table{min-width:850px}}
 
 
+/* Mobile sidebar must never cover its own close control. Keep the top bar above the drawer and overlay. */
+@media(max-width:640px){
+  #sidebar{z-index:20!important}
+  body.pwfb-mobile-sidebar-open:after{z-index:10!important}
+  body>div.flex-1>header{position:relative;z-index:30!important}
+  #sidebarToggle{position:relative;z-index:31!important;flex-shrink:0;background:#fff7ed;border-color:#f58220;color:#b45309}
+  body.pwfb-mobile-sidebar-open #sidebarToggle{position:fixed!important;top:.65rem;right:.7rem;left:auto;z-index:120!important;width:2.65rem;height:2.65rem;background:#f58220!important;border-color:#f58220!important;color:#fff!important;box-shadow:0 3px 12px #0003}
+  body.pwfb-mobile-sidebar-open #sidebarToggle i{pointer-events:none}
+}
 /* Keep the existing PWFB UI; improve spacing and responsive structure only. */
 @media(max-width:640px){
   html,body{width:100%!important;max-width:100%!important;height:100%;overflow:hidden}
@@ -1275,6 +1284,24 @@ var pwfbSalaryEditingId=null;
 var pwfbStorageKey='pwfb-financial-portal-v2', pwfbThemeKey='pwfb-financial-portal-theme-v1', pwfbSidebarKey='pwfb-financial-portal-sidebar-v1';
 function applySidebarState(){var side=document.getElementById('sidebar'),btn=document.getElementById('sidebarToggle');if(!side||!btn)return;side.classList.toggle('sidebar-collapsed',pwfbSidebarCollapsed);btn.innerHTML='<i class="fa-solid '+(pwfbSidebarCollapsed?'fa-angles-right':'fa-bars')+'"></i>';btn.setAttribute('aria-expanded',String(!pwfbSidebarCollapsed));btn.title=pwfbSidebarCollapsed?'Unfold sidebar':'Fold sidebar';}
 function toggleSidebar(){if(window.matchMedia('(max-width: 640px)').matches){document.body.classList.toggle('pwfb-mobile-sidebar-open');var b=document.getElementById('sidebarToggle');if(b)b.setAttribute('aria-expanded',String(document.body.classList.contains('pwfb-mobile-sidebar-open')));return;}pwfbSidebarCollapsed=!pwfbSidebarCollapsed;applySidebarState();try{localStorage.setItem(pwfbSidebarKey,pwfbSidebarCollapsed?'folded':'unfolded');}catch(e){}}
+/* Mobile drawer: tapping outside or pressing Escape always closes it. */
+document.addEventListener('click',function(e){
+  if(!document.body.classList.contains('pwfb-mobile-sidebar-open'))return;
+  var side=document.getElementById('sidebar'),toggle=document.getElementById('sidebarToggle');
+  if(side&&side.contains(e.target)) {
+    if(e.target.closest('a,button')&&e.target!==toggle){document.body.classList.remove('pwfb-mobile-sidebar-open');if(toggle)toggle.setAttribute('aria-expanded','false');}
+    return;
+  }
+  if(toggle&&toggle.contains(e.target))return;
+  document.body.classList.remove('pwfb-mobile-sidebar-open');
+  if(toggle)toggle.setAttribute('aria-expanded','false');
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&document.body.classList.contains('pwfb-mobile-sidebar-open')){
+    document.body.classList.remove('pwfb-mobile-sidebar-open');
+    var toggle=document.getElementById('sidebarToggle');if(toggle)toggle.setAttribute('aria-expanded','false');
+  }
+});
 function setThemeMode(mode){if(!['dark','light','system'].includes(mode))mode='system';document.body.setAttribute('data-theme',mode);var picker=document.getElementById('themeMode');if(picker&&picker.value!==mode)picker.value=mode;try{localStorage.setItem(pwfbThemeKey,mode);}catch(e){}}
 function initAppearance(){var mode='system',folded=false;try{mode=localStorage.getItem(pwfbThemeKey)||'system';folded=localStorage.getItem(pwfbSidebarKey)==='folded';}catch(e){}pwfbSidebarCollapsed=folded;applySidebarState();setThemeMode(mode);}
 function pwfbEsc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
