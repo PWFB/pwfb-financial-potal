@@ -187,6 +187,34 @@
   body.pwfb-mobile-sidebar-open #sidebarToggle{position:fixed!important;top:.65rem;right:.7rem;left:auto;z-index:120!important;width:2.65rem;height:2.65rem;background:#f58220!important;border-color:#f58220!important;color:#fff!important;box-shadow:0 3px 12px #0003}
   body.pwfb-mobile-sidebar-open #sidebarToggle i{pointer-events:none}
 }
+
+/* Final stacking fix: the drawer must sit above every page, including search results. */
+@media(max-width:640px){
+  body #sidebar,
+  body.pwfb-mobile-sidebar-open #sidebar{
+    position:fixed!important;
+    z-index:20000!important;
+    isolation:isolate;
+  }
+  body.pwfb-mobile-sidebar-open:after{
+    z-index:19900!important;
+    pointer-events:auto!important;
+  }
+  body.pwfb-mobile-sidebar-open #sidebarToggle{
+    position:fixed!important;
+    z-index:21000!important;
+    top:.65rem!important;
+    right:.7rem!important;
+    left:auto!important;
+    pointer-events:auto!important;
+  }
+  body.pwfb-mobile-sidebar-open #sidebar nav,
+  body.pwfb-mobile-sidebar-open #sidebar nav *{
+    position:relative;
+    z-index:20001;
+  }
+}
+
 </style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
