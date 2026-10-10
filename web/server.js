@@ -64,6 +64,7 @@ function verifyPin(pin, stored) {
   return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
 }
 function validPin(pin) { return /^\d{4,8}$/.test(String(pin || "")); }
+function validCredential(value) { const secret = String(value || ""); return validPin(secret) || (secret.length >= 8 && secret.length <= 128); }
 function setSessionCookie(res, token) {
   res.cookie(sessionCookie, token, {
     httpOnly: true,
@@ -221,10 +222,10 @@ app.post("/api/auth/register/request", asyncRoute(async (req, res) => {
 app.post("/api/auth/register/verify", asyncRoute(async (req, res) => {
   const phone = normalizePhone(req.body?.phone);
   const name = String(req.body?.name || "").trim().replace(/\s+/g, " ");
-  const pin = String(req.body?.pin || "");
+  const password = String(req.body?.password ?? req.body?.pin ?? "");
   const code = String(req.body?.code || "").trim();
-  if (!phone || name.length < 2 || name.length > 100 || !validPin(pin) || !/^[0-9]{6}$/.test(code)) {
-    return res.status(400).json({ error: "Enter your name, valid phone number, 4–8 digit PIN, and 6-digit SMS code." });
+  if (!phone || name.length < 2 || name.length > 100 || !validCredential(password) || !/^[0-9]{6}$/.test(code)) {
+    return res.status(400).json({ error: "Enter your name, valid phone number, password (8+ characters) or legacy 4–8 digit PIN, and 6-digit SMS code." });
   }
   const adminPhoneForRegistration = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
   if (!adminPhoneForRegistration || (phone !== adminPhoneForRegistration && process.env.PORTAL_ALLOW_REGISTRATION !== "true")) {
@@ -239,7 +240,7 @@ app.post("/api/auth/register/verify", asyncRoute(async (req, res) => {
     const role = adminPhone && phone === adminPhone ? "admin" : "staff";
     const inserted = await client.query(
       "INSERT INTO pwfb_portal_users (phone_e164,full_name,pin_hash,role,phone_verified_at) VALUES ($1,$2,$3,$4,NOW()) RETURNING id,full_name,phone_e164,role",
-      [phone, name, hashPin(pin), role]
+      [phone, name, hashPin(password), role]
     );
     const user = inserted.rows[0];
     await issueSession(client, req, res, user);
@@ -256,12 +257,12 @@ app.post("/api/auth/register/verify", asyncRoute(async (req, res) => {
 
 app.post("/api/auth/login/request", asyncRoute(async (req, res) => {
   const phone = normalizePhone(req.body?.phone);
-  const pin = String(req.body?.pin || "");
-  if (!phone || !validPin(pin)) return res.status(400).json({ error: "Enter your phone number and 4–8 digit PIN." });
+  const password = String(req.body?.password ?? req.body?.pin ?? "");
+  if (!phone || !validCredential(password)) return res.status(400).json({ error: "Enter your phone number and a valid password (8+ characters) or legacy 4–8 digit PIN." });
   const result = await pool.query("SELECT id,full_name,phone_e164,pin_hash,role,disabled_at FROM pwfb_portal_users WHERE phone_e164=$1", [phone]);
   const user = result.rows[0];
-  if (!user || user.disabled_at || !verifyPin(pin, user.pin_hash)) {
-    return res.status(401).json({ error: "Phone number or PIN is incorrect." });
+  if (!user || user.disabled_at || !verifyPin(password, user.pin_hash)) {
+    return res.status(401).json({ error: "Phone number or password is incorrect." });
   }
   await sendOtp(phone, "login", req);
   res.json({ ok: true, message: "A one-time login code has been sent by SMS." });
@@ -289,6 +290,52 @@ app.post("/api/auth/login/verify", asyncRoute(async (req, res) => {
     await issueSession(client, req, res, user);
     await client.query("COMMIT");
     res.json({ ok: true, user: safeUser(user) });
+  } catch (error) {
+    try { await client.query("ROLLBACK"); } catch {}
+    throw error;
+  } finally {
+    client.release();
+  }
+}));
+
+
+app.post("/api/auth/password-reset/request", asyncRoute(async (req, res) => {
+  const phone = normalizePhone(req.body?.phone);
+  if (!phone) return res.status(400).json({ error: "Enter a valid Nigerian phone number." });
+  const result = await pool.query("SELECT id FROM pwfb_portal_users WHERE phone_e164=$1 AND disabled_at IS NULL", [phone]);
+  // Avoid revealing whether a phone number has a portal account.
+  if (result.rowCount) await sendOtp(phone, "login_reset", req);
+  res.set("Cache-Control", "no-store");
+  res.json({ ok: true, message: "If an active account matches that number, a password reset code has been sent. The code expires in 5 minutes." });
+}));
+
+app.post("/api/auth/password-reset/verify", asyncRoute(async (req, res) => {
+  const phone = normalizePhone(req.body?.phone);
+  const code = String(req.body?.code || "").trim();
+  const password = String(req.body?.password || "");
+  if (!phone || !/^[0-9]{6}$/.test(code) || password.length < 8 || password.length > 128) {
+    return res.status(400).json({ error: "Enter a valid phone number, 6-digit SMS code, and password between 8 and 128 characters." });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const otpError = await verifyOtp(client, phone, "login_reset", code);
+    if (otpError) { await client.query("COMMIT"); return res.status(otpError.status).json({ error: otpError.message }); }
+    const result = await client.query(
+      "SELECT id FROM pwfb_portal_users WHERE phone_e164=$1 AND disabled_at IS NULL FOR UPDATE",
+      [phone]
+    );
+    const user = result.rows[0];
+    if (!user) {
+      await client.query("COMMIT");
+      return res.status(400).json({ error: "Unable to reset this account. Request a new code or contact the portal administrator." });
+    }
+    await client.query("UPDATE pwfb_portal_users SET pin_hash=$2, updated_at=NOW() WHERE id=$1", [user.id, hashPin(password)]);
+    await client.query("UPDATE pwfb_portal_sessions SET revoked_at=NOW() WHERE user_id=$1 AND revoked_at IS NULL", [user.id]);
+    await client.query("COMMIT");
+    clearSessionCookie(res);
+    res.set("Cache-Control", "no-store");
+    res.json({ ok: true, message: "Password updated. Please sign in with your new password." });
   } catch (error) {
     try { await client.query("ROLLBACK"); } catch {}
     throw error;
