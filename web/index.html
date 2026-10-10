@@ -326,7 +326,7 @@
                     </form>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between"><h3 class="text-sm font-bold">Payment Register</h3><span id="paymentCount" class="text-xs text-gray-500">0 records</span></div>
+                    <div class="px-4 py-3 border-b border-gray-200 flex flex-wrap gap-2 items-center justify-between"><h3 class="text-sm font-bold">Payment Register</h3><div class="flex flex-wrap gap-2 items-center"><button type="button" onclick="pwfbDownloadDm2PosTemplate()" class="bg-orange-100 text-orange-800 rounded-lg px-3 py-2 text-xs font-bold">Download DM 2 POS Template (69)</button><span id="paymentCount" class="text-xs text-gray-500">0 records</span></div></div><div class="px-4 py-2 bg-amber-50 text-amber-900 text-xs border-b border-amber-200">POS reconciliation template is simulated only. Downloading it does not create a payment or mark any salary as paid. Confirm actual amount and receipt before recording settlement.</div>
                     <div class="overflow-x-auto"><table class="w-full text-left border-collapse text-xs min-w-[1250px]"><thead><tr class="bg-gray-100 text-gray-700 uppercase"><th class="p-3">Date</th><th class="p-3">Category</th><th class="p-3">Payee</th><th class="p-3 text-right">Amount</th><th class="p-3">Method</th><th class="p-3">Status</th><th class="p-3">Receipt / Transaction Ref</th><th class="p-3">Narration</th><th class="p-3">Actions</th></tr></thead><tbody id="payment-tbody"></tbody><tfoot id="payment-tfoot" class="bg-gray-900 text-white font-bold"></tfoot></table></div>
                 </div>
             </section>
@@ -1096,6 +1096,18 @@ function paymentSourceChanged(){
  if(cat==='Salary')row=pwfbSalarySchedule.find(function(r){return r.id===src;});
  else if(cat==='Transport'&&src.indexOf('TR-')===0)row=defaultTransport[Number(src.slice(3))];
  if(row){document.getElementById('paymentPayee').value=row.name||'';document.getElementById('paymentAmount').value=cat==='Salary'?Math.max(0,Number(row.gross||0)-Number(row.deductions||0)):(Number(row.amount)||0);}
+}
+function pwfbDownloadDm2PosTemplate(){
+ var rows=[["Record Type","Batch","Staff Ref","Staff Name","Salary Gross (reference only)","Actual POS Deposit Amount (fill only from evidence)","Payment Method","Placeholder Reference (NOT A RECEIPT)","Verification Status","Verification Note"]];
+ pwfbDm2SalarySeed.forEach(function(r){
+  rows.push(["SIMULATED TEMPLATE ONLY","DM 2",r.ref,r.name,r.gross,"","POS Deposit","SIMULATED-NOT-A-RECEIPT-DM2-"+r.ref,"Pending Verification","No actual POS payment is evidenced. Enter the real amount and receipt details only after verification."]);
+ });
+ var csv=rows.map(function(row){return row.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
+ var blob=new Blob(["\\uFEFF",csv],{type:'text/csv;charset=utf-8;'});
+ var url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='DM2-POS-SIMULATED-RECONCILIATION-TEMPLATE.csv';
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+ alert('Downloaded '+pwfbDm2SalarySeed.length+' simulated template rows. No payments were created or marked paid.');
 }
 function paymentResetForm(){var f=document.getElementById('paymentForm');if(f)f.reset();var d=document.getElementById('paymentDate');if(d)d.value=new Date().toISOString().slice(0,10);var st=document.getElementById('paymentStatus');if(st)st.value='Pending Verification';paymentRefreshSources();}
 function paymentDelete(id){if(!confirm('Delete this payment record?'))return;pwfbPayments=pwfbPayments.filter(function(p){return p.id!==id;});pwfbPersist();paymentRender();}
