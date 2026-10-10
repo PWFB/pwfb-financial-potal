@@ -327,7 +327,7 @@
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between"><h3 class="text-sm font-bold">Payment Register</h3><span id="paymentCount" class="text-xs text-gray-500">0 records</span></div>
-                    <div class="overflow-x-auto"><table class="w-full text-left border-collapse text-xs min-w-[850px]"><thead><tr class="bg-gray-100 text-gray-700 uppercase"><th class="p-3">Date</th><th class="p-3">Category</th><th class="p-3">Payee</th><th class="p-3 text-right">Amount</th><th class="p-3">Method</th><th class="p-3">Status</th><th class="p-3">Receipt / Transaction Ref</th><th class="p-3">Narration</th><th class="p-3">Actions</th></tr></thead><tbody id="payment-tbody"></tbody><tfoot id="payment-tfoot" class="bg-gray-900 text-white font-bold"></tfoot></table></div>
+                    <div class="overflow-x-auto"><table class="w-full text-left border-collapse text-xs min-w-[1250px]"><thead><tr class="bg-gray-100 text-gray-700 uppercase"><th class="p-3">Date</th><th class="p-3">Category</th><th class="p-3">Payee</th><th class="p-3 text-right">Amount</th><th class="p-3">Method</th><th class="p-3">Status</th><th class="p-3">Receipt / Transaction Ref</th><th class="p-3">Narration</th><th class="p-3">Actions</th></tr></thead><tbody id="payment-tbody"></tbody><tfoot id="payment-tfoot" class="bg-gray-900 text-white font-bold"></tfoot></table></div>
                 </div>
             </section>
 
@@ -1111,7 +1111,7 @@ function paymentRender(){
  document.getElementById('payment-transport-total').textContent=paymentMoney(tNet);
  document.getElementById('payment-recorded-total').textContent=paymentMoney(sum);
  document.getElementById('paymentCount').textContent=pwfbPayments.length+' records · Paid '+paymentMoney(paid);
- document.getElementById('payment-tfoot').innerHTML='<tr><td colspan="3" class="p-3">TOTAL RECORDED PAYMENTS</td><td class="p-3 text-right">'+paymentMoney(sum)+'</td><td colspan="3" class="p-3">Paid total: '+paymentMoney(paid)+'</td></tr>';
+ document.getElementById('payment-tfoot').innerHTML='<tr><td colspan="3" class="p-3">TOTAL RECORDED PAYMENTS</td><td class="p-3 text-right">'+paymentMoney(sum)+'</td><td colspan="5" class="p-3">Paid total: '+paymentMoney(paid)+' · Pending verification: '+paymentMoney(pwfbPayments.filter(function(p){return p.status==='Pending Verification';}).reduce(function(n,p){return n+(Number(p.amount)||0);},0))+'</td></tr>';
  paymentRefreshSources();
 }
 function paymentInit(){
