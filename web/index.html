@@ -204,17 +204,26 @@
             <section id="tab-payroll" class="tab-content space-y-4">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                     <div>
-                        <h3 class="text-sm font-bold text-gray-800">PERFECT WISDOM FOR BF (DIVISION 1)</h3>
-                        <p class="text-xs text-gray-500">Grouped Branch-by-Branch Accordions</p>
+                        <h3 id="payroll-division-heading" class="text-sm font-bold text-gray-800">Monthly Payroll — All Divisions</h3>
+                        <p class="text-xs text-gray-500">Choose All, DM 1 or DM 2, then expand each branch to review its staff.</p>
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-col sm:items-end gap-2 w-full sm:w-auto">
+                        <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Filter monthly payroll division">
+                            <span class="text-xs font-bold text-gray-600 uppercase">Show:</span>
+                            <button id="payroll-filter-all" type="button" onclick="setPayrollDivision('ALL')" aria-pressed="true" class="payroll-division-filter bg-brand-green text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">All</button>
+                            <button id="payroll-filter-dm1" type="button" onclick="setPayrollDivision('DM 1')" aria-pressed="false" class="payroll-division-filter bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300">DM 1</button>
+                            <button id="payroll-filter-dm2" type="button" onclick="setPayrollDivision('DM 2')" aria-pressed="false" class="payroll-division-filter bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300">DM 2</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+
                         <button onclick="toggleAllAccordions(true)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-1.5 px-3 rounded-lg border border-gray-300 transition">
                             <i class="fa-solid fa-angles-down mr-1"></i> Expand All
                         </button>
                         <button onclick="toggleAllAccordions(false)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-1.5 px-3 rounded-lg border border-gray-300 transition">
                             <i class="fa-solid fa-angles-up mr-1"></i> Collapse All
                         </button>
+                        </div>
                     </div>
                 </div>
 
@@ -430,6 +439,36 @@
     <script>
         let currentTab = 'payroll';
         let accordionStates = {};
+        let currentPayrollDivision = 'ALL';
+
+        function setPayrollDivision(division) {
+            currentPayrollDivision = ['ALL', 'DM 1', 'DM 2'].includes(division) ? division : 'ALL';
+            const config = [
+                ['ALL', 'payroll-filter-all'],
+                ['DM 1', 'payroll-filter-dm1'],
+                ['DM 2', 'payroll-filter-dm2']
+            ];
+            config.forEach(([value, id]) => {
+                const button = document.getElementById(id);
+                if (!button) return;
+                const active = currentPayrollDivision === value;
+                button.setAttribute('aria-pressed', String(active));
+                button.className = 'payroll-division-filter text-xs font-semibold px-3 py-1.5 rounded-lg ' +
+                    (active ? 'bg-brand-green text-white shadow-sm' : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200');
+            });
+            const heading = document.getElementById('payroll-division-heading');
+            if (heading) heading.textContent = currentPayrollDivision === 'ALL'
+                ? 'Monthly Payroll — All Divisions'
+                : 'Monthly Payroll — ' + currentPayrollDivision;
+            renderBranchAccordions();
+            pwfbAddActions();
+            pwfbSearch();
+        }
+
+        function isDm2PayrollRecord(item) {
+            return Boolean(item && (item.dm2SeedRef || String(item.branch || '').trim().toUpperCase() === 'DM 2' ||
+                String(item.branch || '').trim().toUpperCase() === 'DM2'));
+        }
 
         // 1. PAYROLL DATASET (PAGES 1, 2, 3)
         const rawPayrollData = [
@@ -592,6 +631,9 @@
 
             const grouped = {};
             rawPayrollData.forEach((item, index) => {
+                const isDm2 = isDm2PayrollRecord(item);
+                if (currentPayrollDivision === 'DM 2' && !isDm2) return;
+                if (currentPayrollDivision === 'DM 1' && isDm2) return;
                 if (!grouped[item.branch]) grouped[item.branch] = [];
                 grouped[item.branch].push({ ...item, originalIndex: index });
             });
