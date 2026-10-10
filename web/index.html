@@ -115,6 +115,22 @@
  #tab-transport table{min-width:850px}
 }
 
+
+/* Branch totals and orange scrolling controls */
+::-webkit-scrollbar-thumb{background:#f58220!important;border-radius:8px!important;border:1px solid #fff3}
+::-webkit-scrollbar-thumb:hover{background:#d9680b!important}
+*{scrollbar-color:#f58220 #f3f4f6;scrollbar-width:thin}
+#tab-payroll tfoot,#tab-payroll .branch-total,#tab-payroll tfoot tr,
+#tab-payroll [class*="overflow-x-auto"] tfoot{background:linear-gradient(100deg,#064e3b,#087b66)!important;color:#fff!important}
+#tab-payroll tfoot td,#tab-payroll [class*="overflow-x-auto"] tfoot td{padding:.8rem .7rem!important;border-top:2px solid #f58220!important;border-right:1px solid #ffffff22!important;font-weight:800!important;white-space:nowrap}
+#tab-payroll tfoot td:first-child{color:#fff!important;letter-spacing:.035em;text-transform:uppercase}
+#tab-payroll tfoot td:last-child{background:#f58220!important;color:#fff!important;font-size:1rem!important}
+#tab-payroll [class*="overflow-x-auto"]{scrollbar-color:#f58220 #e5e7eb;scrollbar-width:thin}
+#tab-payroll [class*="overflow-x-auto"]::-webkit-scrollbar{height:10px;width:10px}
+#tab-payroll [class*="overflow-x-auto"]::-webkit-scrollbar-track{background:#e5e7eb;border-radius:10px}
+#tab-payroll [class*="overflow-x-auto"]::-webkit-scrollbar-thumb{background:#f58220;border:2px solid #e5e7eb;border-radius:10px}
+#tab-payroll [class*="overflow-x-auto"]::-webkit-scrollbar-thumb:hover{background:#d9680b}
+
 </style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
