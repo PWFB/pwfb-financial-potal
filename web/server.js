@@ -310,6 +310,39 @@ app.post("/api/auth/logout", asyncRoute(async (req, res) => {
   res.json({ ok: true });
 }));
 
+
+app.get("/api/transport-salaries", asyncRoute(async (req, res) => {
+  const user = await authenticatedUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in to view salary entries." });
+  const region = String(req.query.region || "").trim();
+  if (!["DM 1", "DM 2"].includes(region)) return res.status(400).json({ error: "Choose a valid transport region." });
+  const result = await pool.query(
+    "SELECT staff_ref, monthly_salary::text AS monthly_salary, updated_at FROM pwfb_portal_transport_salaries WHERE region=$1 ORDER BY staff_ref",
+    [region]
+  );
+  res.set("Cache-Control", "no-store");
+  res.json({ salaries: result.rows });
+}));
+app.put("/api/transport-salaries", asyncRoute(async (req, res) => {
+  const user = await authenticatedUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in again before saving salary entries." });
+  if (user.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can change monthly salary entries." });
+  const region = String(req.body?.region || "").trim();
+  const staffRef = String(req.body?.staffRef || "").trim();
+  const rawSalary = req.body?.monthlySalary;
+  const monthlySalary = Number(rawSalary);
+  if (!["DM 1", "DM 2"].includes(region) || !/^\d{3}$/.test(staffRef)) return res.status(400).json({ error: "Invalid region or staff reference." });
+  if (rawSalary === "" || rawSalary === null || rawSalary === undefined || !Number.isFinite(monthlySalary) || monthlySalary < 0 || monthlySalary > 1000000000 || !/^\d{1,10}(\.\d{1,2})?$/.test(String(rawSalary))) {
+    return res.status(400).json({ error: "Enter a valid monthly salary between ₦0.00 and ₦1,000,000,000.00." });
+  }
+  const result = await pool.query(
+    "INSERT INTO pwfb_portal_transport_salaries (region, staff_ref, monthly_salary, updated_by, updated_at) VALUES ($1,$2,$3,$4,NOW()) ON CONFLICT (region,staff_ref) DO UPDATE SET monthly_salary=EXCLUDED.monthly_salary, updated_by=EXCLUDED.updated_by, updated_at=NOW() RETURNING staff_ref, monthly_salary::text AS monthly_salary, updated_at",
+    [region, staffRef, monthlySalary, user.id]
+  );
+  res.set("Cache-Control", "no-store");
+  res.json({ ok: true, salary: result.rows[0] });
+}));
+
 app.use("/api", (_req, res) => res.status(404).json({ error: "API endpoint not found." }));
 app.use(express.static(path.join(__dirname, "dist"), { index: false, maxAge: "1h" }));
 app.get(/.*/, (req, res, next) => {
@@ -363,6 +396,19 @@ async function start() {
       user_agent_hash TEXT
     );
     CREATE INDEX IF NOT EXISTS pwfb_portal_sessions_user_idx ON pwfb_portal_sessions (user_id, expires_at DESC);
+    CREATE TABLE IF NOT EXISTS pwfb_portal_transport_salaries (
+      region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
+      staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}
+  `);
+  app.listen(port, "0.0.0.0", () => console.log(`PWFB Financial Portal listening on ${port}`));
+}
+start().catch(error => { console.error("Startup failed:", error); process.exit(1); });
+),
+      monthly_salary NUMERIC(14,2) NOT NULL CHECK (monthly_salary >= 0),
+      updated_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (region, staff_ref)
+    );
   `);
   app.listen(port, "0.0.0.0", () => console.log(`PWFB Financial Portal listening on ${port}`));
 }
