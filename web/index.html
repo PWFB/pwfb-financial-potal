@@ -757,27 +757,19 @@
                         <h4 class="text-sm font-extrabold text-brand-orange uppercase tracking-wide">CUMULATIVE DIVISION TOTAL</h4>
                         <p class="text-xs text-gray-200">Exact Division Summary Matching Page 3</p>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-6 text-right">
-                        <div>
-                            <div class="text-[10px] text-gray-300 uppercase font-semibold">Total Staff</div>
-                            <div class="text-sm font-bold text-white">${grand.staffCount.toLocaleString()}</div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-gray-300 uppercase font-semibold">Total Gross</div>
-                            <div class="text-sm font-bold text-white">₦${grand.gross.toLocaleString()}</div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-gray-300 uppercase font-semibold">Total Bonus</div>
-                            <div class="text-sm font-bold text-white">₦${grand.bonus.toLocaleString()}</div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-gray-300 uppercase font-semibold">Total Deductions</div>
-                            <div class="text-sm font-bold text-red-300">₦${grand.totalDed.toLocaleString()}</div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-brand-orange uppercase font-bold">Cumulative Net Pay</div>
-                            <div class="text-base font-black text-brand-orange">₦${grand.netPay.toLocaleString()}</div>
-                        </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 text-right">
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">Total Staff</div><div class="text-sm font-bold text-white">${grand.staffCount.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">Total Gross</div><div class="text-sm font-bold text-white">₦${grand.gross.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">Total Bonus</div><div class="text-sm font-bold text-white">₦${grand.bonus.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">Coop Savings</div><div class="text-sm font-bold text-white">₦${grand.coopS.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">Coop Loan</div><div class="text-sm font-bold text-white">₦${grand.coopL.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">DEV (2.5%)</div><div class="text-sm font-bold text-white">₦${grand.dev.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">TAX (3%)</div><div class="text-sm font-bold text-white">₦${grand.tax.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">Offline</div><div class="text-sm font-bold text-white">₦${grand.offline.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">Other</div><div class="text-sm font-bold text-white">₦${grand.others.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">Advance</div><div class="text-sm font-bold text-white">₦${grand.advance.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-gray-300 uppercase font-semibold">Total Deductions</div><div class="text-sm font-bold text-red-300">₦${grand.totalDed.toLocaleString()}</div></div>
+                        <div><div class="text-[10px] text-brand-orange uppercase font-bold">Cumulative Net Pay</div><div class="text-base font-black text-brand-orange">₦${grand.netPay.toLocaleString()}</div></div>
                     </div>
                 </div>
             `;
