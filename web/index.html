@@ -177,6 +177,16 @@
   .balmz-fab{right:.75rem;bottom:.75rem}
 }
 
+
+/* Final mobile drawer stacking override: close control stays above the open sidebar. */
+@media(max-width:640px){
+  #sidebar{z-index:20!important}
+  body.pwfb-mobile-sidebar-open:after{z-index:10!important}
+  body>div.flex-1>header{position:relative!important;z-index:30!important}
+  #sidebarToggle{position:relative;z-index:31!important;flex-shrink:0;background:#fff7ed;border-color:#f58220;color:#b45309}
+  body.pwfb-mobile-sidebar-open #sidebarToggle{position:fixed!important;top:.65rem;right:.7rem;left:auto;z-index:120!important;width:2.65rem;height:2.65rem;background:#f58220!important;border-color:#f58220!important;color:#fff!important;box-shadow:0 3px 12px #0003}
+  body.pwfb-mobile-sidebar-open #sidebarToggle i{pointer-events:none}
+}
 </style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
