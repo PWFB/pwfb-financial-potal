@@ -1103,7 +1103,7 @@ function pwfbDownloadDm2PosTemplate(){
   rows.push(["SIMULATED TEMPLATE ONLY","DM 2",r.ref,r.name,r.gross,"","POS Deposit","SIMULATED-NOT-A-RECEIPT-DM2-"+r.ref,"Pending Verification","No actual POS payment is evidenced. Enter the real amount and receipt details only after verification."]);
  });
  var csv=rows.map(function(row){return row.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
- var blob=new Blob(["\\uFEFF",csv],{type:'text/csv;charset=utf-8;'});
+ var blob=new Blob(["\uFEFF",csv],{type:'text/csv;charset=utf-8;'});
  var url=URL.createObjectURL(blob),a=document.createElement('a');
  a.href=url;a.download='DM2-POS-SIMULATED-RECONCILIATION-TEMPLATE.csv';
  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
