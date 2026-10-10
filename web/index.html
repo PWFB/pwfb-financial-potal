@@ -227,7 +227,6 @@
                     </div>
                 </div>
 
-                <div id="payroll-validation-alert" role="alert" aria-live="polite" class="mb-3 rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-900"></div>
 
                 <!-- BRANCH ACCORDION LIST -->
                 <div id="branch-accordion-list" class="space-y-3"></div>
@@ -278,7 +277,6 @@
             </section>
 
             <section id="tab-salary" class="tab-content hidden space-y-4">
-                <div class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-950" role="status" aria-live="polite"><div class="font-bold text-sm">DM 2 salary-payment batch — partial import</div><p class="mt-1">All 69 source records (references 001–069) are loaded. IMPORTANT: supplied amounts add up to ₦12,412,850, but the source summary says ₦11,948,980 — a difference of ₦463,870. Do not approve or disburse this batch until the source total or individual rows are reconciled.</p></div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
                         <div><h3 class="text-sm font-bold text-gray-900">Create Salary Schedule</h3><p class="text-xs text-gray-500">Prepare and review monthly staff salary payments. Net salary is calculated automatically.</p></div>
@@ -649,11 +647,11 @@
                 grouped[displayBranch].push({ ...item, originalIndex: index });
             });
 
-            let grand = { gross: 0, bonus: 0, coopS: 0, coopL: 0, dev: 0, tax: 0, offline: 0, others: 0, advance: 0, totalDed: 0, netPay: 0 };
+            let grand = { staffCount: 0, gross: 0, bonus: 0, coopS: 0, coopL: 0, dev: 0, tax: 0, offline: 0, others: 0, advance: 0, totalDed: 0, netPay: 0 };
 
             Object.keys(grouped).forEach(branchName => {
                 const staffList = grouped[branchName];
-                let bTotal = { gross: 0, bonus: 0, coopS: 0, coopL: 0, dev: 0, tax: 0, offline: 0, others: 0, advance: 0, totalDed: 0, netPay: 0 };
+                let bTotal = { staffCount: staffList.length, gross: 0, bonus: 0, coopS: 0, coopL: 0, dev: 0, tax: 0, offline: 0, others: 0, advance: 0, totalDed: 0, netPay: 0 };
 
                 staffList.forEach(s => {
                     const totalDed = s.coopS + s.coopL + s.dev + s.tax + s.offline + s.others + s.advance;
@@ -675,7 +673,7 @@
                     const rowIssues = pwfbPayrollRowIssues(s);
                     tableRows += `
                         <tr data-pwfb-payroll-index="${s.originalIndex}" class="hover:bg-gray-50 border-b border-gray-100">
-                            <td class="p-3 font-bold text-gray-900">${rowIssues.length ? '<span title="Detected payroll issue: ' + rowIssues.join('; ') + '" class="text-red-700 font-extrabold mr-1">🛑</span>' : ''}${s.name}${s.dm2SeedRef ? '<div class="text-amber-700 text-[10px] font-semibold">DM 2 provisional — correct later</div>' : ''}${rowIssues.length ? '<div class="text-red-700 text-[10px]">' + rowIssues.join('; ') + '</div>' : ''} </td>
+                            <td class="p-3 font-bold text-gray-900">${rowIssues.length ? '<span title="Detected payroll issue: ' + rowIssues.join('; ') + '" class="text-red-700 font-extrabold mr-1">🛑</span>' : ''}${s.name}${rowIssues.length ? '<div class="text-red-700 text-[10px]">' + rowIssues.join('; ') + '</div>' : ''} </td>
                             <td class="p-3 text-gray-500 font-mono">${s.gra}</td>
                             <td class="p-3 text-right">₦${s.gross.toLocaleString()}</td>
                             <td class="p-3 text-right">₦${s.bonus.toLocaleString()}</td>
@@ -759,7 +757,11 @@
                         <h4 class="text-sm font-extrabold text-brand-orange uppercase tracking-wide">CUMULATIVE DIVISION TOTAL</h4>
                         <p class="text-xs text-gray-200">Exact Division Summary Matching Page 3</p>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-right">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-6 text-right">
+                        <div>
+                            <div class="text-[10px] text-gray-300 uppercase font-semibold">Total Staff</div>
+                            <div class="text-sm font-bold text-white">${grand.staffCount.toLocaleString()}</div>
+                        </div>
                         <div>
                             <div class="text-[10px] text-gray-300 uppercase font-semibold">Total Gross</div>
                             <div class="text-sm font-bold text-white">₦${grand.gross.toLocaleString()}</div>
@@ -1129,7 +1131,7 @@ function pwfbSyncDm2MonthlyPayroll(){
  });
 }
 function pwfbPayrollRowIssues(s){var issues=[];['gross','bonus','coopS','coopL','dev','tax','offline','others','advance'].forEach(function(k){var v=Number(s[k]||0);if(!Number.isFinite(v)||v<0)issues.push(k+' is invalid or negative');});if(s.dm2SeedRef&&Number(s.gross||0)===0)issues.push('DM 2 gross is zero and needs confirmation');return issues;}
-function pwfbValidateMonthlyPayroll(){var el=document.getElementById('payroll-validation-alert');if(!el)return;var dm2=rawPayrollData.filter(function(r){return r.dm2SeedRef;});var dm2Total=dm2.reduce(function(n,r){return n+(Number(r.gross)||0);},0);var flagged=rawPayrollData.filter(function(r){return pwfbPayrollRowIssues(r).length;});var sourceSummary=11948980;var diff=dm2Total-sourceSummary;var notes=[];if(dm2.length!==69)notes.push('DM 2 record count is '+dm2.length+'; expected 69.');if(diff!==0)notes.push('DM 2 gross total is ₦'+dm2Total.toLocaleString('en-NG')+' but the supplied summary is ₦'+sourceSummary.toLocaleString('en-NG')+'; difference ₦'+Math.abs(diff).toLocaleString('en-NG')+'.');if(flagged.length)notes.push(flagged.length+' payroll row(s) have invalid values or require amount confirmation.');el.innerHTML='<div class="font-extrabold text-base mb-1">🛑 PAYROLL VALIDATION — REVIEW REQUIRED</div><div>All '+dm2.length+' DM 2 records are included in Monthly Payroll as provisional entries. DEV (2.5%) and TAX (3%) are recalculated from gross; other deduction components and source amounts still require reconciliation. Records are not marked paid.</div><ul class="list-disc pl-5 mt-2">'+(notes.length?notes.map(function(n){return '<li>'+pwfbEsc(n)+'</li>';}).join(''):'<li>No automatic validation errors found.</li>')+'</ul><div class="mt-2 font-semibold">Do not approve or disburse until the flagged figures are reconciled. 🛑 marks rows with detected issues.</div>';}
+function pwfbValidateMonthlyPayroll(){var el=document.getElementById('payroll-validation-alert');if(el)el.remove();}
 function pwfbLoad(){try{var d=JSON.parse(localStorage.getItem(pwfbStorageKey)||'null');if(d){if(Array.isArray(d.payroll))rawPayrollData.splice(0,rawPayrollData.length,...d.payroll);if(Array.isArray(d.transport))defaultTransport.splice(0,defaultTransport.length,...d.transport.map(function(row){return Object.assign({region:'DM 2'},row);}));if(Array.isArray(d.coop))baseCoopData.splice(0,baseCoopData.length,...d.coop);if(Array.isArray(d.transfers))pwfbTransfers=d.transfers;if(Array.isArray(d.salarySchedule)){var savedSalary=d.salarySchedule.slice();pwfbDm2SalarySeed.forEach(function(seed){if(!savedSalary.some(function(r){return r.ref===seed.ref&&r.batch==='DM 2';}))savedSalary.push(seed);});pwfbSalarySchedule=savedSalary;}if(Array.isArray(d.payments))pwfbPayments=d.payments;}}catch(e){}pwfbSyncDm2MonthlyPayroll();}
 function pwfbRenderTransfers(){var body=document.getElementById('transfer-tbody');if(!body)return;var total=0;body.innerHTML=pwfbTransfers.map(function(t,i){total+=Number(t.amount)||0;return '<tr class="border-b"><td class="p-3">'+pwfbEsc(t.date)+'</td><td class="p-3">'+pwfbEsc(t.from)+'</td><td class="p-3">'+pwfbEsc(t.to)+'</td><td class="p-3 text-right">₦'+(Number(t.amount)||0).toLocaleString()+'</td><td class="p-3">'+pwfbEsc(t.narration)+' '+pwfbEsc(t.ref||'')+'</td><td class="p-3"><button class="action-btn bg-blue-100 text-blue-700" onclick="pwfbEditTransfer('+i+')">Edit</button><button class="action-btn bg-red-100 text-red-700" onclick="pwfbDeleteTransfer('+i+')">Delete</button></td></tr>';}).join('');document.getElementById('transferCount').textContent=pwfbTransfers.length+' records';document.getElementById('transfer-tfoot').innerHTML='<tr><td colspan="3" class="p-3">TOTAL TRANSFERS</td><td class="p-3 text-right">₦'+total.toLocaleString()+'</td><td colspan="2"></td></tr>';}
 function pwfbEditTransfer(i){var t=pwfbTransfers[i];if(!t)return;var f=prompt('From:',t.from);if(f===null)return;var to=prompt('To:',t.to);if(to===null)return;var a=Number(prompt('Amount:',t.amount));if(!Number.isFinite(a)||a<=0){alert('Enter a valid amount');return;}var d=prompt('Date (YYYY-MM-DD):',t.date);if(d===null)return;var n=prompt('Narration:',t.narration||'');if(n===null)return;Object.assign(t,{from:f,to:to,amount:a,date:d,narration:n});pwfbPersist();pwfbRenderTransfers();pwfbSearch();}
