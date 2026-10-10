@@ -390,6 +390,47 @@ app.put("/api/transport-salaries", asyncRoute(async (req, res) => {
   res.json({ ok: true, salary: result.rows[0] });
 }));
 
+
+app.post("/api/transport-salaries/bulk", asyncRoute(async (req, res) => {
+  const user = await authenticatedUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in again before uploading salary entries." });
+  if (user.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can upload monthly salary entries." });
+  const region = String(req.body?.region || "").trim();
+  const salaries = req.body?.salaries;
+  if (!["DM 1", "DM 2"].includes(region) || !Array.isArray(salaries) || salaries.length < 1 || salaries.length > 500) {
+    return res.status(400).json({ error: "Choose a valid region and upload between 1 and 500 salary rows." });
+  }
+  const seen = new Set();
+  for (const row of salaries) {
+    const staffRef = String(row?.staffRef || "").trim();
+    const rawSalary = String(row?.monthlySalary ?? "").trim();
+    const amount = Number(rawSalary);
+    if (!/^\d{3}$/.test(staffRef) || seen.has(staffRef)) return res.status(400).json({ error: "Every staff reference must be a unique three-digit reference." });
+    if (!/^\d{1,10}(\.\d{1,2})?$/.test(rawSalary) || !Number.isFinite(amount) || amount < 0 || amount > 1000000000) return res.status(400).json({ error: "Every monthly salary must be a valid amount between ₦0.00 and ₦1,000,000,000.00." });
+    seen.add(staffRef);
+  }
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const saved = [];
+    for (const row of salaries) {
+      const result = await client.query(
+        "INSERT INTO pwfb_portal_transport_salaries (region, staff_ref, monthly_salary, updated_by, updated_at) VALUES ($1,$2,$3,$4,NOW()) ON CONFLICT (region,staff_ref) DO UPDATE SET monthly_salary=EXCLUDED.monthly_salary, updated_by=EXCLUDED.updated_by, updated_at=NOW() RETURNING staff_ref, monthly_salary::text AS monthly_salary, updated_at",
+        [region, String(row.staffRef).trim(), Number(row.monthlySalary), user.id]
+      );
+      saved.push(result.rows[0]);
+    }
+    await client.query("COMMIT");
+    res.set("Cache-Control", "no-store");
+    res.json({ ok: true, count: saved.length, salaries: saved });
+  } catch (error) {
+    try { await client.query("ROLLBACK"); } catch {}
+    throw error;
+  } finally {
+    client.release();
+  }
+}));
+
 app.use("/api", (_req, res) => res.status(404).json({ error: "API endpoint not found." }));
 app.use(express.static(path.join(__dirname, "dist"), { index: false, maxAge: "1h" }));
 app.get(/.*/, (req, res, next) => {
