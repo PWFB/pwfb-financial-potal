@@ -27,3 +27,15 @@
 @media(max-width:850px){.header-actions{gap:7px}.signed-in{max-width:180px;overflow-wrap:anywhere}.payroll-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.branch-total-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.header{align-items:flex-start;gap:8px}.brand{min-width:0}.logo-svg{width:34px;height:34px;flex-shrink:0}.brand strong{font-size:13px}.brand span{font-size:9px;letter-spacing:.5px}.header-actions{margin-left:auto;gap:6px}.signed-in{display:none}.logout{display:none}.export{font-size:11px;padding:9px}.mobile-menu-toggle{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}.tabs{border-radius:10px;scrollbar-width:thin;scrollbar-color:#f58220 #f3f4f6}.tabs button{padding:12px 13px;font-size:12px}.payroll-summary{padding:12px;gap:8px}.summary-card{padding:11px}.summary-card strong{font-size:15px}.branch-total-block{padding:13px 12px}.branch-total-heading{align-items:flex-start;flex-direction:column;gap:4px}.branch-total-grid{grid-template-columns:minmax(0,1fr)}.section-head{min-width:900px}footer{padding:14px 12px;font-size:10px;overflow-wrap:anywhere}main{width:calc(100% - 14px)}}
 @media(min-width:601px){.mobile-menu-toggle,.mobile-menu{display:none}}
+
+/* Keep the three-dot navigation available whenever the compact layout is active, regardless of sidebar state. */
+@media(max-width:850px){
+  .header{position:sticky;top:0;z-index:100;align-items:center}
+  .header-actions{position:relative;z-index:101;flex-wrap:nowrap;min-width:max-content}
+  .mobile-menu-toggle{display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:103;visibility:visible;opacity:1;flex-shrink:0}
+  .mobile-menu{display:grid;position:absolute;top:calc(100% + 8px);right:0;z-index:104;visibility:visible}
+}
+@media(min-width:601px) and (max-width:850px){
+  .signed-in{display:none}
+  .logout{display:none}
+}
