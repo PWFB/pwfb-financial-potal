@@ -241,6 +241,11 @@
                         </div>
                     </div>
                 </div>
+                <div id="transport-data-integrity" class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-950" role="status" aria-live="polite">
+                    <div class="font-bold text-sm">Transport data completeness check</div>
+                    <p id="transport-data-integrity-text" class="mt-1">Checking DM 1 and DM 2 record counts…</p>
+                    <p class="mt-1">Required full schedule: DM 1 = 66 records; DM 2 = 70 records; total = 136. Missing entries are not fabricated.</p>
+                </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex flex-wrap gap-2 justify-between items-center">
                         <div>
@@ -722,6 +727,21 @@
             const tfoot = document.getElementById('transport-tfoot');
             if (!tbody || !tfoot) return;
             const filtered = defaultTransport.filter(row => currentTransportRegion === 'ALL' || row.region === currentTransportRegion);
+            const dm1Count = defaultTransport.filter(row => row.region === 'DM 1' || row.region === 'D1').length;
+            const dm2Count = defaultTransport.filter(row => row.region === 'DM 2' || row.region === 'DM2').length;
+            const integrityText = document.getElementById('transport-data-integrity-text');
+            const integrityBox = document.getElementById('transport-data-integrity');
+            if (integrityText) {
+                const missing1 = Math.max(0, 66 - dm1Count);
+                const missing2 = Math.max(0, 70 - dm2Count);
+                integrityText.textContent = 'Currently loaded: DM 1 ' + dm1Count + '/66 (' + missing1 + ' missing); DM 2 ' + dm2Count + '/70 (' + missing2 + ' missing); total ' + defaultTransport.length + '/136 records.';
+            }
+            if (integrityBox) {
+                const complete = dm1Count >= 66 && dm2Count >= 70;
+                integrityBox.className = complete
+                    ? 'rounded-xl border border-green-300 bg-green-50 p-4 text-xs text-green-950'
+                    : 'rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-950';
+            }
             let total = 0;
             tbody.innerHTML = filtered.map(row => {
                 const amount = Number(row.amount) || 0;
