@@ -624,6 +624,16 @@
             { sn: 55, name: "OLABISI AKANGBE ELIZABETH", junSav: 120000, julColl: 5000, julWT: 0, julLoanBal: 360000, julLoanColl: 60000 }
         ];
 
+        // DM 2 records are stored under the division name, but grouped by their
+        // branch/location narration (for example, "BM AWOTAN" and "AWOTAN" -> "AWOTAN").
+        function pwfbPayrollDisplayBranch(item) {
+            if (isDm2PayrollRecord(item)) {
+                const label = String(item.dm2Branch || '').trim();
+                if (label) return label;
+            }
+            return String(item.branch || 'Unassigned').trim() || 'Unassigned';
+        }
+
         // RENDER ACCORDION BRANCHES
         function renderBranchAccordions() {
             const container = document.getElementById('branch-accordion-list');
@@ -634,8 +644,9 @@
                 const isDm2 = isDm2PayrollRecord(item);
                 if (currentPayrollDivision === 'DM 2' && !isDm2) return;
                 if (currentPayrollDivision === 'DM 1' && isDm2) return;
-                if (!grouped[item.branch]) grouped[item.branch] = [];
-                grouped[item.branch].push({ ...item, originalIndex: index });
+                const displayBranch = pwfbPayrollDisplayBranch(item);
+                if (!grouped[displayBranch]) grouped[displayBranch] = [];
+                grouped[displayBranch].push({ ...item, originalIndex: index });
             });
 
             let grand = { gross: 0, bonus: 0, coopS: 0, coopL: 0, dev: 0, tax: 0, offline: 0, others: 0, advance: 0, totalDed: 0, netPay: 0 };
@@ -940,7 +951,10 @@
         }
 
         function toggleAllAccordions(openState) {
-            rawPayrollData.forEach(item => accordionStates[item.branch] = openState);
+            rawPayrollData.forEach(item => {
+                const displayBranch = pwfbPayrollDisplayBranch(item);
+                accordionStates[displayBranch] = openState;
+            });
             renderBranchAccordions();
             if(typeof pwfbAddActions==='function')pwfbAddActions();
         }
@@ -1109,6 +1123,7 @@ function pwfbSyncDm2MonthlyPayroll(){
    existing.reviewStatus=existing.reviewStatus||'Needs review — corrections pending';
   }
   var gross=Number(existing.gross)||0;
+  existing.dm2Branch=String(seed.narration||'Unassigned').replace(/^BM\\s+/i,'').trim()||'Unassigned';
   existing.dev=pwfbDm2PercentAmount(gross,0.025);
   existing.tax=pwfbDm2PercentAmount(gross,0.03);
  });
