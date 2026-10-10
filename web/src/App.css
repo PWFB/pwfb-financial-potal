@@ -39,3 +39,23 @@
   .signed-in{display:none}
   .logout{display:none}
 }
+
+/* Transport schedule controls and reconciliation entry */
+.reconciliation-launch-card{width:100%;display:flex;align-items:center;gap:12px;text-align:left;margin:0 0 16px;padding:15px 16px;border:1px solid #f4b16e;border-radius:14px;background:linear-gradient(110deg,#fff7ed,#fff);color:#153a2c;cursor:pointer;box-shadow:0 3px 12px rgba(22,101,52,.07)}
+.reconciliation-launch-card:hover,.reconciliation-launch-card:focus-visible{border-color:#f58220;box-shadow:0 0 0 3px rgba(245,130,32,.18);outline:none}
+.reconciliation-launch-icon{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:11px;background:#f58220;color:#fff;font-size:21px;font-weight:800}
+.reconciliation-launch-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.reconciliation-launch-copy strong{font-size:14px}
+.reconciliation-launch-copy small{font-size:12px;color:#667085}
+.reconciliation-launch-card>b{font-size:12px;color:#b45309;white-space:nowrap}
+.transport-region-switch{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:14px}
+.transport-region-switch button{border:1px solid #d0d5dd;border-radius:10px;background:#fff;padding:10px 13px;color:#344054;font-size:12px;font-weight:700;cursor:pointer}
+.transport-region-switch button.selected{background:#008751;color:#fff;border-color:#008751;box-shadow:0 2px 7px rgba(0,135,81,.15)}
+.transport-warning,.transport-confirmation{border:1px solid #f2c078;border-radius:12px;background:#fff7ed;color:#7c2d12;padding:13px 15px;margin-bottom:14px;font-size:12px}
+.transport-warning strong,.transport-confirmation strong{display:block;font-size:13px;margin-bottom:4px}
+.transport-warning p,.transport-confirmation p{margin:0}
+.transport-confirmation{border-color:#a7d8b7;background:#effaf2;color:#14532d}
+.transport-empty{padding:18px;text-align:center;color:#667085;font-size:13px}
+.reconciliation-status{display:inline-block;border-radius:999px;background:#e7f6ec;color:#166534;padding:4px 8px;font-size:11px;font-weight:700}
+.reconciliation-note{margin:12px 0;color:#667085;font-size:12px}
+@media(max-width:520px){.reconciliation-launch-card{padding:12px;gap:9px}.reconciliation-launch-copy small{font-size:11px}.reconciliation-launch-card>b{font-size:11px}.transport-region-switch button{flex:1;min-width:135px}}
