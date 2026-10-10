@@ -1117,7 +1117,7 @@ function pwfbAddActions(){
    Array.from(body.rows).forEach(function(row,i){
     var old=row.querySelector('[data-pwfb-actions]');if(old)old.remove();
     var ix=i;
-    if(x[0]==='payroll'){var rowIndex=row.getAttribute('data-pwfb-payroll-index');if(rowIndex!==null){ix=Number(rowIndex);}else{var name=row.cells[0]&&row.cells[0].innerText.trim().split('\\n')[0];ix=rawPayrollData.findIndex(function(v){return v.name===name;});}if(ix<0)return;}
+    if(x[0]==='payroll'){var rowIndex=row.getAttribute('data-pwfb-payroll-index');if(rowIndex===null)return;ix=Number(rowIndex);if(!Number.isInteger(ix)||ix<0)return;}
     var td=document.createElement('td');td.className='p-3 whitespace-nowrap';td.setAttribute('data-pwfb-actions','1');
     var edit=document.createElement('button');edit.type='button';edit.className='action-btn bg-blue-100 text-blue-700';edit.textContent='Edit';edit.addEventListener('click',function(){pwfbEditRecord(x[0],ix);});
     var del=document.createElement('button');del.type='button';del.className='action-btn bg-red-100 text-red-700';del.textContent='Delete';del.addEventListener('click',function(){pwfbDeleteRecord(x[0],ix);});
