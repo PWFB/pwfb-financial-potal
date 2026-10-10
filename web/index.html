@@ -83,6 +83,21 @@
     body[data-theme="dark"] .balmz-panel .balmz-muted{color:#d1d5db!important}
     @media(prefers-color-scheme:dark){body[data-theme="system"] .balmz-panel,body[data-theme="system"] .balmz-panel .balmz-surface{background:#1f2937!important;color:#f3f4f6!important;border-color:#374151!important}body[data-theme="system"] .balmz-panel .balmz-muted{color:#d1d5db!important}}
     @media(max-width:640px){.balmz-panel{right:.5rem;bottom:5rem;width:calc(100vw - 1rem);max-height:75vh}.balmz-fab{right:.75rem;bottom:.75rem}}
+
+    .recon-review-row th:first-child{box-shadow:inset 3px 0 0 #d5803b}
+    @media print {
+      body.pwfb-print-reconciliation * { visibility:hidden !important; }
+      body.pwfb-print-reconciliation #tab-reconciliation,
+      body.pwfb-print-reconciliation #tab-reconciliation * { visibility:visible !important; }
+      body.pwfb-print-reconciliation #tab-reconciliation { display:block !important; position:absolute; left:0; top:0; width:100%; padding:0; background:#fff !important; }
+      body.pwfb-print-reconciliation #tab-reconciliation button,
+      body.pwfb-print-reconciliation #tab-reconciliation input { display:none !important; }
+      body.pwfb-print-reconciliation #tab-reconciliation .overflow-x-auto { overflow:visible !important; }
+      body.pwfb-print-reconciliation #reconciliationTable { min-width:0 !important; font-size:7pt !important; }
+      body.pwfb-print-reconciliation #reconciliationTable th,
+      body.pwfb-print-reconciliation #reconciliationTable td { padding:3px !important; white-space:normal !important; }
+    }
+
 </style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
@@ -113,6 +128,11 @@
                 <button id="nav-payroll" onclick="switchTab('payroll')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition text-white bg-brand-green shadow-sm">
                     <i class="fa-solid fa-money-check-dollar w-5 text-center"></i>
                     <span class="sidebar-label">Monthly Payroll</span>
+                </button>
+
+                <button id="nav-reconciliation" onclick="switchTab('reconciliation')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
+                    <i class="fa-solid fa-scale-balanced w-5 text-center"></i>
+                    <span class="sidebar-label">Branch Reconciliation</span>
                 </button>
 
                 <button id="nav-transport" onclick="switchTab('transport')" class="nav-link w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition">
@@ -233,6 +253,76 @@
 
                 <!-- CUMULATIVE DIVISION GRAND TOTAL CARD -->
                 <div id="grand-total-card" class="bg-brand-darkgreen text-white rounded-xl p-5 shadow-sm border border-brand-green/30 mt-6"></div>
+            </section>
+
+            <!-- MODULE: SEPTEMBER 2026 BRANCH PAYROLL RECONCILIATION -->
+            <section id="tab-reconciliation" class="tab-content hidden space-y-4">
+              <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                  <div><h3 class="text-sm font-bold text-gray-900">Payroll reconciliation by branch</h3><p class="text-xs text-gray-500">Perfect Wisdom · September 2026 · Transcribed from four supplied payroll photos</p></div>
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="pwfbExportReconciliationCsv()" class="bg-brand-green text-white rounded-lg px-3 py-2 text-xs font-bold"><i class="fa-solid fa-file-csv mr-1"></i>Export CSV</button>
+                    <button type="button" onclick="pwfbPrintReconciliation()" class="bg-brand-orange text-white rounded-lg px-3 py-2 text-xs font-bold"><i class="fa-solid fa-print mr-1"></i>Print / Save PDF</button>
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 xl:grid-cols-5 gap-3">
+                <div class="bg-white rounded-xl border border-gray-200 p-4"><p class="text-xs text-gray-500">Gross</p><p class="text-lg font-black text-gray-900">12,701,400</p></div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4"><p class="text-xs text-gray-500">Corrected bonus</p><p class="text-lg font-black text-gray-900">934,000</p></div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4"><p class="text-xs text-gray-500">Total earnings</p><p class="text-lg font-black text-brand-green">13,635,400</p></div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4"><p class="text-xs text-gray-500">Total deductions</p><p class="text-lg font-black text-brand-orange">1,745,455</p></div>
+                <div class="bg-white rounded-xl border border-gray-200 p-4 col-span-2 xl:col-span-1"><p class="text-xs text-gray-500">Corrected net</p><p class="text-lg font-black text-brand-green">11,889,945</p></div>
+              </div>
+              <div class="rounded-xl border border-orange-300 bg-orange-50 text-orange-950 p-4 text-xs">
+                <div class="font-bold text-sm text-orange-900">Grand-total corrections found</div>
+                <ul class="list-disc pl-5 mt-2 space-y-1">
+                  <li><b>Bonus:</b> printed 839,100; branch total is <b>934,000</b> (increase 94,900, equal to BODIJA branch bonus).</li>
+                  <li><b>Tax:</b> printed 370,250; branch total is <b>379,370</b> (increase 9,120).</li>
+                  <li><b>Total deductions:</b> <b>1,745,455</b> reconciles using corrected tax. “Total” means deductions, not net pay.</li>
+                </ul>
+              </div>
+              <div class="rounded-xl border border-green-200 bg-green-50 p-3 text-xs text-green-950"><b>Cross-foot check:</b> branch gross totals = 12,701,400; branch deductions = 1,745,455; corrected net = 11,889,945. Net = gross + bonus − deductions.</div>
+              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div><h3 class="text-sm font-bold text-gray-900">Branch-by-branch figures</h3><p class="text-xs text-gray-500">17 branch/group subtotals · source labels flagged where unclear</p></div>
+                  <input id="reconciliationSearch" type="search" oninput="pwfbFilterReconciliation()" aria-label="Filter reconciliation branches" placeholder="Filter branch name…" class="border border-gray-300 rounded-lg px-3 py-2 text-xs w-full sm:max-w-xs">
+                </div>
+                <div class="overflow-x-auto">
+                  <table id="reconciliationTable" class="w-full text-left border-collapse text-xs min-w-[1450px]">
+                    <thead><tr class="bg-gray-100 text-gray-700 uppercase"><th class="p-3">Branch / group</th><th class="p-3 text-right">Gross</th><th class="p-3 text-right">Bonus</th><th class="p-3 text-right">Gross + bonus</th><th class="p-3 text-right">Coop S</th><th class="p-3 text-right">Coop L</th><th class="p-3 text-right">DEV</th><th class="p-3 text-right">TAX</th><th class="p-3 text-right">Offline</th><th class="p-3 text-right">Other</th><th class="p-3 text-right">Advance</th><th class="p-3 text-right">Deductions (calc.)</th><th class="p-3 text-right">Printed total</th><th class="p-3 text-right">Net</th></tr></thead>
+                    <tbody>
+                      <tr><th scope="row" class="p-3 text-left font-semibold">OLODO (continued across pages)</th><td class=" text-right">725,800</td><td class=" text-right">40,900</td><td class="font-bold text-brand-green text-right">766,700</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">18,145</td><td class=" text-right">21,775</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">40,420</td><td class=" text-right">40,420</td><td class=" text-right">726,280</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">IGBOORA</th><td class=" text-right">692,000</td><td class=" text-right">176,700</td><td class="font-bold text-brand-green text-right">868,700</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">17,300</td><td class=" text-right">20,765</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">38,565</td><td class=" text-right">38,565</td><td class=" text-right">830,135</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">BODIJA</th><td class=" text-right">675,600</td><td class=" text-right">94,900</td><td class="font-bold text-brand-green text-right">770,500</td><td class=" text-right">15,000</td><td class=" text-right">0</td><td class=" text-right">16,890</td><td class=" text-right">20,110</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">52,500</td><td class=" text-right">52,500</td><td class=" text-right">718,000</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">AREA M (Molawoye Bankole group) <span class="inline-block ml-2 px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-semibold">Needs label check</span></th><td class=" text-right">1,760,800</td><td class=" text-right">0</td><td class="font-bold text-brand-green text-right">1,760,800</td><td class=" text-right">70,000</td><td class=" text-right">350,000</td><td class=" text-right">44,020</td><td class=" text-right">52,840</td><td class=" text-right">2,500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">519,360</td><td class=" text-right">519,360</td><td class=" text-right">1,241,440</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">AREA 21</th><td class=" text-right">589,200</td><td class=" text-right">0</td><td class="font-bold text-brand-green text-right">589,200</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">14,730</td><td class=" text-right">17,670</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">20,000</td><td class=" text-right">52,900</td><td class=" text-right">52,900</td><td class=" text-right">536,300</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">Unlabeled group (Oluron Amoo Bukola) <span class="inline-block ml-2 px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-semibold">Needs label check</span></th><td class=" text-right">601,600</td><td class=" text-right">4,800</td><td class="font-bold text-brand-green text-right">606,400</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">15,040</td><td class=" text-right">18,040</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">33,580</td><td class=" text-right">33,580</td><td class=" text-right">572,820</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">ERUWA</th><td class=" text-right">677,200</td><td class=" text-right">135,800</td><td class="font-bold text-brand-green text-right">813,000</td><td class=" text-right">20,000</td><td class=" text-right">0</td><td class=" text-right">16,930</td><td class=" text-right">18,740</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">55,670</td><td class=" text-right">55,670</td><td class=" text-right">757,330</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">ELEBU (AREA 2) <span class="inline-block ml-2 px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-semibold">Needs label check</span></th><td class=" text-right">692,000</td><td class=" text-right">40,900</td><td class="font-bold text-brand-green text-right">732,900</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">17,300</td><td class=" text-right">20,765</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">38,565</td><td class=" text-right">38,565</td><td class=" text-right">694,335</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">Unlabeled group (Kuti Mariam) <span class="inline-block ml-2 px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-semibold">Needs label check</span></th><td class=" text-right">692,000</td><td class=" text-right">0</td><td class="font-bold text-brand-green text-right">692,000</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">17,300</td><td class=" text-right">20,765</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">38,565</td><td class=" text-right">38,565</td><td class=" text-right">653,435</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">Unlabeled group (Amulokidowu / R0 / R6) <span class="inline-block ml-2 px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-semibold">Needs label check</span></th><td class=" text-right">706,800</td><td class=" text-right">0</td><td class="font-bold text-brand-green text-right">706,800</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">17,370</td><td class=" text-right">21,210</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">39,080</td><td class=" text-right">39,080</td><td class=" text-right">667,720</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">AREA 2H</th><td class=" text-right">692,000</td><td class=" text-right">0</td><td class="font-bold text-brand-green text-right">692,000</td><td class=" text-right">30,000</td><td class=" text-right">0</td><td class=" text-right">17,300</td><td class=" text-right">20,765</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">30,000</td><td class=" text-right">98,565</td><td class=" text-right">98,565</td><td class=" text-right">593,435</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">ADEGBA</th><td class=" text-right">706,800</td><td class=" text-right">0</td><td class="font-bold text-brand-green text-right">706,800</td><td class=" text-right">15,000</td><td class=" text-right">200,000</td><td class=" text-right">17,670</td><td class=" text-right">21,210</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">254,380</td><td class=" text-right">254,380</td><td class=" text-right">452,420</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">SHAGAMEBO (group) <span class="inline-block ml-2 px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-semibold">Needs label check</span></th><td class=" text-right">662,400</td><td class=" text-right">4,800</td><td class="font-bold text-brand-green text-right">667,200</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">16,560</td><td class=" text-right">19,875</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">36,935</td><td class=" text-right">36,935</td><td class=" text-right">630,265</td></tr>
+<tr class="recon-review-row"><th scope="row" class="p-3 text-left font-semibold">AWOTAN</th><td class=" text-right">706,800</td><td class=" text-right">176,700</td><td class="font-bold text-brand-green text-right">883,500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">17,670</td><td class=" text-right">21,210</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">30,000</td><td class=" text-right">69,380</td><td class=" text-right">69,380</td><td class=" text-right">814,120</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">MONIYA</th><td class=" text-right">706,800</td><td class=" text-right">122,700</td><td class="font-bold text-brand-green text-right">829,500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">17,670</td><td class=" text-right">21,210</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">129,300</td><td class=" text-right">168,680</td><td class=" text-right">168,680</td><td class=" text-right">660,820</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">AKOBO2</th><td class=" text-right">706,800</td><td class=" text-right">40,900</td><td class="font-bold text-brand-green text-right">747,700</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">17,670</td><td class=" text-right">21,210</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">130,050</td><td class=" text-right">168,930</td><td class=" text-right">168,930</td><td class=" text-right">578,770</td></tr>
+<tr><th scope="row" class="p-3 text-left font-semibold">AREA 2G (New GA group) <span class="inline-block ml-2 px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-semibold">Needs label check</span></th><td class=" text-right">706,800</td><td class=" text-right">94,900</td><td class="font-bold text-brand-green text-right">801,700</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">17,670</td><td class=" text-right">21,210</td><td class=" text-right">500</td><td class=" text-right">0</td><td class=" text-right">0</td><td class=" text-right">39,380</td><td class=" text-right">39,380</td><td class=" text-right">762,320</td></tr>
+                      <tr class="bg-blue-50 font-black border-t-2 border-blue-500"><th scope="row" class="p-3 text-left">Corrected grand total</th><td class="p-3 text-right">12,701,400</td><td class="p-3 text-right">934,000</td><td class="p-3 text-right">13,635,400</td><td class="p-3 text-right">150,000</td><td class="p-3 text-right">550,000</td><td class="p-3 text-right">317,235</td><td class="p-3 text-right">379,370</td><td class="p-3 text-right">9,500</td><td class="p-3 text-right">0</td><td class="p-3 text-right">339,350</td><td class="p-3 text-right">1,745,455</td><td class="p-3 text-right">—</td><td class="p-3 text-right">11,889,945</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="px-4 py-3 text-[11px] text-gray-500">Amounts are shown as transcribed. Branch deduction totals are recalculated from the deduction columns. Currency was not explicitly specified in the source photos.</p>
+              </div>
+              <div class="rounded-xl border border-orange-300 bg-orange-50 p-4 text-xs text-orange-950">
+                <h3 class="font-bold text-sm mb-2">Items to verify in source rows</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                  <li><b>AWOTAN — Adebayo Oluwaseun, No. 148:</b> the detail row appears to show DEV/TAX/total as zero, while the branch subtotal includes DEV 4,090 and TAX 4,910. If standard deductions apply, the detail-row total would be <b>9,000</b>; verify against the source before changing the employee record. The branch subtotal is preserved as supplied.</li>
+                  <li>Some branch labels are obscured or absent in the photos and are flagged rather than guessed. OLODO continues across two photographed pages and is counted once.</li>
+                  <li>Bonus and tax are corrected by summing visible branch subtotals. Deductions and net use those recalculated totals.</li>
+                </ul>
+              </div>
+              <p class="text-[11px] text-gray-500">Audit basis: four supplied payroll photographs (55354–55357). Branch subtotals cross-footed across Coop S, Coop L, DEV, TAX, Offline, Other and Advance. Verify source entries before payroll approval.</p>
             </section>
 
             <!-- MODULE 2: TRANSPORT SCHEDULE / BANK DISBURSEMENT -->
@@ -932,10 +1022,28 @@
                 'salary': 'Salary Schedule',
                 'payment': 'Payments & Cumulative Totals',
                 'coop': 'Cooperative Ledger',
-                'transfer': 'Transfers (From → To)'
+                'transfer': 'Transfers (From → To)',
+                'reconciliation': 'September 2026 Branch Payroll Reconciliation'
             };
             document.getElementById('current-module-title').innerText = titleMap[tab];
             if(tab==='payment' && typeof paymentRender==='function') paymentRender();
+        }
+
+
+        function pwfbFilterReconciliation() {
+            const q=(document.getElementById('reconciliationSearch').value||'').toLocaleLowerCase();
+            document.querySelectorAll('#reconciliationTable tbody tr:not(:last-child)').forEach(function(row){
+                row.hidden=!row.cells[0].innerText.toLocaleLowerCase().includes(q);
+            });
+        }
+        function pwfbExportReconciliationCsv() {
+            const rows=pwfbCsvRowsForTab('reconciliation');
+            pwfbDownloadCsv(rows,'pwfb-september-2026-branch-reconciliation.csv');
+        }
+        function pwfbPrintReconciliation() {
+            document.body.classList.add('pwfb-print-reconciliation');
+            window.print();
+            setTimeout(function(){document.body.classList.remove('pwfb-print-reconciliation');},1000);
         }
 
         function toggleAccordion(branchName) {
@@ -992,7 +1100,7 @@
             setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
         }
         function exportCurrentTabCSV(selection) {
-            const choices = ['payroll','transport','salary','payment','coop','transfer'];
+            const choices = ['payroll','transport','salary','payment','coop','transfer','reconciliation'];
             let target = selection || 'current';
             if (target === 'current') target = currentTab;
             const today = new Date().toISOString().slice(0,10);
@@ -1001,12 +1109,12 @@
                 let allRows = [];
                 choices.forEach(function(tab) {
                     const rows = pwfbCsvRowsForTab(tab);
-                    if (rows.length) { if (allRows.length) allRows.push([]); allRows.push([({payroll:'MONTHLY PAYROLL',transport:'TRANSPORT SCHEDULE',salary:'SALARY SCHEDULE',payment:'PAYMENTS REGISTER',coop:'COOPERATIVE LEDGER',transfer:'TRANSFERS REGISTER'})[tab]]); allRows = allRows.concat(rows); }
+                    if (rows.length) { if (allRows.length) allRows.push([]); allRows.push([({payroll:'MONTHLY PAYROLL',transport:'TRANSPORT SCHEDULE',salary:'SALARY SCHEDULE',payment:'PAYMENTS REGISTER',coop:'COOPERATIVE LEDGER',transfer:'TRANSFERS REGISTER',reconciliation:'SEPTEMBER 2026 BRANCH RECONCILIATION'})[tab]]); allRows = allRows.concat(rows); }
                 });
                 pwfbDownloadCsv(allRows, 'pwfb-all-financial-registers-' + today + '.csv'); return;
             }
             if (!choices.includes(target)) { alert('Choose a downloadable file from the list.'); return; }
-            const names = {payroll:'monthly-payroll',transport:'transport-schedule',salary:'salary-schedule',payment:'payments-register',coop:'cooperative-ledger',transfer:'transfers-register'};
+            const names = {payroll:'monthly-payroll',transport:'transport-schedule',salary:'salary-schedule',payment:'payments-register',coop:'cooperative-ledger',transfer:'transfers-register',reconciliation:'september-2026-branch-reconciliation'};
             pwfbDownloadCsv(pwfbCsvRowsForTab(target), 'pwfb-' + names[target] + '-' + today + '.csv');
         }
 
