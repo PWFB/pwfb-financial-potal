@@ -59,3 +59,11 @@
 .reconciliation-status{display:inline-block;border-radius:999px;background:#e7f6ec;color:#166534;padding:4px 8px;font-size:11px;font-weight:700}
 .reconciliation-note{margin:12px 0;color:#667085;font-size:12px}
 @media(max-width:520px){.reconciliation-launch-card{padding:12px;gap:9px}.reconciliation-launch-copy small{font-size:11px}.reconciliation-launch-card>b{font-size:11px}.transport-region-switch button{flex:1;min-width:135px}}
+
+/* Monthly salary entry within the transport schedule */
+.salary-entry-cell{display:flex;align-items:center;gap:6px;min-width:175px}
+.salary-entry-cell input{width:112px;min-width:90px;padding:8px 9px;border:1px solid #d0d5dd;border-radius:8px;background:#fff;color:#101828;font-size:12px}
+.salary-entry-cell input:focus{outline:2px solid rgba(245,130,32,.35);border-color:#f58220}
+.salary-save-button{border:0;border-radius:8px;padding:8px 10px;background:#f58220;color:#fff;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.salary-save-button:disabled{opacity:.45;cursor:not-allowed}
+.salary-entry-notice{margin:0 0 12px;border-radius:10px;padding:10px 12px;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa;font-size:12px}
