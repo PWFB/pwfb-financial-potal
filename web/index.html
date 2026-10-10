@@ -139,6 +139,35 @@
 #tab-transport table tfoot{background:#073e46;color:#fff}
 @media(max-width:640px){#tab-transport>div:first-child>div{padding:.9rem}#tab-transport>div:first-child h3{font-size:1.05rem}#tab-transport .region-filter{font-size:11px;padding:.5rem .65rem}#tab-transport>div:last-of-type>div:first-child{padding:.8rem}#tab-transport table{min-width:850px}}
 
+
+/* Mobile usability fix: sidebar becomes an overlay instead of squeezing the workspace */
+@media(max-width:640px){
+  html,body{width:100%;max-width:100%;overflow:hidden}
+  body{display:flex!important;flex-direction:row!important}
+  #sidebar{position:fixed!important;inset:0 auto 0 0!important;width:min(84vw,320px)!important;min-width:0!important;height:100dvh!important;max-height:100dvh!important;overflow-y:auto!important;transform:translateX(-105%);transition:transform .22s ease!important;z-index:100!important;box-shadow:8px 0 30px #0003}
+  body.pwfb-mobile-sidebar-open #sidebar{transform:translateX(0)}
+  body.pwfb-mobile-sidebar-open:after{content:"";position:fixed;inset:0;background:#0f172a88;z-index:90}
+  #sidebar.sidebar-collapsed{width:min(84vw,320px)!important;min-width:0!important}
+  #sidebar.sidebar-collapsed .sidebar-label,#sidebar.sidebar-collapsed .sidebar-brand-copy,#sidebar.sidebar-collapsed .sidebar-section-label,#sidebar.sidebar-collapsed .sidebar-footer-copy{display:initial}
+  #sidebar.sidebar-collapsed .sidebar-label{display:initial}
+  body>div.flex-1{width:100%!important;min-width:0!important;max-width:100vw!important;flex:1 1 100%!important}
+  header{width:100%;min-width:0;padding:.65rem .75rem!important;gap:.5rem;align-items:flex-start!important;flex-wrap:wrap}
+  header>div:first-child{min-width:0;flex:1 1 100%;gap:.55rem!important}
+  #current-module-title{font-size:1rem!important;line-height:1.35!important;overflow-wrap:anywhere}
+  header>div:last-child{width:100%;min-width:0;display:flex;flex-wrap:wrap;gap:.4rem!important}
+  header>div:last-child .relative{width:100%!important;max-width:none!important}
+  main{padding:.75rem!important;width:100%;min-width:0}
+  main>*{min-width:0;max-width:100%}
+  #tab-payroll,#tab-reconciliation,#tab-transport,#tab-salary,#tab-payment,#tab-coop,#tab-transfer{width:100%;min-width:0}
+  #tab-payroll>div:first-child{flex-wrap:wrap}
+  #tab-payroll .grid{grid-template-columns:minmax(0,1fr)!important}
+  #tab-payroll #branch-accordion-list{width:100%;min-width:0}
+  #tab-payroll #branch-accordion-list>div{max-width:100%;min-width:0}
+  #tab-payroll #branch-accordion-list .overflow-x-auto,#tab-transport .overflow-x-auto,#tab-reconciliation .overflow-x-auto,#tab-salary .overflow-x-auto,#tab-payment .overflow-x-auto{max-width:100%;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  #tab-payroll table,#tab-transport table,#tab-reconciliation table,#tab-salary table,#tab-payment table{min-width:760px}
+  #tab-payroll>div:first-child>div{width:100%;max-width:100%}
+  .balmz-fab{right:.75rem;bottom:.75rem}
+}
 </style>
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800 h-screen flex overflow-hidden">
@@ -1245,7 +1274,7 @@ var pwfbPayments=[];
 var pwfbSalaryEditingId=null;
 var pwfbStorageKey='pwfb-financial-portal-v2', pwfbThemeKey='pwfb-financial-portal-theme-v1', pwfbSidebarKey='pwfb-financial-portal-sidebar-v1';
 function applySidebarState(){var side=document.getElementById('sidebar'),btn=document.getElementById('sidebarToggle');if(!side||!btn)return;side.classList.toggle('sidebar-collapsed',pwfbSidebarCollapsed);btn.innerHTML='<i class="fa-solid '+(pwfbSidebarCollapsed?'fa-angles-right':'fa-bars')+'"></i>';btn.setAttribute('aria-expanded',String(!pwfbSidebarCollapsed));btn.title=pwfbSidebarCollapsed?'Unfold sidebar':'Fold sidebar';}
-function toggleSidebar(){pwfbSidebarCollapsed=!pwfbSidebarCollapsed;applySidebarState();try{localStorage.setItem(pwfbSidebarKey,pwfbSidebarCollapsed?'folded':'unfolded');}catch(e){}}
+function toggleSidebar(){if(window.matchMedia('(max-width: 640px)').matches){document.body.classList.toggle('pwfb-mobile-sidebar-open');var b=document.getElementById('sidebarToggle');if(b)b.setAttribute('aria-expanded',String(document.body.classList.contains('pwfb-mobile-sidebar-open')));return;}pwfbSidebarCollapsed=!pwfbSidebarCollapsed;applySidebarState();try{localStorage.setItem(pwfbSidebarKey,pwfbSidebarCollapsed?'folded':'unfolded');}catch(e){}}
 function setThemeMode(mode){if(!['dark','light','system'].includes(mode))mode='system';document.body.setAttribute('data-theme',mode);var picker=document.getElementById('themeMode');if(picker&&picker.value!==mode)picker.value=mode;try{localStorage.setItem(pwfbThemeKey,mode);}catch(e){}}
 function initAppearance(){var mode='system',folded=false;try{mode=localStorage.getItem(pwfbThemeKey)||'system';folded=localStorage.getItem(pwfbSidebarKey)==='folded';}catch(e){}pwfbSidebarCollapsed=folded;applySidebarState();setThemeMode(mode);}
 function pwfbEsc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
