@@ -449,7 +449,128 @@
                 </div>
             </section>
 
-        </main>
+        
+<!-- Payroll & Bank Schedule: second schedule -->
+<section id="payrollBankSummary" class="panel" style="margin:24px 0;padding:20px;border-radius:14px;overflow:hidden">
+  <div class="section-heading"><h1>Payroll Summary &amp; Bank Schedule</h1><p>Branch payroll totals and destination bank payments</p></div>
+  <h2>Branch-by-Branch Payroll Summary</h2>
+  <div class="table-responsive" style="overflow-x:auto">
+    <table class="data-table" style="min-width:1150px;width:100%">
+      <thead><tr><th>Branch Name</th><th class="text-right">Gross</th><th class="text-right">Bonus</th><th class="text-right">Coop. Savings</th><th class="text-right">Coop. LC</th><th class="text-right">Dev (2.5%)</th><th class="text-right">Tax (3%)</th><th class="text-right">Offline</th><th class="text-right">Oth</th><th class="text-right">Advances</th><th class="text-right">Total Deductions</th><th class="text-right">Branch Net Total</th></tr></thead>
+      <tbody id="payrollSummaryRows"></tbody>
+    </table>
+  </div>
+  <h2 style="margin-top:28px">Bank Payment Schedule (Destination Accounts)</h2>
+  <div class="table-responsive" style="overflow-x:auto">
+    <table class="data-table" style="min-width:780px;width:100%">
+      <thead><tr><th>Destination Bank Name</th><th>Destination Bank Account Number</th><th>Account Name</th><th class="text-right">Amount (₦)</th><th>Narration</th></tr></thead>
+      <tbody id="payrollBankRows"></tbody>
+      <tfoot><tr class="total-row"><th colspan="3">Total scheduled payments</th><th class="text-right" id="payrollBankTotal">₦0</th><th id="payrollBankCount">0 payments</th></tr></tfoot>
+    </table>
+  </div>
+</section>
+<script>
+(function(){
+ const branches=[
+ ["Awotan Branch",706800,112800,0,0,17670,21210,500,0,30000,69380,750220],
+ ["Moniya Branch",706800,163600,0,0,17670,21210,500,0,129300,168680,701720],
+ ["Akoboz Branch",922800,40900,0,0,23070,27690,0,0,260100,310860,652840],
+ ["Area 2G Branch",706800,94900,0,0,17670,21210,500,0,3938,43318,758382],
+ ["Abeokuta Branch",0,0,0,0,0,0,0,0,0,0,0],
+ ["Kuti Mariam Section",692000,0,0,0,17300,20765,500,0,0,38565,653435],
+ ["R6 Branch",706800,0,0,0,17670,21210,500,0,12080,51460,655340],
+ ["Area 2H Branch",692000,0,0,30000,17300,20765,500,0,60000,128565,563435],
+ ["Adegba Branch",706800,0,200000,15000,17670,21210,500,0,0,254380,452420],
+ ["Shagam Branch",662400,0,0,0,16560,19875,500,0,4800,41735,620665],
+ ["Ayetoro / Area 2I Branch",589200,0,0,20000,14730,17670,500,0,20000,52900,536300],
+ ["Olorun Amoo Bukola / R0 Branch",601600,0,0,4800,15040,18040,500,0,0,38380,563220],
+ ["Eruwa Branch",1190800,135800,20000,54000,29770,34140,0,0,20000,157910,1168690],
+ ["Elebu Branch",528400,0,0,0,13210,15855,500,0,0,29565,498835],
+ ["Olodo Branch",326000,0,0,0,8150,9780,500,0,0,18430,307570],
+ ["Rebecca Adejumoke Section",1072000,81800,0,0,26800,32160,0,0,40420,99380,1054420],
+ ["Igboor Branch",692000,176700,0,0,17300,20765,500,0,12380,50945,817755],
+ ["Bodija Branch",675600,94900,0,15000,16890,20190,0,0,0,59445,711055]
+ ];
+ const money=n=>Number(n).toLocaleString('en-NG');
+ document.getElementById('payrollSummaryRows').innerHTML=branches.map((r,i)=>'<tr'+(i===branches.length-1?' class="total-row"':'')+'>'+r.map((v,j)=>'<td'+(j?' class="text-right"':'')+'>'+(j===0?'<strong>'+v+'</strong>':money(v))+'</td>').join('')+'</tr>').join('')+
+ '<tr class="total-row"><td><strong>OVERALL GRAND TOTAL (provided)</strong></td>'+[13095800,901400,220000,138800,327395,392875,5500,0,603018,1687588,12309612].map(v=>'<td class="text-right"><strong>'+money(v)+'</strong></td>').join('')+'</tr>';
+ const payments=[
+ ["Wema/ALAT","0280064037","JOSEPH ANIEBIET RAPHAEL",6000,"BM AWOTAN"],
+ ["Wema/ALAT","0281295863","VICTORIA BUKOLA AJAYI",6000,"BM AWOTAN"],
+ ["Access Bank","1495923913","NAISAT ADEJOKE OLAOULIWA",6000,"AWOTAN"],
+ ["Wema/ALAT","0280145332","OLUWAFUNMILAYO ELIZABETH GO",6000,"BM MONIYA 3"],
+ ["Wema/ALAT","0279629719","ADESINA TITILOPE RISIKAT",6000,"MONIYA 3"],
+ ["Ecobank","2280088175","AYORINDE DORCAS OYEKANMI",6000,"MONIYA 3"],
+ ["First City Monument B.","3858780016","OLUWA TOBA FUNMIVOLAJAA",6000,"AKOBO 3"],
+ ["Fidelity Bank","632636995","FATOKI OPEYEMI",6000,"AKOBO 2"],
+ ["First Bank of Nigeria","3055267857","OLALERE BUSAYO IDAYAT",6000,"AKOBO 2"],
+ ["First Bank of Nigeria","3110516160","OZOGUN OMOLOLA OLUWAKEMI",6000,"AKOBO 2"],
+ ["First Bank of Nigeria","3022690257","FATIMO OLUFUNMI BABATUNDE",6000,"AKOBO 2"],
+ ["Wema/ALAT","0275365725","ATINUKE ABIDOUN BAMISAYE",6000,"BM NEW GARAGE"],
+ ["United Bank for Africa","2305476678","OMOBOLANLE IDRIS",6000,"NEW GARAGE"],
+ ["Access Bank","3226958569","GRACE OLUWAKEMI AWOVIDE",6000,"NEW GARAGE"],
+ ["United Bank for Africa","2172476591","KUTI MARIAM",6000,"ABEOKUTA 1"],
+ ["United Bank for Africa","2184965878","LATEEF OYINOLYE BUSARI",6000,"BM ABEOKUTA 1"],
+ ["First Bank of Nigeria","3206777321","ABOSEDE OLADIMEJI",6000,"AMULOKO"],
+ ["Zenith Bank","2189674517","OLUWAFUNMILAYO MARIAM OYINL",6000,"AMULOKO"],
+ ["United Bank for Africa","2226757245","BM AMULOKO",6000,"AMULOKO"],
+ ["United Bank for Africa","2331040171","OLUMIDE JACOB IDOWU",6000,"BM MONIYA 1"],
+ ["Zenith Bank","0230250789","OYEDEJI TEMILADE BIDEN",6000,"MONIYA 1"],
+ ["United Bank for Africa","2074156269","OLAOYE ABIODUN OLUWAFEMI",6000,"MONIYA 1"],
+ ["Wema/ALAT","1437287402","TOHEEB LABISI ADENIYI",6000,"MONIYA 1"],
+ ["Wema/ALAT","0275792284","OWONIKO VICTORIA",6000,"BM ADEGBAYI"],
+ ["Wema/ALAT","1839529368","ABISOLA OLUWAFEMI",6000,"ADEGBAYI"],
+ ["GTBank Plc","0466722501","ABRAHIM MUTIYAT ADUNOLA",6000,"ADEGBAYI"],
+ ["Access Bank","0280616033","OLALERE BUSAYO AKANGBE",6000,"ADEGBAYI"],
+ ["Wema/ALAT","0275792284","ADETOYE KEHINDE DEBORAH",6000,"ADEGBAYI"],
+ ["Access Bank","3040925218","EBO OLADAYO EMMANUEL",6000,"BM SHAGAMU"],
+ ["GTBank Plc","3057171774","ODUSOTE REMILEKUN",0,"shagamu"],
+ ["First Bank of Nigeria","3039718779","BLESSING AUGUSTINA ILESANMI",6000,"shagamu"],
+ ["First Bank of Nigeria","3083479143","RODIAT OLUWASEUNFUNMI AYORINI",6000,"shagamu"],
+ ["Wema/ALAT","0288678744","AJAYI OLUWASEUN",6000,"BM AYETORO"],
+ ["Sterling Bank","0060992388","ADEOLA ESTHER ADEINMI",6000,"AYETORO"],
+ ["Fidelity Bank","6163287244","OGASUNKANMI SHOOLA",6000,"AYETORO"],
+ ["Access Bank","1853420670","MUIDAT ROMOKE OLOWOWAKE",6000,"AYETORO"],
+ ["GTBank Plc","0595081801","AMOO BUKOLA",6000,"BM OLORUNSOGO"],
+ ["Access Bank","1513880495","GLORY GRACE JACOB",6000,"OLORUNSOGO"],
+ ["United Bank for Africa","2136073347","ALABI OLUFEMI OMOWUMI",6000,"OLORUNSOGO"],
+ ["Wema/ALAT","0287753727","LATEIF ATEREONKE ATANDA",6000,"OLORUNSOGO"],
+ ["First City Monument B.","1007804687","ALAIGE MURINAT OMOWUMI",6000,"BM ERUWA"],
+ ["Zenith Bank","219835775","VICTORIA TITILAYO ADESHINA",6000,"ERUWA"],
+ ["Ecobank","3880110264","OKETOLA TITILAYO ADESHINA",6000,"ERUWA"],
+ ["Access Bank","0105149939","OKEOLA OLALEKAN SAMUEL",6000,"ERUWA"],
+ ["Access Bank","1473724174","OYEKUNLE YUSUFF",6000,"ERUWA"],
+ ["GTBank Plc","0215584125","OLUWASEGUN DAVID O.",6000,"ERUWA"],
+ ["Wema/ALAT","1768210456","OLATINVO OYINDAMOLA POLASH",6000,"BM ELEBU"],
+ ["Keystone Bank","6071594837","ADENIYI OLADAYO BLESSING",6000,"ELEBU"],
+ ["Wema/ALAT","0279892292","SAHEED DOLAPO AJALA",6000,"ELEBU"],
+ ["First City Monument B.","8797014016","AFOLABI KIKELOMO",6000,"ELEBU"],
+ ["Union Bank","0101530102","OLEYEYE ADEOLA ESTHER",6000,"OLODO"],
+ ["First Bank of Nigeria","3120840419","ADEBAYO JUSTINA TAIWO",6000,"BM OLODO"],
+ ["GTBank Plc","0109129193","ADEYEMI OMOLADE DEBORAH",6000,"OLODO"],
+ ["First Bank of Nigeria","3139060675","REBECCA ADEJUMOKE AJAYI",6000,"REBECCA ADEJUMOKE"],
+ ["Polaris Bank","1130554954","ADEYEMI OMOLADE DEBORAH",6000,"BM OLODO"],
+ ["United Bank for Africa","2087480870","ADEYEMI OYEWUMI SARAH",6000,"OLODO"],
+ ["Access Bank","1224105704","AKINKANMI FAITH ALABI",6000,"OLODO"],
+ ["Union Bank","0227367992","ADIO ABEEB OLAITAN",6000,"BM IGBOORA"],
+ ["Polaris Bank","0445788590","ABIMBOLA MAYOWA ADISA",6000,"IGBOORA"],
+ ["First City Monument B.","2508195018","FASASI KHADIAT O.",6000,"IGBOORA"],
+ ["Wema/ALAT","0252214512","SANDRA TEMITOPE AJAO",6000,"IGBOORA"],
+ ["Wema/ALAT","027354246","KEHINDE MARIAM OYEBIMPE",6000,"BODIJA INDIVIDUAL"],
+ ["First Bank of Nigeria","3143571877","CLAWLEYE ISANKOLE FUNSHO",8000,"AM BODIJA INDIVIDUAL"],
+ ["GTBank Plc","0249117014","ADEOYNI ADEDAYO PAUL",8000,"AM"],
+ ["First Bank of Nigeria","303368388","ADENIYU OPEYEMI TEMILADE",8000,"pwfb head office"],
+ ["Wema/ALAT","0234345142","KONOJU BETTY ONORIDE",8000,"pwfb"],
+ ["First City Monument B.","7479380913","OLADELE MOJISOLA",8000,"067"],
+ ["Wema/ALAT","0281295863","OLUBIYI FUNMILADE OMONYI",8000,"BM SANGO 2"]
+ ];
+ document.getElementById('payrollBankRows').innerHTML=payments.map(r=>'<tr>'+r.map((v,i)=>'<td'+(i===3?' class="text-right"':'')+'>'+String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</td>').join('')+'</tr>').join('');
+ document.getElementById('payrollBankTotal').textContent='₦'+money(payments.reduce((s,r)=>s+r[3],0));
+ document.getElementById('payrollBankCount').textContent=payments.length+' payments';
+})();
+</script>
+
+</main>
     </div>
 
     <!-- BALMZ AI: writing helper -->
