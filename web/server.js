@@ -457,6 +457,7 @@ async function start() {
       disabled_at TIMESTAMPTZ
     );
     ALTER TABLE pwfb_portal_users ADD COLUMN IF NOT EXISTS full_name TEXT NOT NULL DEFAULT '';
+
     CREATE TABLE IF NOT EXISTS pwfb_portal_otp_challenges (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       phone_e164 TEXT NOT NULL,
@@ -473,6 +474,7 @@ async function start() {
     ALTER TABLE pwfb_portal_otp_challenges ADD CONSTRAINT pwfb_portal_otp_challenges_purpose_check CHECK (purpose IN ('register','login_reset','login'));
     CREATE INDEX IF NOT EXISTS pwfb_portal_otp_phone_created_idx ON pwfb_portal_otp_challenges (phone_e164, created_at DESC);
     CREATE INDEX IF NOT EXISTS pwfb_portal_otp_expiry_idx ON pwfb_portal_otp_challenges (expires_at);
+
     CREATE TABLE IF NOT EXISTS pwfb_portal_sessions (
       id BIGSERIAL PRIMARY KEY,
       user_id BIGINT NOT NULL REFERENCES pwfb_portal_users(id) ON DELETE CASCADE,
@@ -484,14 +486,10 @@ async function start() {
       user_agent_hash TEXT
     );
     CREATE INDEX IF NOT EXISTS pwfb_portal_sessions_user_idx ON pwfb_portal_sessions (user_id, expires_at DESC);
+
     CREATE TABLE IF NOT EXISTS pwfb_portal_transport_salaries (
       region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
-      staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}
-  `);
-  app.listen(port, "0.0.0.0", () => console.log(`PWFB Financial Portal listening on ${port}`));
-}
-start().catch(error => { console.error("Startup failed:", error); process.exit(1); });
-),
+      staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}$'),
       monthly_salary NUMERIC(14,2) NOT NULL CHECK (monthly_salary >= 0),
       updated_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
