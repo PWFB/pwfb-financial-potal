@@ -529,6 +529,10 @@ async function start() {
       region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
       staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}
   `);
+  const configuredAdminPhone = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
+  if (configuredAdminPhone) {
+    await pool.query("UPDATE pwfb_portal_users SET role = 'admin', updated_at = NOW() WHERE phone_e164 = $1 AND disabled_at IS NULL", [configuredAdminPhone]);
+  }
   app.listen(port, "0.0.0.0", () => console.log(`PWFB Financial Portal listening on ${port}`));
 }
 start().catch(error => { console.error("Startup failed:", error); process.exit(1); });
