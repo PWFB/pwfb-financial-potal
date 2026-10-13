@@ -34,3 +34,68 @@
 .auth-mark{background:#f58220!important}
 .auth-back-link{color:#c85d08!important}
 .landing-secondary-button:hover,.show-password-button:hover{border-color:#f58220!important;background:#fff3e7!important;color:#9a3412!important}
+
+
+/* Login safety fix: keep the public sign-in screen readable in every saved app theme. */
+body[data-theme="dark"] .auth-shell,
+body[data-theme="dark"] .landing-shell,
+body[data-theme="system"] .auth-shell,
+body[data-theme="system"] .landing-shell {
+  color-scheme: light;
+  color: #17251e;
+  background-color: #f6f8f7;
+}
+body[data-theme="dark"] .auth-shell .auth-intro h1,
+body[data-theme="dark"] .landing-shell .landing-hero h1,
+body[data-theme="system"] .auth-shell .auth-intro h1,
+body[data-theme="system"] .landing-shell .landing-hero h1 { color: #153b29; }
+body[data-theme="dark"] .auth-card,
+body[data-theme="dark"] .landing-access-card,
+body[data-theme="system"] .auth-card,
+body[data-theme="system"] .landing-access-card {
+  color: #17251e;
+  color-scheme: light;
+  background: #fff;
+  border-color: #e2eae4;
+}
+body[data-theme="dark"] .auth-card h2,
+body[data-theme="dark"] .landing-access-card h2,
+body[data-theme="system"] .auth-card h2,
+body[data-theme="system"] .landing-access-card h2 { color: #17251e; }
+body[data-theme="dark"] .auth-form label,
+body[data-theme="system"] .auth-form label { color: #34453a; }
+body[data-theme="dark"] .auth-form input,
+body[data-theme="system"] .auth-form input {
+  color: #17251e;
+  color-scheme: light;
+  background: #fbfdfb;
+  border-color: #d7e1d9;
+}
+body[data-theme="dark"] .landing-feature-grid article,
+body[data-theme="system"] .landing-feature-grid article {
+  color: #204632;
+  background: #ffffffd9;
+  border-color: #dfebe2;
+}
+@media(max-width:800px) {
+  .auth-shell,
+  .landing-shell {
+    min-height: 100vh;
+    min-height: 100svh;
+    height: auto;
+    align-content: start;
+    justify-items: stretch;
+    overflow: visible;
+    padding-top: max(18px, env(safe-area-inset-top));
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+  }
+  .auth-intro,
+  .landing-hero,
+  .auth-card,
+  .landing-access-card {
+    min-width: 0;
+    width: 100%;
+  }
+  .auth-card,
+  .landing-access-card { margin-bottom: 8px; }
+}
