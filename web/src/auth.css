@@ -26,3 +26,11 @@
 .auth-back-link:hover{color:#005c37}
 @media(max-width:800px){.landing-shell{grid-template-columns:1fr;gap:22px;padding:24px 14px 30px;align-content:center}.landing-hero{justify-self:center;text-align:center;max-width:600px}.landing-hero h1{font-size:34px;letter-spacing:-1px;margin-bottom:12px}.landing-description{font-size:13px;margin:0 auto}.landing-feature-grid{gap:7px;margin-top:18px}.landing-feature-grid article{min-height:108px;padding:12px 9px;gap:6px}.landing-feature-grid article strong{font-size:11px}.landing-feature-grid article small{font-size:10px}.landing-access-card{justify-self:center;max-width:460px;padding:24px 20px;border-radius:18px}.landing-access-card h2{font-size:24px}.auth-back-link{margin-bottom:14px}}
 @media(max-width:420px){.landing-shell{padding:18px 10px 24px}.landing-hero h1{font-size:29px}.landing-feature-grid{grid-template-columns:1fr;gap:7px}.landing-feature-grid article{min-height:0;display:grid;grid-template-columns:28px 1fr;align-items:center;text-align:left;padding:10px 12px;column-gap:8px}.landing-feature-grid article span{grid-row:span 2}.landing-feature-grid article small{grid-column:2}.landing-access-card{padding:22px 16px}}
+
+/* Orange accent for login, registration and password recovery */
+.auth-submit{background:#f58220!important;border-color:#f58220!important;color:#fff!important}
+.auth-submit:hover{background:#c85d08!important;border-color:#c85d08!important}
+.auth-form input:focus,.auth-form select:focus{border-color:#f58220!important;box-shadow:0 0 0 3px #f582201f!important}
+.auth-mark{background:#f58220!important}
+.auth-back-link{color:#c85d08!important}
+.landing-secondary-button:hover,.show-password-button:hover{border-color:#f58220!important;background:#fff3e7!important;color:#9a3412!important}
