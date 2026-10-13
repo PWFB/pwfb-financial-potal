@@ -432,6 +432,47 @@ app.post("/api/transport-salaries/bulk", asyncRoute(async (req, res) => {
 }));
 
 app.use("/api", (_req, res) => res.status(404).json({ error: "API endpoint not found." }));
+
+app.get("/api/admin/staff", asyncRoute(async (req, res) => {
+  const actor = await authenticatedUser(req);
+  if (!actor) return res.status(401).json({ error: "Please sign in again." });
+  if (actor.role !== "admin") return res.status(403).json({ error: "Administrator access is required." });
+  const result = await pool.query(
+    "SELECT id,full_name,phone_e164,role,created_at,disabled_at FROM pwfb_portal_users ORDER BY created_at DESC,id DESC LIMIT 500"
+  );
+  res.set("Cache-Control", "no-store");
+  res.json({ staff: result.rows.map(row => ({
+    id: row.id, name: row.full_name, phone: row.phone_e164, role: row.role,
+    createdAt: row.created_at, disabled: Boolean(row.disabled_at)
+  })) });
+}));
+
+app.post("/api/admin/staff", asyncRoute(async (req, res) => {
+  const actor = await authenticatedUser(req);
+  if (!actor) return res.status(401).json({ error: "Please sign in again." });
+  if (actor.role !== "admin") return res.status(403).json({ error: "Administrator access is required." });
+  const name = String(req.body?.name || "").trim().replace(/\\s+/g, " ");
+  const phone = normalizePhone(req.body?.phone);
+  const password = String(req.body?.password || "");
+  const role = req.body?.role === "viewer" ? "viewer" : "staff";
+  if (name.length < 2 || name.length > 100) return res.status(400).json({ error: "Enter a staff name between 2 and 100 characters." });
+  if (!phone) return res.status(400).json({ error: "Enter a valid Nigerian phone number." });
+  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: "Use a temporary password between 8 and 128 characters." });
+  try {
+    const result = await pool.query(
+      "INSERT INTO pwfb_portal_users (phone_e164,full_name,pin_hash,role,phone_verified_at) VALUES ($1,$2,$3,$4,NOW()) RETURNING id,full_name,phone_e164,role,created_at",
+      [phone, name, hashPin(password), role]
+    );
+    const row = result.rows[0];
+    res.status(201).json({ ok: true, staff: {
+      id: row.id, name: row.full_name, phone: row.phone_e164, role: row.role, createdAt: row.created_at
+    }, message: "Staff account created. They must complete SMS verification when signing in." });
+  } catch (error) {
+    if (error.code === "23505") return res.status(409).json({ error: "An account already exists for that phone number." });
+    throw error;
+  }
+}));
+
 app.use(express.static(path.join(__dirname, "dist"), { index: false, maxAge: "1h" }));
 app.get(/.*/, (req, res, next) => {
   if (req.path.startsWith("/api/")) return next();
