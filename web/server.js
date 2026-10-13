@@ -527,7 +527,7 @@ async function start() {
     CREATE INDEX IF NOT EXISTS pwfb_portal_sessions_user_idx ON pwfb_portal_sessions (user_id, expires_at DESC);
     CREATE TABLE IF NOT EXISTS pwfb_portal_transport_salaries (
       region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
-      staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}
+      staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}$'),
       monthly_salary NUMERIC(14,2) NOT NULL CHECK (monthly_salary >= 0),
       updated_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -538,16 +538,6 @@ async function start() {
   if (configuredAdminPhone) {
     await pool.query("UPDATE pwfb_portal_users SET role = 'admin', updated_at = NOW() WHERE phone_e164 = $1 AND disabled_at IS NULL", [configuredAdminPhone]);
   }
-  app.listen(port, "0.0.0.0", () => console.log(`PWFB Financial Portal listening on ${port}`));
-}
-start().catch(error => { console.error("Startup failed:", error); process.exit(1); });
-),
-      monthly_salary NUMERIC(14,2) NOT NULL CHECK (monthly_salary >= 0),
-      updated_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      PRIMARY KEY (region, staff_ref)
-    );
-  `);
   app.listen(port, "0.0.0.0", () => console.log(`PWFB Financial Portal listening on ${port}`));
 }
 start().catch(error => { console.error("Startup failed:", error); process.exit(1); });
