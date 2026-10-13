@@ -99,3 +99,16 @@
 .bulk-preview-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;margin-top:8px;border-top:1px solid #fed7aa}
 .bulk-preview-footer strong{font-size:13px;color:#14532d}
 @media(max-width:720px){.transport-edit-toolbar{align-items:stretch;flex-direction:column;padding:12px}.transport-search{max-width:none;width:100%}.transport-edit-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.transport-action{padding:10px 7px;font-size:11px;white-space:normal;text-align:center}.transport-summary-cards{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px;gap:8px}.transport-summary-cards>div{padding:10px}.bulk-preview-panel{margin:12px 8px;padding:10px}.bulk-preview-heading{align-items:flex-start;flex-direction:column}.bulk-preview-footer{align-items:stretch;flex-direction:column}.bulk-preview-footer button{width:100%}}
+
+
+/* Transport and salary: persistent, mobile-friendly division selector */
+.transport-page-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 22px;margin:0 0 16px;border:1px solid #dce5e0;border-radius:16px;background:linear-gradient(135deg,#f3faf6,#fff);color:#173b2b}
+.transport-page-heading h2{margin:4px 0 6px;font-size:clamp(1.35rem,3vw,1.8rem);font-weight:800}
+.transport-page-heading p{margin:0;color:#52665c}
+.transport-page-total{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:100px;padding:12px;border-radius:12px;background:#075b3b;color:#fff}
+.transport-page-total strong{font-size:1.8rem;line-height:1.1}.transport-page-total span{font-size:.75rem}
+.transport-region-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 18px}
+.transport-region-switch button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:12px 14px;border:2px solid #cbd8d0;border-radius:12px;background:#fff;color:#174b34;font-weight:800;font-size:1rem;cursor:pointer}
+.transport-region-switch button span{font-weight:600;font-size:.8rem}
+.transport-region-switch button.selected{border-color:#087747;background:#087747;color:#fff;box-shadow:0 4px 14px #075b3b22}
+@media(max-width:560px){.transport-page-heading{align-items:flex-start;padding:16px;gap:10px}.transport-page-total{min-width:76px;padding:10px}.transport-region-switch{gap:8px}.transport-region-switch button{flex-direction:column;gap:3px;min-height:64px;padding:10px 6px}.transport-page-heading p{font-size:.88rem}}
