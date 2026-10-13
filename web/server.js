@@ -451,7 +451,7 @@ app.post("/api/admin/staff", asyncRoute(async (req, res) => {
   const actor = await authenticatedUser(req);
   if (!actor) return res.status(401).json({ error: "Please sign in again." });
   if (actor.role !== "admin") return res.status(403).json({ error: "Administrator access is required." });
-  const name = String(req.body?.name || "").trim().replace(/\\s+/g, " ");
+  const name = String(req.body?.name || "").trim().replace(/\s+/g, " ");
   const phone = normalizePhone(req.body?.phone);
   const password = String(req.body?.password || "");
   const role = req.body?.role === "viewer" ? "viewer" : "staff";
