@@ -250,3 +250,76 @@
 
 /* Transport schedule: make the destination bank code easy to scan on mobile and desktop. */
 .bank-code-value{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:4px 7px;border:1px solid #bbf7d0;border-radius:7px;background:#ecfdf5;color:#065f46;font-size:12px;font-weight:800;letter-spacing:.03em;white-space:nowrap}
+
+
+/* Persistent Light / Dark / System appearance selector, adapted from the legacy PWFB portal. */
+.theme-picker-label{font-size:11px;font-weight:800;color:#6b7280}
+.theme-mode-picker{max-width:130px;min-width:95px;padding:8px 9px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#374151;font:inherit;font-size:12px;font-weight:750;cursor:pointer}
+.theme-mode-picker:focus-visible{outline:3px solid #f5822055;border-color:#f58220}
+body{transition:background-color .18s ease,color .18s ease}
+body[data-theme="dark"]{color-scheme:dark;background:#111827;color:#e5e7eb}
+body[data-theme="dark"] .app,body[data-theme="dark"] .header,body[data-theme="dark"] footer{background:#111827;color:#e5e7eb;border-color:#374151}
+body[data-theme="dark"] .header{box-shadow:0 2px 8px #0005}
+body[data-theme="dark"] main,body[data-theme="dark"] .panel,body[data-theme="dark"] .summary-card,body[data-theme="dark"] .admin-create-card,body[data-theme="dark"] .admin-staff-list{background:#1f2937;color:#e5e7eb;border-color:#374151}
+body[data-theme="dark"] .tabs{background:#111827;border-color:#374151}
+body[data-theme="dark"] .tabs button{color:#d1d5db}
+body[data-theme="dark"] .toolbar,body[data-theme="dark"] .section-head,body[data-theme="dark"] th{background:#111827;color:#e5e7eb;border-color:#374151}
+body[data-theme="dark"] td,body[data-theme="dark"] .branch-total-card,body[data-theme="dark"] .salary-branch-accordion,body[data-theme="dark"] .payroll-branch-accordion{background:#1f2937;color:#e5e7eb;border-color:#374151}
+body[data-theme="dark"] td b,body[data-theme="dark"] .summary-card strong,body[data-theme="dark"] .branch-total-heading strong,body[data-theme="dark"] .branch-total-card b,body[data-theme="dark"] .salary-branch-name,body[data-theme="dark"] .salary-branch-total b,body[data-theme="dark"] .admin-create-card h3,body[data-theme="dark"] .admin-list-heading h3,body[data-theme="dark"] .admin-staff-heading h2{color:#f9fafb}
+body[data-theme="dark"] tbody tr:hover,body[data-theme="dark"] .salary-branch-accordion>summary,body[data-theme="dark"] .payroll-branch-accordion>summary{background:#111827;color:#e5e7eb}
+body[data-theme="dark"] .salary-branch-accordion[open]>summary,body[data-theme="dark"] .payroll-branch-accordion[open]>summary{background:linear-gradient(100deg,#064e3b 0%,#087b66 72%,#075b61 100%);color:#fff}
+body[data-theme="dark"] .search,body[data-theme="dark"] .transport-search,body[data-theme="dark"] .salary-entry-cell input,body[data-theme="dark"] .admin-create-card input,body[data-theme="dark"] .admin-create-card select,body[data-theme="dark"] .bulk-preview-table input,body[data-theme="dark"] .theme-mode-picker,body[data-theme="dark"] .logout{background:#111827;color:#f9fafb;border-color:#4b5563}
+body[data-theme="dark"] .search input,body[data-theme="dark"] .transport-search input{color:#f9fafb}
+body[data-theme="dark"] .filters button,body[data-theme="dark"] .transport-region-switch button,body[data-theme="dark"] .transport-action,body[data-theme="dark"] .salary-branch-toolbar button,body[data-theme="dark"] .payroll-branch-toolbar button{background:#111827;color:#e5e7eb;border-color:#4b5563}
+body[data-theme="dark"] .filters button.selected,body[data-theme="dark"] .transport-region-switch button.selected{background:#f58220;color:#fff;border-color:#f58220}
+body[data-theme="dark"] .net,body[data-theme="dark"] .summary-net{background:#123b2b;color:#a7f3d0}
+body[data-theme="dark"] .section-head small,body[data-theme="dark"] .signed-in,body[data-theme="dark"] .admin-create-card>p,body[data-theme="dark"] .admin-list-heading p,body[data-theme="dark"] .admin-staff-heading p,body[data-theme="dark"] .admin-security-note{color:#cbd5e1}
+body[data-theme="dark"] .admin-staff-table th{background:#111827;color:#fdba74;border-color:#374151}
+body[data-theme="dark"] .admin-staff-table td{color:#e5e7eb;border-color:#374151}
+body[data-theme="dark"] .mobile-menu{background:#1f2937;border-color:#374151}
+body[data-theme="dark"] .mobile-menu button{background:#1f2937;color:#e5e7eb}
+body[data-theme="dark"] .mobile-menu button:hover{background:#374151;color:#fdba74}
+body[data-theme="dark"] .transport-warning,body[data-theme="dark"] .salary-entry-notice{background:#422006;color:#fed7aa;border-color:#92400e}
+body[data-theme="dark"] .transport-confirmation{background:#123b2b;color:#a7f3d0;border-color:#166534}
+body[data-theme="dark"] .admin-error{background:#451a1a;color:#fecaca;border-color:#7f1d1d}
+body[data-theme="dark"] .admin-success{background:#123b2b;color:#a7f3d0;border-color:#166534}
+body[data-theme="dark"] .transport-page-heading{background:linear-gradient(135deg,#1f2937,#111827);color:#e5e7eb;border-color:#374151}
+body[data-theme="dark"] .transport-page-heading p{color:#cbd5e1}
+body[data-theme="dark"] .transport-summary-cards,body[data-theme="dark"] .bulk-preview-panel{background:#111827;border-color:#374151}
+body[data-theme="dark"] .transport-summary-cards>div{background:#1f2937;border-color:#374151}
+body[data-theme="dark"] .transport-summary-cards span,body[data-theme="dark"] .transport-summary-cards strong,body[data-theme="dark"] .bulk-preview-heading strong{color:#e5e7eb}
+body[data-theme="dark"] .salary-cumulative-total{background:#111827;border-color:#374151;color:#e5e7eb}
+body[data-theme="dark"] .salary-cumulative-total b{color:#f9fafb}
+@media(prefers-color-scheme:dark){
+ body[data-theme="system"]{color-scheme:dark;background:#111827;color:#e5e7eb}
+ body[data-theme="system"] .app,body[data-theme="system"] .header,body[data-theme="system"] footer{background:#111827;color:#e5e7eb;border-color:#374151}
+ body[data-theme="system"] .panel,body[data-theme="system"] .summary-card,body[data-theme="system"] .admin-create-card,body[data-theme="system"] .admin-staff-list{background:#1f2937;color:#e5e7eb;border-color:#374151}
+ body[data-theme="system"] .tabs,body[data-theme="system"] .toolbar,body[data-theme="system"] .section-head,body[data-theme="system"] th{background:#111827;color:#e5e7eb;border-color:#374151}
+ body[data-theme="system"] td,body[data-theme="system"] .branch-total-card,body[data-theme="system"] .salary-branch-accordion,body[data-theme="system"] .payroll-branch-accordion{background:#1f2937;color:#e5e7eb;border-color:#374151}
+ body[data-theme="system"] td b,body[data-theme="system"] .summary-card strong,body[data-theme="system"] .salary-branch-name,body[data-theme="system"] .salary-branch-total b,body[data-theme="system"] .admin-create-card h3,body[data-theme="system"] .admin-list-heading h3,body[data-theme="system"] .admin-staff-heading h2{color:#f9fafb}
+ body[data-theme="system"] tbody tr:hover,body[data-theme="system"] .salary-branch-accordion>summary,body[data-theme="system"] .payroll-branch-accordion>summary{background:#111827;color:#e5e7eb}
+ body[data-theme="system"] .salary-branch-accordion[open]>summary,body[data-theme="system"] .payroll-branch-accordion[open]>summary{background:linear-gradient(100deg,#064e3b 0%,#087b66 72%,#075b61 100%);color:#fff}
+ body[data-theme="system"] .search,body[data-theme="system"] .transport-search,body[data-theme="system"] .salary-entry-cell input,body[data-theme="system"] .admin-create-card input,body[data-theme="system"] .admin-create-card select,body[data-theme="system"] .bulk-preview-table input,body[data-theme="system"] .theme-mode-picker,body[data-theme="system"] .logout{background:#111827;color:#f9fafb;border-color:#4b5563}
+ body[data-theme="system"] .search input,body[data-theme="system"] .transport-search input{color:#f9fafb}
+ body[data-theme="system"] .filters button,body[data-theme="system"] .transport-region-switch button,body[data-theme="system"] .transport-action,body[data-theme="system"] .salary-branch-toolbar button,body[data-theme="system"] .payroll-branch-toolbar button{background:#111827;color:#e5e7eb;border-color:#4b5563}
+ body[data-theme="system"] .filters button.selected,body[data-theme="system"] .transport-region-switch button.selected{background:#f58220;color:#fff;border-color:#f58220}
+ body[data-theme="system"] .net,body[data-theme="system"] .summary-net{background:#123b2b;color:#a7f3d0}
+ body[data-theme="system"] .section-head small,body[data-theme="system"] .signed-in,body[data-theme="system"] .admin-create-card>p,body[data-theme="system"] .admin-list-heading p,body[data-theme="system"] .admin-staff-heading p,body[data-theme="system"] .admin-security-note{color:#cbd5e1}
+ body[data-theme="system"] .admin-staff-table th{background:#111827;color:#fdba74;border-color:#374151}
+ body[data-theme="system"] .admin-staff-table td{color:#e5e7eb;border-color:#374151}
+ body[data-theme="system"] .mobile-menu{background:#1f2937;border-color:#374151}
+ body[data-theme="system"] .mobile-menu button{background:#1f2937;color:#e5e7eb}
+ body[data-theme="system"] .mobile-menu button:hover{background:#374151;color:#fdba74}
+ body[data-theme="system"] .transport-warning,body[data-theme="system"] .salary-entry-notice{background:#422006;color:#fed7aa;border-color:#92400e}
+ body[data-theme="system"] .transport-confirmation{background:#123b2b;color:#a7f3d0;border-color:#166534}
+ body[data-theme="system"] .admin-error{background:#451a1a;color:#fecaca;border-color:#7f1d1d}
+ body[data-theme="system"] .admin-success{background:#123b2b;color:#a7f3d0;border-color:#166534}
+ body[data-theme="system"] .transport-page-heading{background:linear-gradient(135deg,#1f2937,#111827);color:#e5e7eb;border-color:#374151}
+ body[data-theme="system"] .transport-page-heading p{color:#cbd5e1}
+ body[data-theme="system"] .transport-summary-cards,body[data-theme="system"] .bulk-preview-panel{background:#111827;border-color:#374151}
+ body[data-theme="system"] .transport-summary-cards>div{background:#1f2937;border-color:#374151}
+ body[data-theme="system"] .transport-summary-cards span,body[data-theme="system"] .transport-summary-cards strong,body[data-theme="system"] .bulk-preview-heading strong{color:#e5e7eb}
+ body[data-theme="system"] .salary-cumulative-total{background:#111827;border-color:#374151;color:#e5e7eb}
+ body[data-theme="system"] .salary-cumulative-total b{color:#f9fafb}
+}
+@media(max-width:600px){.theme-picker-label{display:none}.theme-mode-picker{max-width:104px;min-width:88px;padding:8px 5px;font-size:11px}}
