@@ -161,3 +161,21 @@
 .admin-list-state{padding:28px 12px;text-align:center;color:#667085;font-size:13px}
 @media(max-width:850px){.admin-staff-grid{grid-template-columns:1fr}.admin-create-card,.admin-staff-list{padding:16px}}
 @media(max-width:560px){.admin-staff-heading{align-items:flex-start}.admin-count{padding:8px 10px;font-size:11px}.admin-staff-table{min-width:560px}.admin-staff-heading p{font-size:12px}}
+
+/* Foldable branch groups for the monthly transport and salary schedule */
+.salary-branch-list{border-bottom:1px solid #e5e7eb}
+.salary-branch-accordion{border-bottom:1px solid #e5e7eb;background:#fff}
+.salary-branch-accordion>summary{list-style:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:15px 18px;cursor:pointer;background:#fbfcfb;transition:background .15s ease}
+.salary-branch-accordion>summary::-webkit-details-marker{display:none}
+.salary-branch-accordion>summary:hover,.salary-branch-accordion[open]>summary{background:#fff7ed}
+.salary-branch-accordion>summary:focus-visible{outline:3px solid #f58220;outline-offset:-3px}
+.salary-branch-name{font-weight:800;color:#111827;min-width:145px;flex:1}
+.salary-branch-count{font-size:11px;font-weight:800;color:#005c37;background:#e6f4ed;border-radius:999px;padding:5px 9px;white-space:nowrap}
+.salary-branch-total{display:flex;gap:6px;align-items:center;color:#6b7280;font-size:11px;white-space:nowrap}
+.salary-branch-total b{color:#111827;font-size:12px}
+.salary-branch-toggle{color:#f58220;font-size:11px;font-weight:800;white-space:nowrap}
+.salary-branch-accordion[open] .salary-branch-toggle{font-size:0}
+.salary-branch-accordion[open] .salary-branch-toggle:after{content:"Hide staff⌃";font-size:11px}
+.salary-branch-accordion .table-wrap{border-top:1px solid #f1f5f9}
+.salary-branch-accordion table{min-width:1250px}
+@media(max-width:600px){.salary-branch-accordion>summary{align-items:flex-start;gap:8px;padding:13px 12px}.salary-branch-name{flex:1 1 100%;min-width:0;font-size:13px}.salary-branch-count{order:2}.salary-branch-total{flex:1 1 40%;font-size:10px}.salary-branch-total b{font-size:11px}.salary-branch-toggle{margin-left:auto}}
