@@ -17,7 +17,9 @@
     "lucide-react": "^1.53.0",
     "pg": "^8.16.3",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "@neondatabase/auth": "^0.2.0",
+    "jose": "^6.1.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",

@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import pg from "pg";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,7 +14,10 @@ const port = Number(process.env.PORT || 10000);
 const databaseUrl = process.env.DATABASE_URL;
 const sessionSecret = process.env.SESSION_SECRET;
 const otpPepper = process.env.OTP_PEPPER;
-const neonAuthJwksUrl = process.env.NEON_AUTH_JWKS_URL || "https://ep-dawn-moon-b54pcnyv.neonauth.c-7.us-east-2.aws.neon.tech/pwfb_salary_transport/auth/.well-known/jwks.json";
+const neonAuthBaseUrl = process.env.NEON_AUTH_BASE_URL || "https://ep-winter-resonance-b48nus4i.neonauth.c-6.us-east-2.aws.neon.tech/pwfb_financial_portal/auth";
+const neonAuthJwksUrl = process.env.NEON_AUTH_JWKS_URL || "https://ep-winter-resonance-b48nus4i.neonauth.c-6.us-east-2.aws.neon.tech/pwfb_financial_portal/auth/.well-known/jwks.json";
+const portalAdminEmail = String(process.env.PORTAL_ADMIN_EMAIL || "").trim().toLowerCase();
+const neonJwks = createRemoteJWKSet(new URL(neonAuthJwksUrl));
 const sessionCookie = "pwfb_portal_session";
 const sessionHours = 12;
 const maxOtpAttempts = 5;
@@ -402,6 +406,52 @@ app.post("/api/auth/password-reset/verify", asyncRoute(async (req, res) => {
   } finally {
     client.release();
   }
+}));
+
+
+app.post("/api/auth/neon-session", asyncRoute(async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const authorization = String(req.headers.authorization || "");
+  const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+  if (!token || !portalAdminEmail) return res.status(401).json({ error: "Neon email login is not configured for this portal." });
+  let claims;
+  try {
+    const verified = await jwtVerify(token, neonJwks, { issuer: neonAuthBaseUrl });
+    claims = verified.payload;
+  } catch {
+    return res.status(401).json({ error: "Your Neon session could not be verified. Please sign in again." });
+  }
+  const subject = String(claims.sub || "");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(subject)) {
+    return res.status(401).json({ error: "The Neon identity token is invalid." });
+  }
+  // Read the email and verification flag from Neon Auth's own database row, not client-supplied claims.
+  const identityResult = await pool.query(
+    'SELECT email, "emailVerified", COALESCE(banned,false) AS banned FROM neon_auth."user" WHERE id=$1 LIMIT 1',
+    [subject]
+  );
+  const identity = identityResult.rows[0];
+  if (!identity || identity.banned || !identity.emailVerified ||
+      String(identity.email || "").trim().toLowerCase() !== portalAdminEmail) {
+    return res.status(403).json({ error: "Use the verified administrator email configured for this portal." });
+  }
+  const result = await pool.query(
+    "SELECT id,full_name,phone_e164,role FROM pwfb_portal_users WHERE role='admin' AND disabled_at IS NULL ORDER BY created_at ASC,id ASC LIMIT 1"
+  );
+  const user = result.rows[0];
+  if (!user) return res.status(503).json({ error: "The existing administrator record was not found. No data was changed." });
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await issueSession(client, req, res, user);
+    await client.query("COMMIT");
+  } catch (error) {
+    try { await client.query("ROLLBACK"); } catch {}
+    throw error;
+  } finally {
+    client.release();
+  }
+  res.json({ ok: true, user: safeUser(user) });
 }));
 
 app.get("/api/auth/me", asyncRoute(async (req, res) => {
