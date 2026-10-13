@@ -491,8 +491,6 @@ app.post("/api/transport-salaries/bulk", asyncRoute(async (req, res) => {
   }
 }));
 
-app.use("/api", (_req, res) => res.status(404).json({ error: "API endpoint not found." }));
-
 app.get("/api/admin/staff", asyncRoute(async (req, res) => {
   const actor = await authenticatedUser(req);
   if (!actor) return res.status(401).json({ error: "Please sign in again." });
@@ -532,6 +530,8 @@ app.post("/api/admin/staff", asyncRoute(async (req, res) => {
     throw error;
   }
 }));
+
+app.use("/api", (_req, res) => res.status(404).json({ error: "API endpoint not found." }));
 
 app.use(express.static(path.join(__dirname, "dist"), { index: false, maxAge: "1h" }));
 app.get(/.*/, (req, res, next) => {
