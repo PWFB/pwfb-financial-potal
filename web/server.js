@@ -210,7 +210,7 @@ app.get("/admin-setup", asyncRoute(async (_req, res) => {
   res.set("Cache-Control", "no-store");
   const count = await pool.query("SELECT COUNT(*)::int AS total FROM pwfb_portal_users");
   const available = count.rows[0].total === 0 && Boolean(process.env.PORTAL_BOOTSTRAP_TOKEN && process.env.PORTAL_BOOTSTRAP_TOKEN.length >= 32);
-  res.status(available ? 200 : 404).type("html").send(available ? \`<!doctype html>
+  res.status(available ? 200 : 404).type("html").send(available ? `<!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PWFB Financial Potal — Secure Admin Setup</title>
 <style>body{font:16px system-ui;background:#f5f7fb;color:#182230;margin:0;display:grid;min-height:100vh;place-items:center}.card{background:white;width:min(92vw,430px);box-sizing:border-box;padding:28px;border-radius:18px;box-shadow:0 12px 40px #18223018}h1{font-size:24px;margin:0 0 8px}p{line-height:1.5;color:#586174}label{display:block;font-weight:600;margin:16px 0 6px}input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd2dc;border-radius:9px;font:inherit}button{width:100%;margin-top:20px;background:#ed7625;color:#fff;border:0;border-radius:9px;padding:13px;font-weight:700;font-size:16px}#status{white-space:pre-wrap}</style>
@@ -221,7 +221,7 @@ const form=document.querySelector("#setup"),status=document.querySelector("#stat
 form.addEventListener("submit",async event=>{event.preventDefault();button.disabled=true;status.textContent="Setting up securely…";
 try{const response=await fetch("/api/auth/bootstrap-admin",{method:"POST",headers:{"content-type":"application/json"},credentials:"same-origin",body:JSON.stringify({token:document.querySelector("#token").value,name:document.querySelector("#name").value,password:document.querySelector("#password").value})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||"Setup failed.");status.textContent="Administrator created. Opening the Potal…";window.location.replace("/");}
 catch(error){status.textContent=error.message;button.disabled=false;}});
-</script></html>\` : \`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Setup unavailable</title><h1>Secure setup unavailable</h1><p>Initial setup is disabled because an account already exists or the one-time setup token is not configured. No account was changed.</p>\`);
+</script></html>` : `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Setup unavailable</title><h1>Secure setup unavailable</h1><p>Initial setup is disabled because an account already exists or the one-time setup token is not configured. No account was changed.</p>`);
 }));
 
 app.post("/api/auth/bootstrap-admin", asyncRoute(async (req, res) => {
