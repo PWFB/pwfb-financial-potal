@@ -528,6 +528,11 @@ async function start() {
     CREATE TABLE IF NOT EXISTS pwfb_portal_transport_salaries (
       region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
       staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}
+      monthly_salary NUMERIC(14,2) NOT NULL CHECK (monthly_salary >= 0),
+      updated_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (region, staff_ref)
+    );
   `);
   const configuredAdminPhone = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
   if (configuredAdminPhone) {
