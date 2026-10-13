@@ -13,6 +13,7 @@ const port = Number(process.env.PORT || 10000);
 const databaseUrl = process.env.DATABASE_URL;
 const sessionSecret = process.env.SESSION_SECRET;
 const otpPepper = process.env.OTP_PEPPER;
+const neonAuthJwksUrl = process.env.NEON_AUTH_JWKS_URL || "https://ep-dawn-moon-b54pcnyv.neonauth.c-7.us-east-2.aws.neon.tech/pwfb_salary_transport/auth/.well-known/jwks.json";
 const sessionCookie = "pwfb_portal_session";
 const sessionHours = 12;
 const maxOtpAttempts = 5;
@@ -21,8 +22,6 @@ if (!databaseUrl) throw new Error("DATABASE_URL is required");
 if (!sessionSecret || sessionSecret.length < 32) throw new Error("SESSION_SECRET must contain at least 32 characters");
 if (!otpPepper || otpPepper.length < 32) throw new Error("OTP_PEPPER must contain at least 32 characters and be different from SESSION_SECRET");
 if (otpPepper === sessionSecret) throw new Error("OTP_PEPPER and SESSION_SECRET must be different secrets");
-if (!process.env.TERMII_API_KEY) throw new Error("TERMII_API_KEY is required; refusing to start authentication without SMS delivery");
-if (!process.env.TERMII_SENDER_ID) throw new Error("TERMII_SENDER_ID is required; configure an approved sender ID");
 
 const pool = new Pool({
   connectionString: databaseUrl,
@@ -203,7 +202,7 @@ function asyncRoute(handler) {
 
 app.get("/api/health", asyncRoute(async (_req, res) => {
   await pool.query("SELECT 1");
-  res.json({ ok: true, service: "pwfb-financial-portal-api" });
+  res.json({ ok: true, service: "pwfb-financial-portal-api", neonAuthJwksConfigured: Boolean(neonAuthJwksUrl), smsConfigured: Boolean(process.env.TERMII_API_KEY && process.env.TERMII_SENDER_ID) });
 }));
 
 app.post("/api/auth/register/request", asyncRoute(async (req, res) => {
