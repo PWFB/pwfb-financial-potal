@@ -179,3 +179,37 @@
 .salary-branch-accordion .table-wrap{border-top:1px solid #f1f5f9}
 .salary-branch-accordion table{min-width:1250px}
 @media(max-width:600px){.salary-branch-accordion>summary{align-items:flex-start;gap:8px;padding:13px 12px}.salary-branch-name{flex:1 1 100%;min-width:0;font-size:13px}.salary-branch-count{order:2}.salary-branch-total{flex:1 1 40%;font-size:10px}.salary-branch-total b{font-size:11px}.salary-branch-toggle{margin-left:auto}}
+
+/* Legacy PWFB monthly payroll visual language: green, white and orange branch cards */
+.salary-branch-list{border:0!important;background:transparent!important;display:flex;flex-direction:column;gap:10px}
+.salary-branch-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 2px;color:#64748b;font-size:12px;font-weight:700}
+.salary-branch-toolbar>div{display:flex;gap:7px;flex-wrap:wrap}
+.salary-branch-toolbar button{border:1px solid #d1d5db;background:#f8fafc;color:#374151;border-radius:8px;padding:7px 11px;font-size:11px;font-weight:800;cursor:pointer;transition:all .15s ease}
+.salary-branch-toolbar button:first-child{background:#064e3b;color:#fff;border-color:#064e3b}
+.salary-branch-toolbar button:hover{border-color:#f58220;box-shadow:0 2px 8px #064e3b12}
+.salary-branch-accordion{border:1px solid #dbe5e1!important;border-radius:12px!important;overflow:hidden;background:#fff;box-shadow:0 3px 12px #064e3b0a}
+.salary-branch-accordion>summary{list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px;cursor:pointer;background:linear-gradient(100deg,#f8faf9 0%,#f3f8f6 100%);border-bottom:1px solid transparent;transition:background .16s ease}
+.salary-branch-accordion>summary::-webkit-details-marker{display:none}
+.salary-branch-accordion>summary:before{content:"›";display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px;border-radius:7px;background:#e5e7eb;color:#6b7280;font-size:22px;line-height:1;transition:transform .16s ease}
+.salary-branch-accordion>summary:hover{background:#fff7ed}
+.salary-branch-accordion[open]>summary{background:linear-gradient(100deg,#064e3b 0%,#087b66 72%,#075b61 100%);border-bottom-color:#f58220;color:#fff}
+.salary-branch-accordion[open]>summary:before{content:"⌄";background:#f58220;color:#fff;transform:none;font-size:18px}
+.salary-branch-accordion>summary:focus-visible{outline:3px solid #f58220;outline-offset:-3px}
+.salary-branch-name{font-weight:850;color:#111827;min-width:135px;flex:1;text-transform:uppercase;letter-spacing:.035em;font-size:12px}
+.salary-branch-accordion[open] .salary-branch-name{color:#fff}
+.salary-branch-count{font-size:10px;font-weight:800;color:#064e3b;background:#e4f3eb;border-radius:999px;padding:5px 9px;white-space:nowrap}
+.salary-branch-accordion[open] .salary-branch-count{background:#ffffff20;color:#fff;border:1px solid #ffffff38}
+.salary-branch-total{display:flex;gap:5px;align-items:center;color:#64748b;font-size:11px;white-space:nowrap}
+.salary-branch-total b{color:#111827;font-size:12px}
+.salary-branch-accordion[open] .salary-branch-total{color:#d1fae5}
+.salary-branch-accordion[open] .salary-branch-total b{color:#fff}
+.salary-branch-toggle{margin-left:auto;color:#f58220;font-size:11px;font-weight:850;white-space:nowrap}
+.salary-branch-accordion[open] .salary-branch-toggle{font-size:0;color:#fff}
+.salary-branch-accordion[open] .salary-branch-toggle:after{content:"Collapse branch";font-size:11px}
+.salary-branch-accordion .table-wrap{border-top:0;box-shadow:none;border-radius:0}
+.salary-branch-accordion table{min-width:1250px;font-size:11px}
+.salary-branch-accordion table thead tr{background:#f1f5f9;color:#475569}
+.salary-branch-accordion table tfoot{background:linear-gradient(100deg,#064e3b 0%,#087b66 72%,#075b61 100%);color:#fff}
+.salary-branch-accordion table tfoot td{border-top:3px solid #f58220;color:#fff;font-weight:800;white-space:nowrap}
+.salary-branch-accordion table tfoot td:first-child{color:#fff}
+@media(max-width:600px){.salary-branch-accordion>summary{align-items:flex-start;gap:7px;padding:12px}.salary-branch-name{flex:1 1 calc(100% - 34px);min-width:0;font-size:11px}.salary-branch-count{margin-left:29px}.salary-branch-total{flex:1 1 38%;font-size:10px}.salary-branch-total b{font-size:11px}.salary-branch-toggle{margin-left:auto}.salary-branch-toolbar{align-items:flex-start}.salary-branch-toolbar>div{width:100%}.salary-branch-toolbar button{flex:1}}
