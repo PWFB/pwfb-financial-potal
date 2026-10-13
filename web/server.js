@@ -205,6 +205,67 @@ app.get("/api/health", asyncRoute(async (_req, res) => {
   res.json({ ok: true, service: "pwfb-financial-portal-api", neonAuthJwksConfigured: Boolean(neonAuthJwksUrl), smsConfigured: Boolean(process.env.TERMII_API_KEY && process.env.TERMII_SENDER_ID) });
 }));
 
+
+app.get("/admin-setup", asyncRoute(async (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  const count = await pool.query("SELECT COUNT(*)::int AS total FROM pwfb_portal_users");
+  const available = count.rows[0].total === 0 && Boolean(process.env.PORTAL_BOOTSTRAP_TOKEN && process.env.PORTAL_BOOTSTRAP_TOKEN.length >= 32);
+  res.status(available ? 200 : 404).type("html").send(available ? \`<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PWFB Financial Potal — Secure Admin Setup</title>
+<style>body{font:16px system-ui;background:#f5f7fb;color:#182230;margin:0;display:grid;min-height:100vh;place-items:center}.card{background:white;width:min(92vw,430px);box-sizing:border-box;padding:28px;border-radius:18px;box-shadow:0 12px 40px #18223018}h1{font-size:24px;margin:0 0 8px}p{line-height:1.5;color:#586174}label{display:block;font-weight:600;margin:16px 0 6px}input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd2dc;border-radius:9px;font:inherit}button{width:100%;margin-top:20px;background:#ed7625;color:#fff;border:0;border-radius:9px;padding:13px;font-weight:700;font-size:16px}#status{white-space:pre-wrap}</style>
+<div class="card"><h1>First administrator setup</h1><p>One-time setup for the existing PWFB Financial Potal deployment. This page works only while no portal accounts exist. Choose a new strong password; do not reuse a password that may have been saved in a different database.</p>
+<form id="setup"><label for="token">One-time setup token</label><input id="token" type="password" autocomplete="off" required minlength="32"><label for="name">Administrator full name</label><input id="name" required minlength="2" maxlength="100" autocomplete="name"><label for="password">New password (12+ characters)</label><input id="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password"><button id="submit" type="submit">Create administrator and sign in</button><p id="status" role="status"></p></form></div>
+<script>
+const form=document.querySelector("#setup"),status=document.querySelector("#status"),button=document.querySelector("#submit");
+form.addEventListener("submit",async event=>{event.preventDefault();button.disabled=true;status.textContent="Setting up securely…";
+try{const response=await fetch("/api/auth/bootstrap-admin",{method:"POST",headers:{"content-type":"application/json"},credentials:"same-origin",body:JSON.stringify({token:document.querySelector("#token").value,name:document.querySelector("#name").value,password:document.querySelector("#password").value})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||"Setup failed.");status.textContent="Administrator created. Opening the Potal…";window.location.replace("/");}
+catch(error){status.textContent=error.message;button.disabled=false;}});
+</script></html>\` : \`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Setup unavailable</title><h1>Secure setup unavailable</h1><p>Initial setup is disabled because an account already exists or the one-time setup token is not configured. No account was changed.</p>\`);
+}));
+
+app.post("/api/auth/bootstrap-admin", asyncRoute(async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const expectedToken = String(process.env.PORTAL_BOOTSTRAP_TOKEN || "");
+  const suppliedToken = String(req.body?.token || "");
+  const phone = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
+  const name = String(req.body?.name || "").trim().replace(/\s+/g, " ");
+  const password = String(req.body?.password || "");
+  if (expectedToken.length < 32 || suppliedToken.length !== expectedToken.length ||
+      !crypto.timingSafeEqual(Buffer.from(suppliedToken), Buffer.from(expectedToken))) {
+    return res.status(403).json({ error: "Setup token is invalid or not configured." });
+  }
+  if (!phone) return res.status(503).json({ error: "The configured administrator phone number is missing." });
+  if (name.length < 2 || name.length > 100 || password.length < 12 || password.length > 128) {
+    return res.status(400).json({ error: "Enter your full name and a new password between 12 and 128 characters." });
+  }
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(741920261013)");
+    const count = await client.query("SELECT COUNT(*)::int AS total FROM pwfb_portal_users");
+    if (count.rows[0].total !== 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({ error: "Initial setup has already been used. No account was changed." });
+    }
+    const inserted = await client.query(
+      "INSERT INTO pwfb_portal_users (phone_e164,full_name,pin_hash,role,phone_verified_at) VALUES ($1,$2,$3,'admin',NOW()) RETURNING id,full_name,phone_e164,role",
+      [phone, name, hashPin(password)]
+    );
+    const user = inserted.rows[0];
+    await issueSession(client, req, res, user);
+    await client.query("COMMIT");
+    console.info("Initial portal administrator created successfully.");
+    return res.status(201).json({ ok: true, user: safeUser(user) });
+  } catch (error) {
+    try { await client.query("ROLLBACK"); } catch {}
+    if (error.code === "23505") return res.status(409).json({ error: "An account already exists. Initial setup is no longer available." });
+    throw error;
+  } finally {
+    client.release();
+  }
+}));
+
 app.post("/api/auth/register/request", asyncRoute(async (req, res) => {
   const phone = normalizePhone(req.body?.phone);
   if (!phone) return res.status(400).json({ error: "Enter a valid Nigerian phone number." });
