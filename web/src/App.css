@@ -213,3 +213,37 @@
 .salary-branch-accordion table tfoot td{border-top:3px solid #f58220;color:#fff;font-weight:800;white-space:nowrap}
 .salary-branch-accordion table tfoot td:first-child{color:#fff}
 @media(max-width:600px){.salary-branch-accordion>summary{align-items:flex-start;gap:7px;padding:12px}.salary-branch-name{flex:1 1 calc(100% - 34px);min-width:0;font-size:11px}.salary-branch-count{margin-left:29px}.salary-branch-total{flex:1 1 38%;font-size:10px}.salary-branch-total b{font-size:11px}.salary-branch-toggle{margin-left:auto}.salary-branch-toolbar{align-items:flex-start}.salary-branch-toolbar>div{width:100%}.salary-branch-toolbar button{flex:1}}
+
+/* Monthly Payroll: legacy PWFB foldable branch cards */
+.payroll-branch-section{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.payroll-branch-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:4px 2px;color:#64748b;font-size:12px;font-weight:700}
+.payroll-branch-toolbar>div{display:flex;gap:7px;flex-wrap:wrap}
+.payroll-branch-toolbar button{border:1px solid #d1d5db;background:#f8fafc;color:#374151;border-radius:8px;padding:7px 11px;font-size:11px;font-weight:800;cursor:pointer;transition:all .15s ease}
+.payroll-branch-toolbar button:first-child{background:#064e3b;color:#fff;border-color:#064e3b}
+.payroll-branch-toolbar button:hover{border-color:#f58220;box-shadow:0 2px 8px #064e3b12}
+.payroll-branch-list{display:flex;flex-direction:column;gap:10px}
+.payroll-branch-accordion{border:1px solid #dbe5e1;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 3px 12px #064e3b0a}
+.payroll-branch-accordion>summary{list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px;cursor:pointer;background:linear-gradient(100deg,#f8faf9 0%,#f3f8f6 100%);border-bottom:1px solid transparent;transition:background .16s ease}
+.payroll-branch-accordion>summary::-webkit-details-marker{display:none}
+.payroll-branch-accordion>summary:before{content:"›";display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px;border-radius:7px;background:#e5e7eb;color:#6b7280;font-size:22px;line-height:1;transition:transform .16s ease}
+.payroll-branch-accordion>summary:hover{background:#fff7ed}
+.payroll-branch-accordion[open]>summary{background:linear-gradient(100deg,#064e3b 0%,#087b66 72%,#075b61 100%);border-bottom-color:#f58220;color:#fff}
+.payroll-branch-accordion[open]>summary:before{content:"⌄";background:#f58220;color:#fff;font-size:18px}
+.payroll-branch-accordion>summary:focus-visible{outline:3px solid #f58220;outline-offset:-3px}
+.payroll-branch-name{font-weight:850;color:#111827;min-width:115px;flex:1;text-transform:uppercase;letter-spacing:.035em;font-size:12px}
+.payroll-branch-accordion[open] .payroll-branch-name{color:#fff}
+.payroll-branch-region{font-size:10px;font-weight:800;color:#075b61;background:#e1f0f0;border-radius:6px;padding:5px 8px;white-space:nowrap}
+.payroll-branch-accordion[open] .payroll-branch-region{background:#ffffff20;color:#fff;border:1px solid #ffffff38}
+.payroll-branch-count{font-size:10px;font-weight:800;color:#064e3b;background:#e4f3eb;border-radius:999px;padding:5px 9px;white-space:nowrap}
+.payroll-branch-accordion[open] .payroll-branch-count{background:#ffffff20;color:#fff;border:1px solid #ffffff38}
+.payroll-branch-metric{display:flex;gap:5px;align-items:center;color:#64748b;font-size:11px;white-space:nowrap}
+.payroll-branch-metric b{color:#111827;font-size:12px}
+.payroll-branch-accordion[open] .payroll-branch-metric{color:#d1fae5}
+.payroll-branch-accordion[open] .payroll-branch-metric b{color:#fff}
+.payroll-branch-net{margin-left:auto;color:#fff;background:#f58220;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:850;white-space:nowrap}
+.payroll-branch-table-wrap{border:0;border-radius:0;box-shadow:none}
+.payroll-branch-table-wrap table{min-width:1150px;font-size:11px}
+.payroll-branch-table-wrap table thead tr{background:#f1f5f9;color:#475569}
+.payroll-branch-table-wrap table tfoot{background:linear-gradient(100deg,#064e3b 0%,#087b66 72%,#075b61 100%);color:#fff}
+.payroll-branch-table-wrap table tfoot td{border-top:3px solid #f58220;color:#fff;font-weight:800;white-space:nowrap}
+@media(max-width:600px){.payroll-branch-accordion>summary{align-items:flex-start;gap:7px;padding:12px}.payroll-branch-name{flex:1 1 calc(100% - 35px);min-width:0;font-size:11px}.payroll-branch-region{margin-left:29px}.payroll-branch-metric{flex:1 1 40%;font-size:10px}.payroll-branch-metric b{font-size:11px}.payroll-branch-net{margin-left:auto}.payroll-branch-toolbar{align-items:flex-start}.payroll-branch-toolbar>div{width:100%}.payroll-branch-toolbar button{flex:1}}
