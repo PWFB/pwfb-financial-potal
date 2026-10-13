@@ -285,7 +285,7 @@ app.post("/api/auth/register/verify", asyncRoute(async (req, res) => {
   const password = String(req.body?.password ?? req.body?.pin ?? "");
   const code = String(req.body?.code || "").trim();
   if (!phone || name.length < 2 || name.length > 100 || !validCredential(password) || !/^[0-9]{6}$/.test(code)) {
-    return res.status(400).json({ error: "Enter your name, valid phone number, password (8+ characters) or legacy 4–8 digit PIN, and 6-digit SMS code." });
+    return res.status(400).json({ error: "Enter your name, phone number, an 8+ character password or 6-digit PIN (existing 4–8 digit PINs are still supported), and the 6-digit SMS code." });
   }
   const adminPhoneForRegistration = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
   if (!adminPhoneForRegistration || (phone !== adminPhoneForRegistration && process.env.PORTAL_ALLOW_REGISTRATION !== "true")) {
@@ -318,7 +318,7 @@ app.post("/api/auth/register/verify", asyncRoute(async (req, res) => {
 app.post("/api/auth/login/request", asyncRoute(async (req, res) => {
   const phone = normalizePhone(req.body?.phone);
   const password = String(req.body?.password ?? req.body?.pin ?? "");
-  if (!phone || !validCredential(password)) return res.status(400).json({ error: "Enter your phone number and a valid password (8+ characters) or legacy 4–8 digit PIN." });
+  if (!phone || !validCredential(password)) return res.status(400).json({ error: "Enter your phone number and an 8+ character password or 6-digit PIN (existing 4–8 digit PINs are still supported)." });
   const result = await pool.query("SELECT id,full_name,phone_e164,pin_hash,role,disabled_at FROM pwfb_portal_users WHERE phone_e164=$1", [phone]);
   const user = result.rows[0];
   if (!user || user.disabled_at || !verifyPin(password, user.pin_hash)) {
@@ -517,7 +517,7 @@ app.post("/api/admin/staff", asyncRoute(async (req, res) => {
   const role = req.body?.role === "viewer" ? "viewer" : "staff";
   if (name.length < 2 || name.length > 100) return res.status(400).json({ error: "Enter a staff name between 2 and 100 characters." });
   if (!phone) return res.status(400).json({ error: "Enter a valid Nigerian phone number." });
-  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: "Use a temporary password between 8 and 128 characters." });
+  if (!validCredential(password)) return res.status(400).json({ error: "Use a 6-digit PIN or an 8–128 character password (existing 4–8 digit PINs are still supported)." });
   try {
     const result = await pool.query(
       "INSERT INTO pwfb_portal_users (phone_e164,full_name,pin_hash,role,phone_verified_at) VALUES ($1,$2,$3,$4,NOW()) RETURNING id,full_name,phone_e164,role,created_at",
