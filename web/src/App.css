@@ -335,3 +335,19 @@ body[data-theme="dark"] .salary-cumulative-total b{color:#f9fafb}
 .portal-summary-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;padding:16px 4%;background:#f8faf9;border-bottom:1px solid #e2e8f0}.portal-summary-strip>div{min-width:0;padding:13px;border:1px solid #dce9df;border-radius:11px;background:#fff;display:flex;flex-direction:column;gap:6px}.portal-summary-strip span{font-size:10px;letter-spacing:.4px;font-weight:850;color:#64748b;text-transform:uppercase}.portal-summary-strip strong{font-size:clamp(14px,1.45vw,20px);color:#005c37;overflow-wrap:anywhere}.portal-summary-strip small{font-size:10px;line-height:1.35;color:#64748b}.portal-summary-strip .portal-summary-title{background:#005c37;border-color:#005c37;justify-content:center}.portal-summary-strip .portal-summary-title span,.portal-summary-strip .portal-summary-title strong{color:#fff}.portal-summary-strip .portal-summary-title strong{font-size:15px}
 @media(max-width:1050px){.portal-summary-strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:520px){.portal-summary-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:10px}.portal-summary-strip>div{padding:10px}.portal-summary-strip strong{font-size:14px}.portal-summary-strip small{font-size:9px}}
+
+
+/* August 2026 cooperative foldable schedule */
+.coop-member-list{display:grid;gap:10px;margin:12px 0 20px}
+.coop-member-card{background:var(--panel,#fff);border:1px solid var(--border,#dbe2ea);border-radius:10px;overflow:hidden}
+.coop-member-card>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;cursor:pointer;font-weight:750;list-style:none}
+.coop-member-card>summary::-webkit-details-marker{display:none}
+.coop-member-card>summary:after{content:"＋";font-size:18px;margin-left:8px}
+.coop-member-card[open]>summary:after{content:"−"}
+.coop-member-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;padding:14px;border-top:1px solid var(--border,#dbe2ea)}
+.coop-member-metric{background:#f5f8fb;border-left:4px solid #3498db;border-radius:5px;padding:10px 12px;min-width:0}
+.coop-member-metric span{display:block;color:#687587;font-size:10px;font-weight:700;letter-spacing:.35px;text-transform:uppercase}
+.coop-member-metric strong{display:block;margin-top:5px;color:#26384a;font-size:14px;overflow-wrap:anywhere}
+.coop-member-metric.loan{background:#fdf3f2;border-left-color:#e74c3c}
+.coop-member-metric.net{background:#f2f9f4;border-left-color:#27ae60}
+@media(max-width:600px){.coop-member-card>summary{align-items:flex-start;font-size:12px;padding:12px}.coop-member-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px;gap:8px}.coop-member-metric{padding:9px}.coop-member-metric strong{font-size:12px}}
