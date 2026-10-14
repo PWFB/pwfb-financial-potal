@@ -576,8 +576,8 @@ app.post("/api/payroll-additions", asyncRoute(async (req, res) => {
   if (actor.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can add payroll staff." });
   const month = String(req.body?.month || "").trim();
   const region = String(req.body?.region || "").trim();
-  const branch = String(req.body?.branch || "").trim().replace(/\\s+/g, " ").toUpperCase();
-  const name = String(req.body?.name || "").trim().replace(/\\s+/g, " ").toUpperCase();
+  const branch = String(req.body?.branch || "").trim().replace(/\s+/g, " ").toUpperCase();
+  const name = String(req.body?.name || "").trim().replace(/\s+/g, " ").toUpperCase();
   const gra = String(req.body?.gra || "").trim();
   if (!["August 2026", "September 2026"].includes(month)) return res.status(400).json({ error: "Choose August 2026 or September 2026." });
   if (!["DM 1", "DM 2"].includes(region)) return res.status(400).json({ error: "Choose DM 1 or DM 2." });
