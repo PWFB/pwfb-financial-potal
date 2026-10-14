@@ -1,4 +1,4 @@
-import { createAuthClient } from "@neondatabase/auth";
+import { createAuthClient, BetterAuthVanillaAdapter } from "@neondatabase/auth";
 
 // The Neon Auth SDK appends endpoints such as /sign-in/email to this URL.
 // Keep the project's /auth path in the base URL so requests do not hit the
@@ -11,4 +11,15 @@ const authUrl = normalizedAuthUrl.endsWith("/auth")
   ? normalizedAuthUrl
   : `${normalizedAuthUrl}/auth`;
 
-export const authClient = createAuthClient(authUrl);
+export const authClient = createAuthClient(authUrl, {
+  adapter: BetterAuthVanillaAdapter({
+    fetchOptions: {
+      onRequest(request) {
+        // Temporary, non-secret diagnostic so a 404 identifies the exact route.
+        if (typeof window !== "undefined") {
+          window.__PWFB_LAST_AUTH_REQUEST_URL = request?.url || String(request);
+        }
+      },
+    },
+  }),
+});
