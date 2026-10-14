@@ -416,7 +416,7 @@ app.post("/api/auth/neon-session", asyncRoute(async (req, res) => {
   if (!token || !portalAdminEmail) return res.status(401).json({ error: "Neon email login is not configured for this portal." });
   let claims;
   try {
-    const verified = await jwtVerify(token, neonJwks, { issuer: neonAuthBaseUrl });
+    const verified = await jwtVerify(token, neonJwks, { issuer: new URL(neonAuthBaseUrl).origin });
     claims = verified.payload;
   } catch {
     return res.status(401).json({ error: "Your Neon session could not be verified. Please sign in again." });
