@@ -233,7 +233,16 @@ const rowsForMonth=month=>{
  let rows=julyRows;
  for(const step of months.slice(1,months.indexOf(month)+1)){
    rows=rows.map(prev=>{
-     const entry=monthly[step]?.[prev.sn]||{};
+     // Reuse July's savings and loan collection amounts as each month's defaults.
+     // A month-specific entry overrides its defaults when the user changes an amount.
+     const source=julyRows.find(member=>member.sn===prev.sn)||prev;
+     const entry=monthly[step]?.[prev.sn]||{
+       savingCollection:source.savingCollection,
+       savingWithdrawal:0,
+       loanCollection:source.loanCollection,
+       loanPaid:source.loanPaid,
+       newLoan:0
+     };
      const openingSaving=Number(prev.savingClosing||0);
      const savingCollection=parseAmount(entry.savingCollection);
      const savingWithdrawal=parseAmount(entry.savingWithdrawal);
