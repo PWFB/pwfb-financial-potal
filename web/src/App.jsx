@@ -1,6 +1,5 @@
 import {useEffect,useMemo,useState} from "react";
 import "./App.css";
-import "./App.css";
 import "./auth.css";
 import "./credential.css";
 const payroll=[
@@ -92,7 +91,7 @@ const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
 const ded=r=>r.coopS+r.coopL+r.dev+r.tax+r.offline+r.others+r.advance;
 function App(){
 const [themeMode,setThemeMode]=useState(()=>{try{return localStorage.getItem("pwfb-theme-mode")||"system"}catch{return "system"}});
-const [auth,setAuth]=useState(null),[checkingAuth,setCheckingAuth]=useState(false);
+const [auth,setAuth]=useState(null),[checkingAuth,setCheckingAuth]=useState(true);
 // Keep all unauthenticated screens in a stable light appearance so a saved dark/system theme cannot obscure sign-in.
 useEffect(()=>{const saved=["dark","light","system"].includes(themeMode)?themeMode:"system";const mode=auth?saved:"light";document.body.setAttribute("data-theme",mode);try{localStorage.setItem("pwfb-theme-mode",saved)}catch{}},[themeMode,auth]);
 const [authPhone,setAuthPhone]=useState(""),[authPassword,setAuthPassword]=useState(""),[authCode,setAuthCode]=useState(""),[authStage,setAuthStage]=useState("login"),[authError,setAuthError]=useState(""),[authNotice,setAuthNotice]=useState(""),[authBusy,setAuthBusy]=useState(false);
