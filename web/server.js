@@ -66,7 +66,7 @@ function verifyPin(pin, stored) {
   const expected = Buffer.from(expectedHex, "hex");
   return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
 }
-function validPin(pin) { return /^\d{4,8}$/.test(String(pin || "")); }
+function validPin(pin) { return /^\d{6}$/.test(String(pin || "")); }
 function validCredential(value) { const secret = String(value || ""); return validPin(secret) || (secret.length >= 8 && secret.length <= 128); }
 function setSessionCookie(res, token) {
   res.cookie(sessionCookie, token, {
@@ -289,7 +289,7 @@ app.post("/api/auth/register/verify", asyncRoute(async (req, res) => {
   const password = String(req.body?.password ?? req.body?.pin ?? "");
   const code = String(req.body?.code || "").trim();
   if (!phone || name.length < 2 || name.length > 100 || !validCredential(password) || !/^[0-9]{6}$/.test(code)) {
-    return res.status(400).json({ error: "Enter your name, phone number, an 8+ character password or 6-digit PIN (existing 4–8 digit PINs are still supported), and the 6-digit SMS code." });
+    return res.status(400).json({ error: "Enter your name, phone number, an 8+ character password or 6-digit PIN, and the 6-digit SMS code." });
   }
   const adminPhoneForRegistration = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
   if (!adminPhoneForRegistration || (phone !== adminPhoneForRegistration && process.env.PORTAL_ALLOW_REGISTRATION !== "true")) {
@@ -322,7 +322,7 @@ app.post("/api/auth/register/verify", asyncRoute(async (req, res) => {
 app.post("/api/auth/login/request", asyncRoute(async (req, res) => {
   const phone = normalizePhone(req.body?.phone);
   const password = String(req.body?.password ?? req.body?.pin ?? "");
-  if (!phone || !validCredential(password)) return res.status(400).json({ error: "Enter your phone number and an 8+ character password or 6-digit PIN (existing 4–8 digit PINs are still supported)." });
+  if (!phone || !validCredential(password)) return res.status(400).json({ error: "Enter your phone number and an 8+ character password or 6-digit PIN." });
   const result = await pool.query("SELECT id,full_name,phone_e164,pin_hash,role,disabled_at FROM pwfb_portal_users WHERE phone_e164=$1", [phone]);
   const user = result.rows[0];
   if (!user || user.disabled_at || !verifyPin(password, user.pin_hash)) {
@@ -635,7 +635,7 @@ app.post("/api/admin/staff", asyncRoute(async (req, res) => {
   const role = req.body?.role === "viewer" ? "viewer" : "staff";
   if (name.length < 2 || name.length > 100) return res.status(400).json({ error: "Enter a staff name between 2 and 100 characters." });
   if (!phone) return res.status(400).json({ error: "Enter a valid Nigerian phone number." });
-  if (!validCredential(password)) return res.status(400).json({ error: "Use a 6-digit PIN or an 8–128 character password (existing 4–8 digit PINs are still supported)." });
+  if (!validCredential(password)) return res.status(400).json({ error: "Use exactly a 6-digit PIN or an 8–128 character password." });
   try {
     const result = await pool.query(
       "INSERT INTO pwfb_portal_users (phone_e164,full_name,pin_hash,role,phone_verified_at) VALUES ($1,$2,$3,$4,NOW()) RETURNING id,full_name,phone_e164,role,created_at",
