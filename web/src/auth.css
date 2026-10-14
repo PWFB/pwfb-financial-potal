@@ -99,3 +99,5 @@ body[data-theme="system"] .landing-feature-grid article {
   .auth-card,
   .landing-access-card { margin-bottom: 8px; }
 }
+
+.auth-credential-mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 -4px}.auth-credential-mode button{border:1px solid #d7e1d9;background:#fbfdfb;color:#526257;border-radius:9px;padding:10px;font-size:12px;font-weight:800;cursor:pointer}.auth-credential-mode button.active{background:#e7f5ec;border-color:#008751;color:#005c37}
