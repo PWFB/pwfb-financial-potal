@@ -1,25 +1,29 @@
-import { createAuthClient, BetterAuthVanillaAdapter } from "@neondatabase/auth";
+import { createAuthClient } from "@neondatabase/auth";
 
-// The Neon Auth SDK appends endpoints such as /sign-in/email to this URL.
-// Keep the project's /auth path in the base URL so requests do not hit the
-// nonexistent /pwfb_financial_portal/sign-in/email route.
+// Record the last requested URL for safe HTTP 404 diagnosis. Do not record
+// request bodies, headers, credentials, or passwords.
+if (typeof window !== "undefined" && typeof window.fetch === "function" && !window.__PWFB_FETCH_DIAGNOSTICS__) {
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = (input, init) => {
+    try {
+      window.__PWFB_LAST_AUTH_REQUEST_URL =
+        typeof Request !== "undefined" && input instanceof Request
+          ? input.url
+          : String(input);
+    } catch {
+      window.__PWFB_LAST_AUTH_REQUEST_URL = "Request URL unavailable";
+    }
+    return nativeFetch(input, init);
+  };
+  window.__PWFB_FETCH_DIAGNOSTICS__ = true;
+}
+
+// Neon Auth's configured base URL includes the project's /auth prefix.
 const configuredAuthUrl = import.meta.env.VITE_NEON_AUTH_URL
   || "https://ep-winter-resonance-b48nus4i.neonauth.c-6.us-east-2.aws.neon.tech/pwfb_financial_portal/auth";
-
 const normalizedAuthUrl = configuredAuthUrl.replace(/\/$/, "");
 const authUrl = normalizedAuthUrl.endsWith("/auth")
   ? normalizedAuthUrl
   : `${normalizedAuthUrl}/auth`;
 
-export const authClient = createAuthClient(authUrl, {
-  adapter: BetterAuthVanillaAdapter({
-    fetchOptions: {
-      onRequest(request) {
-        // Temporary, non-secret diagnostic so a 404 identifies the exact route.
-        if (typeof window !== "undefined") {
-          window.__PWFB_LAST_AUTH_REQUEST_URL = request?.url || String(request);
-        }
-      },
-    },
-  }),
-});
+export const authClient = createAuthClient(authUrl);
