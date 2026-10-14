@@ -541,6 +541,76 @@ app.post("/api/transport-salaries/bulk", asyncRoute(async (req, res) => {
   }
 }));
 
+function payrollAdditionPayload(row) {
+  return {
+    id: String(row.id), month: row.month, region: row.region, branch: row.branch,
+    name: row.name, gra: row.gra, gross: Number(row.gross), bonus: Number(row.bonus),
+    coopS: Number(row.coopS), coopL: Number(row.coopL), dev: Number(row.dev),
+    tax: Number(row.tax), offline: Number(row.offline), others: Number(row.others),
+    advance: Number(row.advance), createdAt: row.createdAt
+  };
+}
+
+app.get("/api/payroll-additions", asyncRoute(async (req, res) => {
+  const actor = await authenticatedUser(req);
+  if (!actor) return res.status(401).json({ error: "Please sign in to view payroll additions." });
+  const month = String(req.query.month || "").trim();
+  if (!["August 2026", "September 2026"].includes(month)) {
+    return res.status(400).json({ error: "Choose August 2026 or September 2026." });
+  }
+  const result = await pool.query(
+    `SELECT id, month, region, branch, name, gra, gross::text AS gross, bonus::text AS bonus,
+      coop_s::text AS "coopS", coop_l::text AS "coopL", dev::text AS dev, tax::text AS tax,
+      offline::text AS offline, others::text AS others, advance::text AS advance,
+      created_at AS "createdAt"
+     FROM pwfb_portal_payroll_additions WHERE month=$1 ORDER BY region, branch, id`,
+    [month]
+  );
+  res.set("Cache-Control", "no-store");
+  res.json({ staff: result.rows.map(payrollAdditionPayload) });
+}));
+
+app.post("/api/payroll-additions", asyncRoute(async (req, res) => {
+  const actor = await authenticatedUser(req);
+  if (!actor) return res.status(401).json({ error: "Please sign in again before adding payroll staff." });
+  if (actor.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can add payroll staff." });
+  const month = String(req.body?.month || "").trim();
+  const region = String(req.body?.region || "").trim();
+  const branch = String(req.body?.branch || "").trim().replace(/\\s+/g, " ").toUpperCase();
+  const name = String(req.body?.name || "").trim().replace(/\\s+/g, " ").toUpperCase();
+  const gra = String(req.body?.gra || "").trim();
+  if (!["August 2026", "September 2026"].includes(month)) return res.status(400).json({ error: "Choose August 2026 or September 2026." });
+  if (!["DM 1", "DM 2"].includes(region)) return res.status(400).json({ error: "Choose DM 1 or DM 2." });
+  if (branch.length < 2 || branch.length > 100) return res.status(400).json({ error: "Enter a branch name between 2 and 100 characters." });
+  if (name.length < 2 || name.length > 100) return res.status(400).json({ error: "Enter a staff name between 2 and 100 characters." });
+  if (!gra || gra.length > 50) return res.status(400).json({ error: "Enter a GRA/reference value up to 50 characters." });
+  const amountKeys = ["gross", "bonus", "coopS", "coopL", "offline", "others", "advance"];
+  const amounts = {};
+  for (const key of amountKeys) {
+    const raw = req.body?.[key];
+    const value = raw === "" || raw === null || raw === undefined ? NaN : Number(raw);
+    if (!Number.isFinite(value) || value < 0 || value > 999999999999.99) {
+      return res.status(400).json({ error: "Enter valid non-negative payroll amounts for all amount fields." });
+    }
+    amounts[key] = Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+  const round5 = value => Math.round(value / 5) * 5;
+  const dev = round5(amounts.gross * 0.025);
+  const tax = round5(amounts.gross * 0.03);
+  const result = await pool.query(
+    `INSERT INTO pwfb_portal_payroll_additions
+      (month, region, branch, name, gra, gross, bonus, coop_s, coop_l, dev, tax, offline, others, advance, created_by)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+     RETURNING id, month, region, branch, name, gra, gross::text AS gross, bonus::text AS bonus,
+       coop_s::text AS "coopS", coop_l::text AS "coopL", dev::text AS dev, tax::text AS tax,
+       offline::text AS offline, others::text AS others, advance::text AS advance,
+       created_at AS "createdAt"`,
+    [month, region, branch, name, gra, amounts.gross, amounts.bonus, amounts.coopS, amounts.coopL, dev, tax, amounts.offline, amounts.others, amounts.advance, actor.id]
+  );
+  res.set("Cache-Control", "no-store");
+  res.status(201).json({ ok: true, staff: payrollAdditionPayload(result.rows[0]) });
+}));
+
 app.get("/api/admin/staff", asyncRoute(async (req, res) => {
   const actor = await authenticatedUser(req);
   if (!actor) return res.status(401).json({ error: "Please sign in again." });
@@ -643,6 +713,27 @@ async function start() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       PRIMARY KEY (region, staff_ref)
     );
+    CREATE TABLE IF NOT EXISTS pwfb_portal_payroll_additions (
+      id BIGSERIAL PRIMARY KEY,
+      month TEXT NOT NULL CHECK (month IN ('August 2026','September 2026')),
+      region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
+      branch TEXT NOT NULL,
+      name TEXT NOT NULL,
+      gra TEXT NOT NULL,
+      gross NUMERIC(14,2) NOT NULL CHECK (gross >= 0),
+      bonus NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (bonus >= 0),
+      coop_s NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (coop_s >= 0),
+      coop_l NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (coop_l >= 0),
+      dev NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (dev >= 0),
+      tax NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (tax >= 0),
+      offline NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (offline >= 0),
+      others NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (others >= 0),
+      advance NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (advance >= 0),
+      created_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS pwfb_portal_payroll_additions_month_idx
+      ON pwfb_portal_payroll_additions (month, region, branch, id);
   `);
   const configuredAdminPhone = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
   if (configuredAdminPhone) {
