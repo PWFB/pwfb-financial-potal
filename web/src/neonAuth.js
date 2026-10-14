@@ -26,4 +26,5 @@ const authUrl = normalizedAuthUrl.endsWith("/auth")
   ? normalizedAuthUrl
   : `${normalizedAuthUrl}/auth`;
 
+export { authUrl };
 export const authClient = createAuthClient(authUrl);
