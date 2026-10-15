@@ -431,3 +431,98 @@ body[data-theme="dark"] .coop-member-metric.loan strong{color:#ffedd5}
 body[data-theme="dark"] .coop-storage-note{background:#431407;color:#ffedd5;border-color:#92400e}
 body[data-theme="dark"] .coop-cancel-button{background:#1f2937;color:#e5e7eb;border-color:#4b5563}
 @media(prefers-color-scheme:dark){body[data-theme="system"] .coop-ledger-heading,body[data-theme="system"] .coop-table-toolbar,body[data-theme="system"] .coop-member-form,body[data-theme="system"] .coop-member-card>summary,body[data-theme="system"] .coop-member-grid,body[data-theme="system"] .coop-card-actions{background:#111827;color:#e5e7eb;border-color:#374151}body[data-theme="system"] .coop-ledger-heading h2,body[data-theme="system"] .coop-form-heading strong,body[data-theme="system"] .coop-member-metric strong{color:#e5e7eb}body[data-theme="system"] .coop-member-form input,body[data-theme="system"] .coop-member-metric input,body[data-theme="system"] .coop-search input{background:#1f2937;color:#f9fafb;border-color:#4b5563}body[data-theme="system"] .coop-member-metric{background:#123b2b;color:#d1fae5}body[data-theme="system"] .coop-member-metric.loan{background:#431407;color:#ffedd5}body[data-theme="system"] .coop-member-metric.loan strong{color:#ffedd5}body[data-theme="system"] .coop-storage-note{background:#431407;color:#ffedd5;border-color:#92400e}}
+
+
+/* Transport & salary roster CRUD: green Add, red Edit, orange Delete */
+.transport-crud-add,
+.transport-crud-edit,
+.transport-crud-delete,
+.transport-roster-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 9px 13px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+}
+.transport-crud-add { background: #15803d; border-color: #166534; }
+.transport-crud-edit { background: #dc2626; border-color: #b91c1c; }
+.transport-crud-delete { background: #f58220; border-color: #d96a0b; }
+.transport-roster-cancel { background: #64748b; border-color: #475569; }
+.transport-crud-add:hover,
+.transport-crud-edit:hover,
+.transport-crud-delete:hover,
+.transport-roster-cancel:hover { filter: brightness(.94); transform: translateY(-1px); }
+.transport-crud-add:disabled,
+.transport-crud-edit:disabled,
+.transport-crud-delete:disabled,
+.transport-roster-cancel:disabled { opacity: .58; cursor: not-allowed; transform: none; }
+.transport-edit-actions { align-items: center; }
+.transport-row-actions { min-width: 178px; }
+.transport-row-actions > button { margin: 3px 4px 3px 0; }
+.transport-roster-form {
+  margin: 14px 0 18px;
+  padding: 18px;
+  border: 1px solid var(--border, #d1d5db);
+  border-radius: 16px;
+  background: var(--surface, #fff);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .07);
+}
+.transport-roster-form-heading,
+.transport-roster-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.transport-roster-form-heading { margin-bottom: 14px; }
+.transport-roster-form-heading > div { display: grid; gap: 5px; }
+.transport-roster-form-heading strong { font-size: 17px; }
+.transport-roster-form-heading small,
+.transport-roster-form-note { color: var(--muted, #64748b); font-size: 12px; line-height: 1.5; }
+.transport-roster-fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.transport-roster-fields label { display: grid; align-content: start; gap: 6px; font-size: 12px; font-weight: 750; }
+.transport-roster-fields input,
+.transport-roster-fields select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 9px;
+  color: var(--text, #0f172a);
+  background: var(--input-bg, var(--surface, #fff));
+  font: inherit;
+  font-size: 14px;
+}
+.transport-roster-fields input:focus,
+.transport-roster-fields select:focus { outline: 2px solid rgba(245, 130, 32, .38); border-color: #f58220; }
+.transport-roster-form-note { margin: 12px 0; }
+.transport-roster-form-actions { justify-content: flex-start; margin-top: 14px; }
+@media (max-width: 900px) {
+  .transport-roster-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .transport-row-actions { min-width: 145px; }
+}
+@media (max-width: 520px) {
+  .transport-roster-form { padding: 12px; }
+  .transport-roster-fields { grid-template-columns: minmax(0, 1fr); }
+  .transport-row-actions { min-width: 130px; }
+  .transport-row-actions > button { width: 100%; margin: 3px 0; }
+  .transport-crud-add, .transport-crud-edit, .transport-crud-delete, .transport-roster-cancel { min-height: 40px; }
+}
