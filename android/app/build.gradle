@@ -21,6 +21,7 @@ android {
             versionNameSuffix '-debug'
         }
         release {
+            minifyEnabled false
             // The release AAB is intentionally unsigned unless a release keystore
             // is configured later. The debug APK is directly installable for testing.
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
