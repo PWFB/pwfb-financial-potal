@@ -9,7 +9,7 @@ on:
       - ".github/workflows/pwfb-financial-potal-android.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   android-build:
@@ -51,3 +51,15 @@ jobs:
           path: android-artifacts/*
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish public download links for the login page
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v${{ github.run_number }}
+          name: PWFB Financial Potal Android build ${{ github.run_number }}
+          target_commitish: main
+          make_latest: true
+          files: |
+            android-artifacts/PWFB-Financial-Potal-debug.apk
+            android-artifacts/PWFB-Financial-Potal-release-unsigned.aab
+            android-artifacts/SHA256SUMS.txt
