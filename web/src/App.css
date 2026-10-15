@@ -362,3 +362,72 @@ body[data-theme="dark"] .salary-cumulative-total b{color:#f9fafb}
 .admin-credential-picker button:focus-visible{outline:3px solid #f5822055;outline-offset:2px}
 body[data-theme="dark"] .admin-credential-picker button{background:#1f2937;border-color:#4b5563;color:#e5e7eb}
 body[data-theme="dark"] .admin-credential-picker button.active{background:#431407;border-color:#fb923c;color:#ffedd5}
+
+
+/* Financial Potal polish: stronger orange + green cumulative totals */
+.salary-cumulative-total.payroll-cumulative-total{position:relative;overflow:hidden;isolation:isolate;border:1px solid #b7dfc9;background:linear-gradient(112deg,#064e3b 0%,#087443 58%,#f58220 58%,#f58220 100%);color:#fff;box-shadow:0 12px 28px #064e3b18}
+.salary-cumulative-total.payroll-cumulative-total:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,transparent 0 58%,#ffffff12 58% 100%)}
+.salary-cumulative-total.payroll-cumulative-total>div:first-child{max-width:320px}
+.salary-cumulative-total.payroll-cumulative-total strong{font-size:14px;letter-spacing:.055em;color:#fff}
+.salary-cumulative-total.payroll-cumulative-total small{color:#d1fae5}
+.salary-cumulative-total.payroll-cumulative-total .salary-cumulative-metrics{flex:1;justify-content:flex-end;gap:clamp(12px,2vw,26px)}
+.salary-cumulative-total.payroll-cumulative-total .salary-cumulative-metrics span{color:#fff;font-weight:750}
+.salary-cumulative-total.payroll-cumulative-total .salary-cumulative-metrics b{color:#fff;font-size:clamp(16px,1.8vw,23px);font-variant-numeric:tabular-nums}
+.salary-cumulative-total.payroll-cumulative-total .salary-cumulative-metrics span:last-child{padding:10px 13px;border-radius:10px;background:#ffffff20;border:1px solid #ffffff55}
+@media(max-width:600px){.salary-cumulative-total.payroll-cumulative-total{background:linear-gradient(150deg,#064e3b 0%,#087443 66%,#f58220 66%,#f58220 100%)}.salary-cumulative-total.payroll-cumulative-total .salary-cumulative-metrics{justify-content:stretch}.salary-cumulative-total.payroll-cumulative-total .salary-cumulative-metrics span{min-width:0}.salary-cumulative-total.payroll-cumulative-total .salary-cumulative-metrics span:last-child{grid-column:1/-1}}
+/* Cooperative CRUD controls and responsive card redesign */
+.coop-ledger-page{gap:20px}
+.coop-ledger-heading{padding:20px;border-radius:16px;border:1px solid #d4e8dc;background:linear-gradient(125deg,#f0fdf4 0%,#fff 66%,#fff7ed 100%)}
+.coop-ledger-heading h2{color:#064e3b}
+.coop-month-switch{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 9px;scrollbar-width:thin}
+.coop-month-switch button{flex:0 0 auto;border:1px solid #d1d5db;border-radius:999px;background:#fff;color:#475569;padding:10px 15px;font:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}
+.coop-month-switch button:hover{border-color:#f58220;transform:translateY(-1px)}
+.coop-month-switch button.selected{background:#005c37;border-color:#005c37;color:#fff;box-shadow:0 4px 12px #005c3725}
+.coop-summary-grid>div{position:relative;overflow:hidden;border-color:#dbe7df;box-shadow:0 4px 16px #0f51320a}
+.coop-summary-grid>div:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#008751}
+.coop-summary-grid>div:nth-child(even):before{background:#f58220}
+.coop-summary-grid strong{color:#005c37}
+.coop-summary-grid>div:nth-child(even) strong{color:#c2410c}
+.coop-table-toolbar{align-items:center;padding:14px;border:1px solid #e2e8f0;border-radius:13px;background:#f8fafc}
+.coop-toolbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;font-size:12px;color:#64748b;font-weight:750}
+.coop-add-button,.coop-edit-button,.coop-delete-button,.coop-cancel-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:10px 14px;border-radius:9px;border:1px solid transparent;font:inherit;font-size:12px;font-weight:850;cursor:pointer;transition:transform .15s,filter .15s}
+.coop-add-button{background:#005c37;color:#fff;box-shadow:0 4px 10px #005c3720}
+.coop-edit-button{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+.coop-delete-button{background:#fff1f2;border-color:#fecdd3;color:#be123c}
+.coop-cancel-button{background:#fff;border-color:#cbd5e1;color:#334155}
+.coop-add-button:hover,.coop-edit-button:hover,.coop-delete-button:hover,.coop-cancel-button:hover{filter:brightness(.97);transform:translateY(-1px)}
+.coop-member-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;padding:18px;border:1px solid #b7dfc9;border-radius:15px;background:linear-gradient(135deg,#f0fdf4,#fff 68%,#fff7ed);box-shadow:0 8px 24px #064e3b0b}
+.coop-form-heading{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid #dbe7df}
+.coop-form-heading>div{display:flex;flex-direction:column;gap:4px}
+.coop-form-heading span{font-size:10px;letter-spacing:1px;font-weight:900;color:#f58220}
+.coop-form-heading strong{font-size:17px;color:#064e3b}
+.coop-member-form>label{display:flex;flex-direction:column;gap:7px;color:#475569;font-size:12px;font-weight:800}
+.coop-member-form input{width:100%;min-width:0;min-height:42px;padding:10px 11px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#111827;font:inherit;font-weight:500}
+.coop-member-form input:focus,.coop-search input:focus{outline:3px solid #f582202b;border-color:#f58220}
+.coop-form-actions{grid-column:1/-1;display:flex;gap:9px;flex-wrap:wrap;padding-top:4px}
+.coop-member-card{border-color:#dce8df;border-radius:14px;box-shadow:0 4px 14px #064e3b08;transition:border-color .15s,box-shadow .15s}
+.coop-member-card:hover{border-color:#a7d6b8;box-shadow:0 7px 18px #064e3b10}
+.coop-member-card>summary{background:linear-gradient(90deg,#f0fdf4,#fff 76%);color:#123c2b}
+.coop-member-card>summary:after{color:#f58220}
+.coop-member-grid{background:#fff}
+.coop-member-metric{border-left-color:#008751;background:#f0fdf4;border-radius:9px}
+.coop-member-metric.loan{border-left-color:#f58220;background:#fff7ed}
+.coop-member-metric.net{border-left-color:#008751;background:#eaf8ef}
+.coop-member-metric strong{color:#123c2b}
+.coop-member-metric.loan strong{color:#9a3412}
+.coop-member-metric input{width:100%;min-width:0;margin-top:7px;padding:9px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#111827;font:inherit;font-weight:700}
+.coop-member-metric input:focus{outline:3px solid #f582202b;border-color:#f58220}
+.coop-card-actions{display:flex;gap:8px;flex-wrap:wrap;padding:12px 14px;border-top:1px solid #e2e8f0;background:#fbfdfb}
+.coop-storage-note{padding:12px 14px;border:1px solid #fed7aa;border-radius:10px;background:#fff7ed;color:#7c2d12}
+.coop-total-footer{background:linear-gradient(110deg,#005c37 0%,#008751 68%,#f58220 68%,#f58220 100%)}
+@media(max-width:850px){.coop-member-form{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.coop-ledger-heading{padding:16px}.coop-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.coop-toolbar-actions{width:100%;justify-content:space-between}.coop-member-form{grid-template-columns:1fr;padding:13px}.coop-form-heading,.coop-form-actions{grid-column:1}.coop-member-card>summary{align-items:flex-start;flex-direction:column;gap:7px}.coop-card-actions{padding:11px}.coop-card-actions button{flex:1}.coop-total-footer{background:linear-gradient(145deg,#005c37 0%,#008751 68%,#f58220 68%,#f58220 100%)}}
+body[data-theme="dark"] .coop-ledger-heading,body[data-theme="dark"] .coop-table-toolbar,body[data-theme="dark"] .coop-member-form,body[data-theme="dark"] .coop-member-card>summary,body[data-theme="dark"] .coop-member-grid,body[data-theme="dark"] .coop-card-actions{background:#111827;color:#e5e7eb;border-color:#374151}
+body[data-theme="dark"] .coop-ledger-heading h2,body[data-theme="dark"] .coop-form-heading strong,body[data-theme="dark"] .coop-member-metric strong{color:#e5e7eb}
+body[data-theme="dark"] .coop-member-form input,body[data-theme="dark"] .coop-member-metric input,body[data-theme="dark"] .coop-search input{background:#1f2937;color:#f9fafb;border-color:#4b5563}
+body[data-theme="dark"] .coop-member-metric{background:#123b2b;color:#d1fae5}
+body[data-theme="dark"] .coop-member-metric.loan{background:#431407;color:#ffedd5}
+body[data-theme="dark"] .coop-member-metric.loan strong{color:#ffedd5}
+body[data-theme="dark"] .coop-storage-note{background:#431407;color:#ffedd5;border-color:#92400e}
+body[data-theme="dark"] .coop-cancel-button{background:#1f2937;color:#e5e7eb;border-color:#4b5563}
+@media(prefers-color-scheme:dark){body[data-theme="system"] .coop-ledger-heading,body[data-theme="system"] .coop-table-toolbar,body[data-theme="system"] .coop-member-form,body[data-theme="system"] .coop-member-card>summary,body[data-theme="system"] .coop-member-grid,body[data-theme="system"] .coop-card-actions{background:#111827;color:#e5e7eb;border-color:#374151}body[data-theme="system"] .coop-ledger-heading h2,body[data-theme="system"] .coop-form-heading strong,body[data-theme="system"] .coop-member-metric strong{color:#e5e7eb}body[data-theme="system"] .coop-member-form input,body[data-theme="system"] .coop-member-metric input,body[data-theme="system"] .coop-search input{background:#1f2937;color:#f9fafb;border-color:#4b5563}body[data-theme="system"] .coop-member-metric{background:#123b2b;color:#d1fae5}body[data-theme="system"] .coop-member-metric.loan{background:#431407;color:#ffedd5}body[data-theme="system"] .coop-member-metric.loan strong{color:#ffedd5}body[data-theme="system"] .coop-storage-note{background:#431407;color:#ffedd5;border-color:#92400e}}
