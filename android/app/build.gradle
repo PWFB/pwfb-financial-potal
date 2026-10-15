@@ -11,8 +11,8 @@ android {
         applicationId 'com.pwfb.financialpotal'
         minSdk 23
         targetSdk 35
-        versionCode 2
-        versionName '1.0.1'
+        versionCode 3
+        versionName '1.0.2'
     }
 
     buildTypes {
@@ -21,7 +21,6 @@ android {
             versionNameSuffix '-debug'
         }
         release {
-            minifyEnabled false
             // The release AAB is intentionally unsigned unless a release keystore
             // is configured later. The debug APK is directly installable for testing.
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
