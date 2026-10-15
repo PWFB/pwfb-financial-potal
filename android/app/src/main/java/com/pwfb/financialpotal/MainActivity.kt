@@ -27,7 +27,6 @@ class MainActivity : Activity() {
     private lateinit var splash: View
     private val portalUrl = "https://pwfb-financial-potal-web.onrender.com"
     private val portalHost = "pwfb-financial-potal-web.onrender.com"
-    private var firstPageLoaded = false
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +49,9 @@ class MainActivity : Activity() {
         root.addView(splash, FrameLayout.LayoutParams(-1, -1))
         setContentView(root)
 
+        // Always fetch the current portal instead of reusing stale WebView cache.
+        webView.settings.cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
+        webView.clearCache(true)
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.databaseEnabled = true
@@ -76,7 +78,6 @@ class MainActivity : Activity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 progress.visibility = View.GONE
                 CookieManager.getInstance().flush()
-                firstPageLoaded = true
                 splash.visibility = View.GONE
             }
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -89,11 +90,8 @@ class MainActivity : Activity() {
                 return true
             }
         }
-        if (savedInstanceState != null) {
-            webView.restoreState(savedInstanceState)
-        } else {
-            webView.loadUrl(portalUrl)
-        }
+        // Do not restore a previous WebView page: it may reopen stale portal code.
+        webView.loadUrl("$portalUrl?app_refresh=${System.currentTimeMillis()}")
     }
 
     private fun createSplash(): View {
