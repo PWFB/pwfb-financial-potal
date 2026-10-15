@@ -555,8 +555,8 @@ app.get("/api/payroll-additions", asyncRoute(async (req, res) => {
   const actor = await authenticatedUser(req);
   if (!actor) return res.status(401).json({ error: "Please sign in to view payroll additions." });
   const month = String(req.query.month || "").trim();
-  if (!["August 2026", "September 2026"].includes(month)) {
-    return res.status(400).json({ error: "Choose August 2026 or September 2026." });
+  if (month !== "September 2026") {
+    return res.status(400).json({ error: "Only September 2026 monthly payroll is available." });
   }
   const result = await pool.query(
     `SELECT id, month, region, branch, name, gra, gross::text AS gross, bonus::text AS bonus,
@@ -579,7 +579,7 @@ app.post("/api/payroll-additions", asyncRoute(async (req, res) => {
   const branch = String(req.body?.branch || "").trim().replace(/\s+/g, " ").toUpperCase();
   const name = String(req.body?.name || "").trim().replace(/\s+/g, " ").toUpperCase();
   const gra = String(req.body?.gra || "").trim();
-  if (!["August 2026", "September 2026"].includes(month)) return res.status(400).json({ error: "Choose August 2026 or September 2026." });
+  if (month !== "September 2026") return res.status(400).json({ error: "Only September 2026 monthly payroll is available." });
   if (!["DM 1", "DM 2"].includes(region)) return res.status(400).json({ error: "Choose DM 1 or DM 2." });
   if (branch.length < 2 || branch.length > 100) return res.status(400).json({ error: "Enter a branch name between 2 and 100 characters." });
   if (name.length < 2 || name.length > 100) return res.status(400).json({ error: "Enter a staff name between 2 and 100 characters." });
@@ -735,6 +735,10 @@ async function start() {
     CREATE INDEX IF NOT EXISTS pwfb_portal_payroll_additions_month_idx
       ON pwfb_portal_payroll_additions (month, region, branch, id);
   `);
+  // August payroll is retired: remove its saved rows and constrain future additions to September only.
+  await pool.query("DELETE FROM pwfb_portal_payroll_additions WHERE month = $1", ["August 2026"]);
+  await pool.query("ALTER TABLE pwfb_portal_payroll_additions DROP CONSTRAINT IF EXISTS pwfb_portal_payroll_additions_month_check");
+  await pool.query("ALTER TABLE pwfb_portal_payroll_additions ADD CONSTRAINT pwfb_portal_payroll_additions_month_check CHECK (month = $September 2026$)");
   const configuredAdminPhone = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
   if (configuredAdminPhone) {
     await pool.query("UPDATE pwfb_portal_users SET role = 'admin', updated_at = NOW() WHERE phone_e164 = $1 AND disabled_at IS NULL", [configuredAdminPhone]);
