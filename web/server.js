@@ -801,7 +801,17 @@ async function start() {
     );
     CREATE TABLE IF NOT EXISTS pwfb_portal_transport_roster (
       region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
-      staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}
+      staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}$'),
+      payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+      is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+      is_added BOOLEAN NOT NULL DEFAULT FALSE,
+      updated_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (region, staff_ref)
+    );
+    CREATE INDEX IF NOT EXISTS pwfb_portal_transport_roster_updated_idx
+      ON pwfb_portal_transport_roster (updated_at DESC);
+    CREATE TABLE IF NOT EXISTS pwfb_portal_payroll_additions (
       id BIGSERIAL PRIMARY KEY,
       month TEXT NOT NULL CHECK (month IN ('August 2026','September 2026')),
       region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
