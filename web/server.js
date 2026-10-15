@@ -735,10 +735,6 @@ async function start() {
     CREATE INDEX IF NOT EXISTS pwfb_portal_payroll_additions_month_idx
       ON pwfb_portal_payroll_additions (month, region, branch, id);
   `);
-  // August payroll is retired: remove its saved rows and constrain future additions to September only.
-  await pool.query("DELETE FROM pwfb_portal_payroll_additions WHERE month = $1", ["August 2026"]);
-  await pool.query("ALTER TABLE pwfb_portal_payroll_additions DROP CONSTRAINT IF EXISTS pwfb_portal_payroll_additions_month_check");
-  await pool.query("ALTER TABLE pwfb_portal_payroll_additions ADD CONSTRAINT pwfb_portal_payroll_additions_month_check CHECK (month = $September 2026$)");
   const configuredAdminPhone = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
   if (configuredAdminPhone) {
     await pool.query("UPDATE pwfb_portal_users SET role = 'admin', updated_at = NOW() WHERE phone_e164 = $1 AND disabled_at IS NULL", [configuredAdminPhone]);
