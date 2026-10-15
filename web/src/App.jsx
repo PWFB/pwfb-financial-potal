@@ -285,7 +285,7 @@ function Coop(){
 const months=["July","August","September","October","November","December"];
 const [selectedMonth,setSelectedMonth]=useState("July");
 const [searchMember,setSearchMember]=useState("");
-const [baseMembers,setBaseMembers]=useState(()=>{try{const saved=window.localStorage.getItem("pwfb-coop-members-v1");const parsed=saved?JSON.parse(saved):null;if(Array.isArray(parsed)&&parsed.length)return parsed;}catch{}return coopAugust.map(m=>({...m}));});
+const [baseMembers,setBaseMembers]=useState(()=>{try{const saved=window.localStorage.getItem("pwfb-coop-members-v1");const parsed=saved?JSON.parse(saved):null;if(Array.isArray(parsed))return parsed;}catch{}return coopAugust.map(m=>({...m}));});
 const [monthly,setMonthly]=useState(()=>{try{const saved=window.localStorage.getItem("pwfb-coop-monthly-v1");const parsed=saved?JSON.parse(saved):null;if(parsed&&typeof parsed==="object")return {...Object.fromEntries(months.slice(1).map(month=>[month,{}])),...parsed};}catch{}return Object.fromEntries(months.slice(1).map(month=>[month,{}]));});
 const [openMember,setOpenMember]=useState({});
 const [notice,setNotice]=useState("");
