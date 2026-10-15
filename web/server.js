@@ -651,6 +651,92 @@ app.post("/api/admin/staff", asyncRoute(async (req, res) => {
   }
 }));
 
+
+app.get("/api/transport-roster", asyncRoute(async (req, res) => {
+  const user = await authenticatedUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in to view the transport roster." });
+  const region = String(req.query.region || "").trim();
+  if (region && !["DM 1", "DM 2"].includes(region)) return res.status(400).json({ error: "Choose a valid transport division." });
+  const result = await pool.query(
+    "SELECT region, staff_ref, payload, is_deleted, is_added, updated_at FROM pwfb_portal_transport_roster WHERE ($1 = '' OR region = $1) ORDER BY region, staff_ref",
+    [region]
+  );
+  res.set("Cache-Control", "no-store");
+  res.json({ records: result.rows.map(row => ({ ...row.payload, region: row.region, staffRef: row.staff_ref, deleted: row.is_deleted, isAdded: row.is_added, updatedAt: row.updated_at })) });
+}));
+
+function validateTransportRecord(input, region, staffRef) {
+  const name = String(input?.name || "").trim().slice(0, 120);
+  const bank = String(input?.bank || "").trim().slice(0, 100);
+  const code = String(input?.code || "").trim().slice(0, 12);
+  const acc = String(input?.acc || "").trim().slice(0, 34);
+  const narration = String(input?.narration || "").trim().slice(0, 120);
+  const rawAmount = String(input?.amount ?? "").trim();
+  const amount = Number(rawAmount);
+  if (!["DM 1", "DM 2"].includes(region) || !/^\d{3}$/.test(staffRef)) throw Object.assign(new Error("Invalid division or three-digit staff reference."), { status: 400 });
+  if (!name || !bank || !code || !acc || !narration) throw Object.assign(new Error("Complete staff name, bank code, destination bank, account number, and branch/narration."), { status: 400 });
+  if (!/^\d{1,12}$/.test(code)) throw Object.assign(new Error("Bank code must contain digits only. Use VERIFY in the schedule for an unconfirmed code, not a guessed code."), { status: 400 });
+  if (!/^\d{1,34}$/.test(acc)) throw Object.assign(new Error("Account number must contain digits only."), { status: 400 });
+  if (!/^\d{1,10}(\.\d{1,2})?$/.test(rawAmount) || !Number.isFinite(amount) || amount < 0 || amount > 1000000000) throw Object.assign(new Error("Enter a valid transport amount from ₦0 to ₦1,000,000,000."), { status: 400 });
+  return { region, ref: staffRef, code, bank, acc, name, amount, narration };
+}
+
+app.post("/api/transport-roster", asyncRoute(async (req, res) => {
+  const user = await authenticatedUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in again before adding staff." });
+  if (user.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can add transport staff." });
+  const region = String(req.body?.region || "").trim();
+  const staffRef = String(req.body?.staffRef || "").trim();
+  let payload;
+  try { payload = validateTransportRecord(req.body?.record, region, staffRef); }
+  catch (error) { return res.status(error.status || 400).json({ error: error.message }); }
+  try {
+    const result = await pool.query(
+      "INSERT INTO pwfb_portal_transport_roster (region, staff_ref, payload, is_deleted, is_added, updated_by, updated_at) VALUES ($1,$2,$3::jsonb,FALSE,TRUE,$4,NOW()) RETURNING region, staff_ref, payload, is_deleted, is_added, updated_at",
+      [region, staffRef, JSON.stringify(payload), user.id]
+    );
+    const row = result.rows[0];
+    res.status(201).json({ ok: true, record: { ...row.payload, region: row.region, staffRef: row.staff_ref, deleted: row.is_deleted, isAdded: row.is_added, updatedAt: row.updated_at } });
+  } catch (error) {
+    if (error.code === "23505") return res.status(409).json({ error: "That staff reference already exists in this division. Refresh the roster and try again." });
+    throw error;
+  }
+}));
+
+app.put("/api/transport-roster", asyncRoute(async (req, res) => {
+  const user = await authenticatedUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in again before editing staff." });
+  if (user.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can edit transport staff." });
+  const region = String(req.body?.region || "").trim();
+  const staffRef = String(req.body?.staffRef || "").trim();
+  let payload;
+  try { payload = validateTransportRecord(req.body?.record, region, staffRef); }
+  catch (error) { return res.status(error.status || 400).json({ error: error.message }); }
+  const isAdded = req.body?.isAdded === true;
+  const result = await pool.query(
+    "INSERT INTO pwfb_portal_transport_roster (region, staff_ref, payload, is_deleted, is_added, updated_by, updated_at) VALUES ($1,$2,$3::jsonb,FALSE,$4,$5,NOW()) ON CONFLICT (region,staff_ref) DO UPDATE SET payload=EXCLUDED.payload, is_deleted=FALSE, is_added=EXCLUDED.is_added, updated_by=EXCLUDED.updated_by, updated_at=NOW() RETURNING region, staff_ref, payload, is_deleted, is_added, updated_at",
+    [region, staffRef, JSON.stringify(payload), isAdded, user.id]
+  );
+  const row = result.rows[0];
+  res.set("Cache-Control", "no-store");
+  res.json({ ok: true, record: { ...row.payload, region: row.region, staffRef: row.staff_ref, deleted: row.is_deleted, isAdded: row.is_added, updatedAt: row.updated_at } });
+}));
+
+app.delete("/api/transport-roster", asyncRoute(async (req, res) => {
+  const user = await authenticatedUser(req);
+  if (!user) return res.status(401).json({ error: "Please sign in again before deleting staff." });
+  if (user.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can delete transport staff." });
+  const region = String(req.body?.region || "").trim();
+  const staffRef = String(req.body?.staffRef || "").trim();
+  if (!["DM 1", "DM 2"].includes(region) || !/^\d{3}$/.test(staffRef)) return res.status(400).json({ error: "Invalid division or staff reference." });
+  const result = await pool.query(
+    "INSERT INTO pwfb_portal_transport_roster (region, staff_ref, payload, is_deleted, is_added, updated_by, updated_at) VALUES ($1,$2,'{}'::jsonb,TRUE,$3,$4,NOW()) ON CONFLICT (region,staff_ref) DO UPDATE SET is_deleted=TRUE, updated_by=EXCLUDED.updated_by, updated_at=NOW() RETURNING region, staff_ref, is_deleted",
+    [region, staffRef, req.body?.isAdded === true, user.id]
+  );
+  res.set("Cache-Control", "no-store");
+  res.json({ ok: true, deleted: true, region: result.rows[0].region, staffRef: result.rows[0].staff_ref });
+}));
+
 app.use("/api", (_req, res) => res.status(404).json({ error: "API endpoint not found." }));
 
 app.use(express.static(path.join(__dirname, "dist"), { index: false, maxAge: "1h" }));
@@ -713,6 +799,47 @@ async function start() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       PRIMARY KEY (region, staff_ref)
     );
+    CREATE TABLE IF NOT EXISTS pwfb_portal_transport_roster (
+      region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
+      staff_ref TEXT NOT NULL CHECK (staff_ref ~ '^[0-9]{3}
+      id BIGSERIAL PRIMARY KEY,
+      month TEXT NOT NULL CHECK (month IN ('August 2026','September 2026')),
+      region TEXT NOT NULL CHECK (region IN ('DM 1','DM 2')),
+      branch TEXT NOT NULL,
+      name TEXT NOT NULL,
+      gra TEXT NOT NULL,
+      gross NUMERIC(14,2) NOT NULL CHECK (gross >= 0),
+      bonus NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (bonus >= 0),
+      coop_s NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (coop_s >= 0),
+      coop_l NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (coop_l >= 0),
+      dev NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (dev >= 0),
+      tax NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (tax >= 0),
+      offline NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (offline >= 0),
+      others NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (others >= 0),
+      advance NUMERIC(14,2) NOT NULL DEFAULT 0 CHECK (advance >= 0),
+      created_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS pwfb_portal_payroll_additions_month_idx
+      ON pwfb_portal_payroll_additions (month, region, branch, id);
+  `);
+  const configuredAdminPhone = normalizePhone(process.env.PORTAL_ADMIN_PHONE || "");
+  if (configuredAdminPhone) {
+    await pool.query("UPDATE pwfb_portal_users SET role = 'admin', updated_at = NOW() WHERE phone_e164 = $1 AND disabled_at IS NULL", [configuredAdminPhone]);
+  }
+  app.listen(port, "0.0.0.0", () => console.log(`PWFB Financial Portal listening on ${port}`));
+}
+start().catch(error => { console.error("Startup failed:", error); process.exit(1); });
+),
+      payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+      is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+      is_added BOOLEAN NOT NULL DEFAULT FALSE,
+      updated_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (region, staff_ref)
+    );
+    CREATE INDEX IF NOT EXISTS pwfb_portal_transport_roster_updated_idx
+      ON pwfb_portal_transport_roster (updated_at DESC);
     CREATE TABLE IF NOT EXISTS pwfb_portal_payroll_additions (
       id BIGSERIAL PRIMARY KEY,
       month TEXT NOT NULL CHECK (month IN ('August 2026','September 2026')),
