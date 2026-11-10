@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import ReportTools from "./ReportTools.jsx";
 
 export function InlineCameraScan({ area }) {
   const [scanUrl, setScanUrl] = useState("");
@@ -358,109 +359,136 @@ export function ScanToTextPage() {
 }
 
 export function DisbursementAnalysisPage() {
+  const [selectedDate,setSelectedDate]=useState("all");
+  const reportRef=useRef(null);
+  const dailyReports=[
+    {date:"2026-11-05",label:"05/11/2026"},
+    {date:"2026-11-06",label:"06/11/2026"}
+  ];
+  const visibleReports=dailyReports.filter(report=>selectedDate==="all"||report.date===selectedDate);
+  const money=value=>"₦"+Number(value).toLocaleString("en-NG",{minimumFractionDigits:2,maximumFractionDigits:2});
   return (
-    <div className="analysis-page">
-      <div className="analysis-page-heading">
+    <div className="analysis-page daily-report-page">
+      <div className="analysis-page-heading no-print">
         <div>
           <p className="auth-eyebrow">PWFB · FINANCE RECORDS</p>
           <h2>Daily Disbursement Analyses Sheet</h2>
-          <p>One combined report containing the disbursement and receipts/reconciliation sections.</p>
+          <p>Choose the actual work date to view its complete daily sheet.</p>
         </div>
-        <span>06 November 2026</span>
+        <label className="daily-date-filter">Filter by work date
+          <select value={selectedDate} onChange={event=>setSelectedDate(event.target.value)}>
+            <option value="all">All dates</option>
+            <option value="2026-11-05">05/11/2026</option>
+            <option value="2026-11-06">06/11/2026</option>
+          </select>
+        </label>
       </div>
-      <article className="analysis-card analysis-combined-card">
-        <div className="analysis-card-title">
-          <span>COMBINED DAILY REPORT</span>
-          <h3>Daily Disbursement Analysis &amp; Reconciliation</h3>
-          <p>PERFECT WISDOM FOR BETTER LTD · 06/11/2026</p>
-        </div>
-        <div className="analysis-figures">
-          <div><span>Opening Balance</span><strong>₦12,689,796.53</strong></div>
-          <div><span>Received from POS 75</span><strong>₦5,000,000.00</strong></div>
-        </div>
-        <InlineCameraScan area="Combined Daily Disbursement Analysis and Reconciliation" />
-        <section className="analysis-report-section">
-          <h4>Daily Disbursement Analysis</h4>
-          <div className="analysis-table-wrap">
-            <table className="analysis-table">
-              <thead>
-                <tr>
-                  <th rowSpan={2}>Batch</th><th rowSpan={2}>Region</th>
-                  <th colSpan={2}>Disbursement</th>
-                  <th colSpan={2}>Reversed / Declined</th>
-                  <th colSpan={2}>Total Balance</th><th rowSpan={2}>Remark</th>
-                </tr>
-                <tr>{["No", "Amount", "No", "Amount", "No", "Amount"].map((value, index) =>
-                  <th key={index}>{value}</th>
-                )}</tr>
-              </thead>
-              <tbody>
-                {[0, 1, 2].map((row) =>
-                  <tr key={row}>{Array.from({ length: 9 }).map((_, cell) =>
-                    <td key={cell}>&nbsp;</td>
-                  )}</tr>
-                )}
-                <tr><td colSpan={2}>TOTAL C/F</td><td colSpan={7}>₦17,689,796.53</td></tr>
-                <tr><td colSpan={2}>Current Balance</td><td colSpan={7}>₦17,689,446.53</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-        <section className="analysis-report-section">
-          <h4>Receipts &amp; Reconciliation</h4>
-          <div className="analysis-table-wrap">
-            <table className="analysis-table">
-              <thead><tr>{["Received", "Excess Rc", "Shortage Rc", "Disbursement", "Balance", "Remark"].map((value) =>
-                <th key={value}>{value}</th>
-              )}</tr></thead>
-              <tbody>
-                <tr>
-                  <td>₦115,282.00</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td>
-                  <td>₦115,282.00</td><td rowSpan={3}>₦17,362,600 to be done with POS.</td>
-                </tr>
-                <tr><td>₦58,344.00</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>₦58,344.00</td></tr>
-                <tr><td>₦17,362,600.00</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>₦17,362,600.00</td></tr>
-                {[0, 1].map((row) =>
-                  <tr key={row}>{Array.from({ length: 6 }).map((_, cell) =>
-                    <td key={cell}>&nbsp;</td>
-                  )}</tr>
-                )}
-                <tr className="analysis-total-row"><td>TOTAL</td>{[0, 1, 2, 3, 4].map((cell) =>
-                  <td key={cell}>&nbsp;</td>
-                )}</tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </article>
-      <article className="analysis-card analysis-combined-card">
-        <div className="analysis-card-title">
-          <span>DATED REMARK ENTRY</span>
-          <h3>Daily Disbursement Analysis &amp; Reconciliation</h3>
-          <p>PERFECT WISDOM FOR BETTER LTD · 05/11/2026</p>
-        </div>
-        <section className="analysis-report-section">
-          <h4>Receipts &amp; Reconciliation</h4>
-          <div className="analysis-table-wrap">
-            <table className="analysis-table">
-              <thead><tr>{["Received", "Excess Rc", "Shortage Rc", "Disbursement", "Balance", "Remark"].map((value) =>
-                <th key={value}>{value}</th>
-              )}</tr></thead>
-              <tbody>
-                <tr>
-                  <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
-                  <td>05/11/2026 — ₦32,016,200.00 to be done with P.O.s.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </article>
-      <p className="analysis-data-note">
-        Both original report sections are kept together in one report card. Figures and blank cells are preserved as supplied;
-        no missing values have been estimated. These displayed source figures are not database-reconciled transactions.
-        The 05/11/2026 remark is retained as a separate dated entry; no other figures were added.
-      </p>
+      <ReportTools targetRef={reportRef} filename={selectedDate==="all"?"pwfb-daily-disbursement-all-dates":"pwfb-daily-disbursement-"+selectedDate}/>
+      <div ref={reportRef} className="analysis-report-export">
+        {visibleReports.map(report=>report.date==="2026-11-05"?(
+          <article className="analysis-card analysis-combined-card" key={report.date}>
+            <div className="analysis-card-title">
+              <span>DAILY REPORT · ACTUAL WORK DATE 05/11/2026</span>
+              <h3>PERFECT WISDOM FOR BETTER LTD</h3>
+              <p>Daily Disbursement Analyses Sheet · 05/11/2026</p>
+            </div>
+            <div className="analysis-figures">
+              <div><span>Opening Balance</span><strong>{money(48610119.04)}</strong></div>
+              <div><span>Total Credit (as written)</span><strong>{money(62110119.04)}</strong></div>
+              <div><span>Total Debit</span><strong>{money(49420000)}</strong></div>
+              <div><span>Balance after debit</span><strong>{money(12690119.04)}</strong></div>
+              <div><span>Bank Balance</span><strong>{money(12689796.53)}</strong></div>
+              <div><span>Bank Charges</span><strong>{money(322.51)}</strong></div>
+            </div>
+            <section className="analysis-report-section">
+              <h4>Disbursement and Balance Notes</h4>
+              <div className="analysis-table-wrap">
+                <table className="analysis-table analysis-detail-table">
+                  <thead><tr><th>Entry</th><th>Type</th><th>Amount</th><th>Handwritten note</th></tr></thead>
+                  <tbody>
+                    <tr><td>Received from POS 95</td><td>Credit</td><td>{money(9500000)}</td><td>As written</td></tr>
+                    <tr><td>Received from POS 24</td><td>Credit</td><td>{money(4000000)}</td><td>As written</td></tr>
+                    <tr><td>Transfer to “Mhs”</td><td>Debit</td><td>{money(48600000)}</td><td>Destination abbreviation is unclear in the handwriting; retained as read</td></tr>
+                    <tr><td>Cooperative Savings wk</td><td>Debit</td><td>{money(420000)}</td><td>“wk” retained as written</td></tr>
+                    <tr><td>Transfer to A/c 2 “Abdul…”</td><td>Debit</td><td>{money(400000)}</td><td>“Mint exchange” is written beside this entry; beneficiary name is not fully legible</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <section className="analysis-report-section">
+              <h4>Credit, Debit and Bank Reconciliation</h4>
+              <div className="analysis-table-wrap">
+                <table className="analysis-table">
+                  <thead><tr><th>Description</th><th>Amount</th><th>Source note</th></tr></thead>
+                  <tbody>
+                    <tr><td>Total Cr</td><td>{money(62110119.04)}</td><td>Written on the sheet</td></tr>
+                    <tr><td>Total Dr</td><td>{money(49420000)}</td><td>Sum of the three listed debit items</td></tr>
+                    <tr><td>Balance before bank charges</td><td>{money(12690119.04)}</td><td>Written on the sheet</td></tr>
+                    <tr><td>Bank Balance</td><td>{money(12689796.53)}</td><td>Written on the sheet</td></tr>
+                    <tr><td>Bank Charges</td><td>{money(322.51)}</td><td>Written on the sheet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <section className="analysis-report-section">
+              <h4>Receipts &amp; Reconciliation</h4>
+              <div className="analysis-table-wrap">
+                <table className="analysis-table">
+                  <thead><tr>{["Received","Excess Rc","Shortage Rc","Disbursement","Balance","Remark"].map(value=><th key={value}>{value}</th>)}</tr></thead>
+                  <tbody>
+                    <tr><td>{money(12640500)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(12640500)}</td><td rowSpan={2}>₦32,016,200 to be done with P.O.s.</td></tr>
+                    <tr><td>{money(19375700)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(19375700)}</td></tr>
+                    <tr className="analysis-total-row"><td>{money(32016200)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(32016200)}</td><td>₦32,016,200 to be done with P.O.s.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <p className="analysis-data-note">The two received amounts are R1 ₦12,640,500 and R2 ₦19,375,700. Their total is ₦32,016,200. The handwritten remark is transcribed as “₦32,016,200 to be done with P.O.s.” The unclear transfer labels have not been expanded or guessed.</p>
+          </article>
+        ):(
+          <article className="analysis-card analysis-combined-card" key={report.date}>
+            <div className="analysis-card-title">
+              <span>COMBINED DAILY REPORT · ACTUAL WORK DATE 06/11/2026</span>
+              <h3>Daily Disbursement Analysis &amp; Reconciliation</h3>
+              <p>PERFECT WISDOM FOR BETTER LTD · 06/11/2026</p>
+            </div>
+            <div className="analysis-figures">
+              <div><span>Opening Balance</span><strong>₦12,689,796.53</strong></div>
+              <div><span>Received from POS 75</span><strong>₦5,000,000.00</strong></div>
+            </div>
+            <section className="analysis-report-section">
+              <h4>Daily Disbursement Analysis</h4>
+              <div className="analysis-table-wrap">
+                <table className="analysis-table">
+                  <thead><tr><th rowSpan={2}>Batch</th><th rowSpan={2}>Region</th><th colSpan={2}>Disbursement</th><th colSpan={2}>Reversed / Declined</th><th colSpan={2}>Total Balance</th><th rowSpan={2}>Remark</th></tr>
+                    <tr>{["No","Amount","No","Amount","No","Amount"].map((value,index)=><th key={index}>{value}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {[0,1,2].map(row=><tr key={row}>{Array.from({length:9}).map((_,cell)=><td key={cell}>&nbsp;</td>)}</tr>)}
+                    <tr><td colSpan={2}>TOTAL C/F</td><td colSpan={7}>₦17,689,796.53</td></tr>
+                    <tr><td colSpan={2}>Current Balance</td><td colSpan={7}>₦17,689,446.53</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <section className="analysis-report-section">
+              <h4>Receipts &amp; Reconciliation</h4>
+              <div className="analysis-table-wrap">
+                <table className="analysis-table">
+                  <thead><tr>{["Received","Excess Rc","Shortage Rc","Disbursement","Balance","Remark"].map(value=><th key={value}>{value}</th>)}</tr></thead>
+                  <tbody>
+                    <tr><td>₦115,282.00</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>₦115,282.00</td><td rowSpan={3}>₦17,362,600 to be done with POS.</td></tr>
+                    <tr><td>₦58,344.00</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>₦58,344.00</td></tr>
+                    <tr><td>₦17,362,600.00</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>₦17,362,600.00</td></tr>
+                    {[0,1].map(row=><tr key={row}>{Array.from({length:6}).map((_,cell)=><td key={cell}>&nbsp;</td>)}</tr>)}
+                    <tr className="analysis-total-row"><td>TOTAL</td>{[0,1,2,3,4].map(cell=><td key={cell}>&nbsp;</td>)}</tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }
