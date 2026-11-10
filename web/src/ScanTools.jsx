@@ -386,6 +386,8 @@ export function DisbursementAnalysisPage() {
   const visibleReports=dailyReports.filter(report=>selectedDate==="all"||report.date===selectedDate);
   const money=value=>"₦"+Number(value).toLocaleString("en-NG",{minimumFractionDigits:2,maximumFractionDigits:2});
   const wholeMoney=value=>"₦"+Number(value).toLocaleString("en-NG",{maximumFractionDigits:0});
+  const receiptAmounts=[115282,58344,17362600];
+  const receiptTotal=receiptAmounts.reduce((total,amount)=>total+amount,0);
   return (
     <div className="analysis-page daily-report-page">
       <div className="analysis-page-heading no-print">
@@ -496,11 +498,11 @@ export function DisbursementAnalysisPage() {
                 <table className="analysis-table">
                   <thead><tr>{["Received","Excess Rc","Shortage Rc","Disbursement","Balance","Remark"].map(value=><th key={value}>{value}</th>)}</tr></thead>
                   <tbody>
-                    <tr><td>₦115,282.00</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>₦115,282.00</td><td rowSpan={3}>₦17,362,600 to be done with POS.</td></tr>
-                    <tr><td>₦58,344.00</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>₦58,344.00</td></tr>
-                    <tr><td>₦17,362,600.00</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>₦17,362,600.00</td></tr>
+                    <tr><td>{money(receiptAmounts[0])}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(receiptAmounts[0])}</td><td rowSpan={3}>₦17,362,600 to be done with POS.</td></tr>
+                    <tr><td>{money(receiptAmounts[1])}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(receiptAmounts[1])}</td></tr>
+                    <tr><td>{money(receiptAmounts[2])}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(receiptAmounts[2])}</td></tr>
                     {[0,1].map(row=><tr key={row}>{Array.from({length:6}).map((_,cell)=><td key={cell}>&nbsp;</td>)}</tr>)}
-                    <tr className="analysis-total-row"><td>TOTAL</td>{[0,1,2,3,4].map(cell=><td key={cell}>&nbsp;</td>)}</tr>
+                    <tr className="analysis-total-row"><td>TOTAL · {money(receiptTotal)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(receiptTotal)}</td><td>&nbsp;</td></tr>
                   </tbody>
                 </table>
               </div>
