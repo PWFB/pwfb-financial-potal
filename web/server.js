@@ -632,7 +632,8 @@ app.post("/api/admin/staff", asyncRoute(async (req, res) => {
   const name = String(req.body?.name || "").trim().replace(/\s+/g, " ");
   const phone = normalizePhone(req.body?.phone);
   const password = String(req.body?.password || "");
-  const role = req.body?.role === "viewer" ? "viewer" : "staff";
+  const requestedRole = String(req.body?.role || "staff");
+  const role = ["staff", "viewer", "RM1", "RM2"].includes(requestedRole) ? requestedRole : "staff";
   if (name.length < 2 || name.length > 100) return res.status(400).json({ error: "Enter a staff name between 2 and 100 characters." });
   if (!phone) return res.status(400).json({ error: "Enter a valid Nigerian phone number." });
   if (!validCredential(password)) return res.status(400).json({ error: "Use exactly a 6-digit PIN or an 8–128 character password." });
@@ -757,13 +758,15 @@ async function start() {
       phone_e164 TEXT NOT NULL UNIQUE,
       full_name TEXT NOT NULL DEFAULT '',
       pin_hash TEXT,
-      role TEXT NOT NULL DEFAULT 'staff' CHECK (role IN ('admin','staff','viewer')),
+      role TEXT NOT NULL DEFAULT 'staff' CHECK (role IN ('admin','staff','viewer','RM1','RM2')),
       phone_verified_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       disabled_at TIMESTAMPTZ
     );
     ALTER TABLE pwfb_portal_users ADD COLUMN IF NOT EXISTS full_name TEXT NOT NULL DEFAULT '';
+    ALTER TABLE pwfb_portal_users DROP CONSTRAINT IF EXISTS pwfb_portal_users_role_check;
+    ALTER TABLE pwfb_portal_users ADD CONSTRAINT pwfb_portal_users_role_check CHECK (role IN ('admin','staff','viewer','RM1','RM2'));
     CREATE TABLE IF NOT EXISTS pwfb_portal_otp_challenges (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       phone_e164 TEXT NOT NULL,
