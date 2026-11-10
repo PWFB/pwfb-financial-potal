@@ -618,7 +618,7 @@ app.put("/api/payroll-additions/:id", asyncRoute(async (req, res) => {
   if (!actor) return res.status(401).json({ error: "Please sign in again before editing payroll." });
   if (actor.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can edit payroll." });
   const id = String(req.params.id || "");
-  if (!/^\\d+$/.test(id)) return res.status(400).json({ error: "Invalid payroll record ID." });
+  if (!/^\d+$/.test(id)) return res.status(400).json({ error: "Invalid payroll record ID." });
   const month = String(req.body?.month || "").trim();
   const region = String(req.body?.region || "").trim();
   const branch = String(req.body?.branch || "").trim().replace(/\s+/g, " ").toUpperCase();
@@ -649,7 +649,7 @@ app.delete("/api/payroll-additions/:id", asyncRoute(async (req, res) => {
   if (!actor) return res.status(401).json({ error: "Please sign in again before deleting payroll." });
   if (actor.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can delete payroll." });
   const id = String(req.params.id || "");
-  if (!/^\\d+$/.test(id)) return res.status(400).json({ error: "Invalid payroll record ID." });
+  if (!/^\d+$/.test(id)) return res.status(400).json({ error: "Invalid payroll record ID." });
   const result = await pool.query("DELETE FROM pwfb_portal_payroll_additions WHERE id=$1 RETURNING id", [id]);
   if (!result.rowCount) return res.status(404).json({ error: "Payroll row was not found. No record was deleted." });
   res.set("Cache-Control", "no-store");
