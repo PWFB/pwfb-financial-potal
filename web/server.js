@@ -621,8 +621,8 @@ app.put("/api/payroll-additions/:id", asyncRoute(async (req, res) => {
   if (!/^\\d+$/.test(id)) return res.status(400).json({ error: "Invalid payroll record ID." });
   const month = String(req.body?.month || "").trim();
   const region = String(req.body?.region || "").trim();
-  const branch = String(req.body?.branch || "").trim().replace(/\\s+/g, " ").toUpperCase();
-  const name = String(req.body?.name || "").trim().replace(/\\s+/g, " ").toUpperCase();
+  const branch = String(req.body?.branch || "").trim().replace(/\s+/g, " ").toUpperCase();
+  const name = String(req.body?.name || "").trim().replace(/\s+/g, " ").toUpperCase();
   const gra = String(req.body?.gra || "").trim();
   if (month !== "September 2026" || !["DM 1", "DM 2"].includes(region) || branch.length < 2 || name.length < 2 || !gra || gra.length > 50) return res.status(400).json({ error: "Enter valid month, division, branch, staff name and GRA." });
   const keys = ["gross", "bonus", "coopS", "coopL", "offline", "others", "advance"];
