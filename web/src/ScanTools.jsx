@@ -367,6 +367,7 @@ export function DisbursementAnalysisPage() {
   ];
   const visibleReports=dailyReports.filter(report=>selectedDate==="all"||report.date===selectedDate);
   const money=value=>"₦"+Number(value).toLocaleString("en-NG",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const wholeMoney=value=>"₦"+Number(value).toLocaleString("en-NG",{maximumFractionDigits:0});
   return (
     <div className="analysis-page daily-report-page">
       <div className="analysis-page-heading no-print">
@@ -406,11 +407,11 @@ export function DisbursementAnalysisPage() {
                 <table className="analysis-table analysis-detail-table">
                   <thead><tr><th>Entry</th><th>Type</th><th>Amount</th><th>Handwritten note</th></tr></thead>
                   <tbody>
-                    <tr><td>Received from POS 95</td><td>Credit</td><td>{money(9500000)}</td><td>As written</td></tr>
-                    <tr><td>Received from POS 24</td><td>Credit</td><td>{money(4000000)}</td><td>As written</td></tr>
-                    <tr><td>Transfer to “Mhs”</td><td>Debit</td><td>{money(48600000)}</td><td>Destination abbreviation is unclear in the handwriting; retained as read</td></tr>
-                    <tr><td>Cooperative Savings wk</td><td>Debit</td><td>{money(420000)}</td><td>“wk” retained as written</td></tr>
-                    <tr><td>Transfer to A/c 2 “Abdul…”</td><td>Debit</td><td>{money(400000)}</td><td>“Mint exchange” is written beside this entry; beneficiary name is not fully legible</td></tr>
+                    <tr><td>Received from POS 95</td><td>Credit</td><td>{wholeMoney(9500000)}</td><td>As written</td></tr>
+                    <tr><td>Received from POS 24</td><td>Credit</td><td>{wholeMoney(4000000)}</td><td>As written</td></tr>
+                    <tr><td>Transfer to “Mhs”</td><td>Debit</td><td>{wholeMoney(48600000)}</td><td>Destination abbreviation is unclear in the handwriting; retained as read</td></tr>
+                    <tr><td>Cooperative Savings wk</td><td>Debit</td><td>{wholeMoney(420000)}</td><td>“wk” retained as written</td></tr>
+                    <tr><td>Transfer to A/c 2 “Abdul…”</td><td>Debit</td><td>{wholeMoney(400000)}</td><td>“Mint exchange” is written beside this entry; beneficiary name is not fully legible</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -436,9 +437,9 @@ export function DisbursementAnalysisPage() {
                 <table className="analysis-table">
                   <thead><tr>{["Received","Excess Rc","Shortage Rc","Disbursement","Balance","Remark"].map(value=><th key={value}>{value}</th>)}</tr></thead>
                   <tbody>
-                    <tr><td>{money(12640500)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(12640500)}</td><td rowSpan={2}>₦32,016,200 to be done with P.O.s.</td></tr>
-                    <tr><td>{money(19375700)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(19375700)}</td></tr>
-                    <tr className="analysis-total-row"><td>{money(32016200)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{money(32016200)}</td><td>₦32,016,200 to be done with P.O.s.</td></tr>
+                    <tr><td>R1 · {wholeMoney(12640500)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{wholeMoney(12640500)}</td><td rowSpan={3}>₦32,016,200 to be done with P.O.s.</td></tr>
+                    <tr><td>R2 · {wholeMoney(19375700)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{wholeMoney(19375700)}</td></tr>
+                    <tr className="analysis-total-row"><td>TOTAL · {wholeMoney(32016200)}</td><td>&nbsp;</td><td>&nbsp;</td><td>—</td><td>{wholeMoney(32016200)}</td></tr>
                   </tbody>
                 </table>
               </div>
