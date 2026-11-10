@@ -433,9 +433,33 @@ export function DisbursementAnalysisPage() {
           </div>
         </section>
       </article>
+      <article className="analysis-card analysis-combined-card">
+        <div className="analysis-card-title">
+          <span>DATED REMARK ENTRY</span>
+          <h3>Daily Disbursement Analysis &amp; Reconciliation</h3>
+          <p>PERFECT WISDOM FOR BETTER LTD · 05/11/2026</p>
+        </div>
+        <section className="analysis-report-section">
+          <h4>Receipts &amp; Reconciliation</h4>
+          <div className="analysis-table-wrap">
+            <table className="analysis-table">
+              <thead><tr>{["Received", "Excess Rc", "Shortage Rc", "Disbursement", "Balance", "Remark"].map((value) =>
+                <th key={value}>{value}</th>
+              )}</tr></thead>
+              <tbody>
+                <tr>
+                  <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                  <td>05/11/2026 — ₦32,016,200.00 to be done with P.O.s.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </article>
       <p className="analysis-data-note">
         Both original report sections are kept together in one report card. Figures and blank cells are preserved as supplied;
         no missing values have been estimated. These displayed source figures are not database-reconciled transactions.
+        The 05/11/2026 remark is retained as a separate dated entry; no other figures were added.
       </p>
     </div>
   );
