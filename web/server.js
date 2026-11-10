@@ -551,6 +551,14 @@ function payrollAdditionPayload(row) {
   };
 }
 
+
+function auditPayload(row){return {id:String(row.id),bankBalance:row.bank_balance===null?null:String(row.bank_balance),branch:row.branch,entryDate:row.entry_date,amount:row.amount===null?null:String(row.amount),charges:row.charges===null?null:String(row.charges),cashPaid:row.cash_paid===null?null:String(row.cash_paid),transferCode:row.transfer_code,excessBf:row.excess_bf===null?null:String(row.excess_bf),unconfirmed:row.unconfirmed===null?null:String(row.unconfirmed),currentExcess:row.current_excess===null?null:String(row.current_excess)}}
+function auditInput(body){const branch=String(body?.branch||"").trim().replace(/\s+/g," ");const entryDate=String(body?.entryDate||"");if(branch.length<2||branch.length>160||!/^\d{4}-\d{2}-\d{2}$/.test(entryDate))throw Object.assign(new Error("Enter a branch name and valid date."),{status:400});const numeric={bankBalance:"bankBalance",amount:"amount",charges:"charges",cashPaid:"cashPaid",excessBf:"excessBf",unconfirmed:"unconfirmed",currentExcess:"currentExcess"};const values={};for(const [key] of Object.entries(numeric)){const raw=body?.[key];if(raw===null||raw===undefined||raw===""){values[key]=null;continue}const value=Number(raw);if(!Number.isFinite(value)||Math.abs(value)>999999999999.99)throw Object.assign(new Error("Enter valid amounts or leave unavailable amounts blank."),{status:400});values[key]=Math.round((value+Number.EPSILON)*100)/100}const transferCode=String(body?.transferCode||"").trim().slice(0,160);return {branch,entryDate,transferCode,...values}}
+app.get("/api/audit-ledger",asyncRoute(async(_req,res)=>{const result=await pool.query("SELECT id,bank_balance,branch,entry_date,amount,charges,cash_paid,transfer_code,excess_bf,unconfirmed,current_excess FROM pwfb_portal_audit_ledger ORDER BY entry_date,id");res.set("Cache-Control","no-store");res.json({rows:result.rows.map(auditPayload)})}));
+app.post("/api/audit-ledger",asyncRoute(async(req,res)=>{const actor=await authenticatedUser(req);if(!actor)return res.status(401).json({error:"Please sign in again."});if(actor.role!=="admin")return res.status(403).json({error:"Only a portal administrator can add audit entries."});const v=auditInput(req.body);const result=await pool.query("INSERT INTO pwfb_portal_audit_ledger(bank_balance,branch,entry_date,amount,charges,cash_paid,transfer_code,excess_bf,unconfirmed,current_excess,created_by,updated_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11) RETURNING id,bank_balance,branch,entry_date,amount,charges,cash_paid,transfer_code,excess_bf,unconfirmed,current_excess",[v.bankBalance,v.branch,v.entryDate,v.amount,v.charges,v.cashPaid,v.transferCode,v.excessBf,v.unconfirmed,v.currentExcess,actor.id]);res.status(201).json({row:auditPayload(result.rows[0])})}));
+app.put("/api/audit-ledger/:id",asyncRoute(async(req,res)=>{const actor=await authenticatedUser(req);if(!actor)return res.status(401).json({error:"Please sign in again."});if(actor.role!=="admin")return res.status(403).json({error:"Only a portal administrator can edit audit entries."});if(!/^\d+$/.test(String(req.params.id||"")))return res.status(400).json({error:"Invalid audit entry ID."});const v=auditInput(req.body);const result=await pool.query("UPDATE pwfb_portal_audit_ledger SET bank_balance=$2,branch=$3,entry_date=$4,amount=$5,charges=$6,cash_paid=$7,transfer_code=$8,excess_bf=$9,unconfirmed=$10,current_excess=$11,updated_by=$12,updated_at=NOW() WHERE id=$1 RETURNING id,bank_balance,branch,entry_date,amount,charges,cash_paid,transfer_code,excess_bf,unconfirmed,current_excess",[req.params.id,v.bankBalance,v.branch,v.entryDate,v.amount,v.charges,v.cashPaid,v.transferCode,v.excessBf,v.unconfirmed,v.currentExcess,actor.id]);if(!result.rowCount)return res.status(404).json({error:"Audit entry not found."});res.set("Cache-Control","no-store");res.json({row:auditPayload(result.rows[0])})}));
+app.delete("/api/audit-ledger/:id",asyncRoute(async(req,res)=>{const actor=await authenticatedUser(req);if(!actor)return res.status(401).json({error:"Please sign in again."});if(actor.role!=="admin")return res.status(403).json({error:"Only a portal administrator can delete audit entries."});if(!/^\d+$/.test(String(req.params.id||"")))return res.status(400).json({error:"Invalid audit entry ID."});const result=await pool.query("DELETE FROM pwfb_portal_audit_ledger WHERE id=$1 RETURNING id",[req.params.id]);if(!result.rowCount)return res.status(404).json({error:"Audit entry not found."});res.set("Cache-Control","no-store");res.json({ok:true,deletedId:String(result.rows[0].id)})}));
+
 app.get("/api/payroll-additions", asyncRoute(async (req, res) => {
   const actor = await authenticatedUser(req);
   if (!actor) return res.status(401).json({ error: "Please sign in to view payroll additions." });
@@ -859,6 +867,25 @@ async function start() {
     );
     CREATE INDEX IF NOT EXISTS pwfb_portal_transport_roster_updated_idx
       ON pwfb_portal_transport_roster (updated_at DESC);
+
+    CREATE TABLE IF NOT EXISTS pwfb_portal_audit_ledger (
+      id BIGSERIAL PRIMARY KEY,
+      bank_balance NUMERIC(16,2),
+      branch TEXT NOT NULL,
+      entry_date DATE NOT NULL,
+      amount NUMERIC(16,2),
+      charges NUMERIC(16,2),
+      cash_paid NUMERIC(16,2),
+      transfer_code TEXT NOT NULL DEFAULT '',
+      excess_bf NUMERIC(16,2),
+      unconfirmed NUMERIC(16,2),
+      current_excess NUMERIC(16,2),
+      created_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
+      updated_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS pwfb_portal_audit_ledger_date_idx ON pwfb_portal_audit_ledger(entry_date,id);
     CREATE TABLE IF NOT EXISTS pwfb_portal_payroll_additions (
       id BIGSERIAL PRIMARY KEY,
       month TEXT NOT NULL CHECK (month IN ('August 2026','September 2026')),
