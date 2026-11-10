@@ -252,7 +252,7 @@ export function ScanToTextPage() {
           }
         },
       });
-      const text = String(result.data?.text ?? "").replace(/\\r\\n?/g, "\\n").replace(/[ \\t]+$/gm, "").replace(/\\n{3,}/g, "\\n\\n").trimEnd();
+      const text = String(result.data?.text ?? "").replace(/\r\n?/g, "\n").replace(/[ \t]+$/gm, "").replace(/\n{3,}/g, "\n\n").trimEnd();
       setExtractedText(text);
       setProgress(100);
       setMessage(text ? "Text extraction complete. Review and edit the result below." : "No readable text was detected. Try a clearer, well-lit image.");
