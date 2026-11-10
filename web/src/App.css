@@ -603,3 +603,10 @@ body[data-theme="dark"] .analysis-figures>div,body[data-theme="dark"] .analysis-
  .scan-page-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
  .scan-page-actions button{flex:1 1 auto}
 }
+
+/* The daily disbursement and reconciliation sheets are one unified report card. */
+.analysis-combined-card{display:grid;gap:16px}
+.analysis-report-section{display:grid;gap:10px;padding-top:15px;border-top:1px solid var(--border,#d1d5db)}
+.analysis-report-section h4{margin:0;color:var(--text,#0f172a);font-size:15px;font-weight:900}
+body[data-theme="dark"] .analysis-report-section{border-color:#374151}
+body[data-theme="dark"] .analysis-report-section h4{color:#e5e7eb}
