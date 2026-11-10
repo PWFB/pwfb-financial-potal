@@ -693,6 +693,43 @@ body[data-theme="dark"] .rapid-summary-grid input,body[data-theme="dark"] .rapid
 body[data-theme="dark"] .rapid-modal{background:#111827;color:#f8fafc}
 body[data-theme="dark"] .rapid-modal h3,body[data-theme="dark"] .rapid-modal label{color:#f8fafc}
 body[data-theme="dark"] .rapid-modal-actions button,body[data-theme="dark"] .rapid-modal-head button{background:#1f2937;color:#f8fafc;border-color:#475569}
+@media screen {
+body[data-theme="system"] .daily-date-filter{color:#f1f5f9}
+body[data-theme="system"] .daily-date-filter select{background:#111827;color:#f8fafc;border-color:#475569;color-scheme:dark}
+body[data-theme="system"] .report-tools{background:#111827;border-color:#374151;color:#f1f5f9}
+body[data-theme="system"] .report-tools-buttons button,body[data-theme="system"] .report-upload-button,body[data-theme="system"] .report-upload-download,body[data-theme="system"] .report-upload-preview>div button{background:#1f2937;border-color:#475569;color:#f8fafc}
+body[data-theme="system"] .report-tools-message,body[data-theme="system"] .report-upload-preview>div span,body[data-theme="system"] .rapid-summary-note,body[data-theme="system"] .rapid-report-meta{color:#cbd5e1}
+body[data-theme="system"] .report-upload-preview iframe{border-color:#475569;background:#fff}
+body[data-theme="system"] .analysis-page,body[data-theme="system"] .audit-dashboard,body[data-theme="system"] .rapid-page{color:#f1f5f9}
+body[data-theme="system"] .analysis-card-title{background:#1e293b;border-color:#475569}
+body[data-theme="system"] .analysis-card-title span{color:#fdba74}
+body[data-theme="system"] .analysis-card-title p,body[data-theme="system"] .analysis-page-heading p{color:#cbd5e1}
+body[data-theme="system"] .analysis-figures>div{background:#1f2937;border:1px solid #475569}
+body[data-theme="system"] .analysis-figures span{color:#cbd5e1}
+body[data-theme="system"] .analysis-figures strong{color:#bbf7d0;overflow-wrap:anywhere}
+body[data-theme="system"] .analysis-table th,body[data-theme="system"] .analysis-table td{background:#111827;color:#f8fafc;border-color:#64748b}
+body[data-theme="system"] .analysis-table th{background:#263449;color:#fff}
+body[data-theme="system"] .analysis-total-row td{background:#27364b!important;color:#fff!important}
+body[data-theme="system"] .analysis-data-note,body[data-theme="system"] .analysis-report-section h4{background:#1f2937;color:#f1f5f9}
+body[data-theme="system"] .audit-sheet-meta{background:#111827;color:#f1f5f9;border-color:#475569}
+body[data-theme="system"] .audit-wide-table th{background:#263449!important;color:#fff!important;border-color:#64748b}
+body[data-theme="system"] .audit-wide-table td{background:#111827!important;color:#f8fafc!important;border-color:#64748b}
+body[data-theme="system"] .audit-wide-table .total-row td{background:#27364b!important;color:#fff!important}
+body[data-theme="system"] .audit-sheet-footnote{color:#cbd5e1}
+body[data-theme="system"] .rapid-heading,body[data-theme="system"] .rapid-summary{background:#111827;border-color:#374151;color:#f1f5f9}
+body[data-theme="system"] .rapid-heading h2,body[data-theme="system"] .rapid-summary h3{color:#f8fafc}
+body[data-theme="system"] .rapid-heading p,body[data-theme="system"] .rapid-summary label{color:#cbd5e1}
+body[data-theme="system"] .rapid-table-wrap{background:#111827;border-color:#475569}
+body[data-theme="system"] .rapid-table th{background:#263449;color:#fff;border-color:#64748b}
+body[data-theme="system"] .rapid-table td{background:#111827;color:#f8fafc;border-color:#475569}
+body[data-theme="system"] .rapid-table tbody tr:hover td{background:#1e293b}
+body[data-theme="system"] .rapid-table tfoot td{background:#27364b;color:#fff}
+body[data-theme="system"] .rapid-summary-grid input,body[data-theme="system"] .rapid-form-grid input{background:#0f172a;color:#f8fafc;border-color:#475569;color-scheme:dark}
+body[data-theme="system"] .rapid-modal{background:#111827;color:#f8fafc}
+body[data-theme="system"] .rapid-modal h3,body[data-theme="system"] .rapid-modal label{color:#f8fafc}
+body[data-theme="system"] .rapid-modal-actions button,body[data-theme="system"] .rapid-modal-head button{background:#1f2937;color:#f8fafc;border-color:#475569}
+
+}
 @media(max-width:640px){
  .daily-date-filter{width:100%;min-width:0}
  .report-tools-buttons>*{flex:1 1 calc(50% - 8px)}
