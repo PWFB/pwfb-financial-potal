@@ -240,6 +240,8 @@ export function ScanToTextPage() {
         document.head.appendChild(script);
       });
       const result = await Tesseract.recognize(file, "eng", {
+        tessedit_pageseg_mode: 6,
+        preserve_interword_spaces: "1",
         logger: (event) => {
           if (event.status === "recognizing text") {
             const percent = Math.round((event.progress || 0) * 100);
@@ -250,7 +252,7 @@ export function ScanToTextPage() {
           }
         },
       });
-      const text = result.data?.text?.trim() || "";
+      const text = String(result.data?.text ?? "").replace(/\r\n?/g, "\n").replace(/[ \t]+$/gm, "").replace(/\n{3,}/g, "\n\n").trimEnd();
       setExtractedText(text);
       setProgress(100);
       setMessage(text ? "Text extraction complete. Review and edit the result below." : "No readable text was detected. Try a clearer, well-lit image.");

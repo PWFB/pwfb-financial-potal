@@ -611,6 +611,51 @@ app.post("/api/payroll-additions", asyncRoute(async (req, res) => {
   res.status(201).json({ ok: true, staff: payrollAdditionPayload(result.rows[0]) });
 }));
 
+
+// Edit or delete administrator-created payroll rows without changing original imported source rows.
+app.put("/api/payroll-additions/:id", asyncRoute(async (req, res) => {
+  const actor = await authenticatedUser(req);
+  if (!actor) return res.status(401).json({ error: "Please sign in again before editing payroll." });
+  if (actor.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can edit payroll." });
+  const id = String(req.params.id || "");
+  if (!/^\d+$/.test(id)) return res.status(400).json({ error: "Invalid payroll record ID." });
+  const month = String(req.body?.month || "").trim();
+  const region = String(req.body?.region || "").trim();
+  const branch = String(req.body?.branch || "").trim().replace(/\s+/g, " ").toUpperCase();
+  const name = String(req.body?.name || "").trim().replace(/\s+/g, " ").toUpperCase();
+  const gra = String(req.body?.gra || "").trim();
+  if (month !== "September 2026" || !["DM 1", "DM 2"].includes(region) || branch.length < 2 || name.length < 2 || !gra || gra.length > 50) return res.status(400).json({ error: "Enter valid month, division, branch, staff name and GRA." });
+  const keys = ["gross", "bonus", "coopS", "coopL", "offline", "others", "advance"];
+  const values = {};
+  for (const key of keys) {
+    const raw = req.body?.[key];
+    const value = raw === "" || raw === null || raw === undefined ? NaN : Number(raw);
+    if (!Number.isFinite(value) || value < 0 || value > 999999999999.99) return res.status(400).json({ error: "Enter valid non-negative payroll amounts." });
+    values[key] = Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+  const round5 = value => Math.round(value / 5) * 5;
+  const dev = round5(values.gross * 0.025), tax = round5(values.gross * 0.03);
+  const result = await pool.query(
+    `UPDATE pwfb_portal_payroll_additions SET month=$2, region=$3, branch=$4, name=$5, gra=$6, gross=$7, bonus=$8, coop_s=$9, coop_l=$10, dev=$11, tax=$12, offline=$13, others=$14, advance=$15 WHERE id=$1 RETURNING id, month, region, branch, name, gra, gross::text AS gross, bonus::text AS bonus, coop_s::text AS "coopS", coop_l::text AS "coopL", dev::text AS dev, tax::text AS tax, offline::text AS offline, others::text AS others, advance::text AS advance, created_at AS "createdAt"`,
+    [id, month, region, branch, name, gra, values.gross, values.bonus, values.coopS, values.coopL, dev, tax, values.offline, values.others, values.advance]
+  );
+  if (!result.rowCount) return res.status(404).json({ error: "Payroll row was not found. No record was changed." });
+  res.set("Cache-Control", "no-store");
+  res.json({ ok: true, staff: payrollAdditionPayload(result.rows[0]) });
+}));
+
+app.delete("/api/payroll-additions/:id", asyncRoute(async (req, res) => {
+  const actor = await authenticatedUser(req);
+  if (!actor) return res.status(401).json({ error: "Please sign in again before deleting payroll." });
+  if (actor.role !== "admin") return res.status(403).json({ error: "Only a portal administrator can delete payroll." });
+  const id = String(req.params.id || "");
+  if (!/^\d+$/.test(id)) return res.status(400).json({ error: "Invalid payroll record ID." });
+  const result = await pool.query("DELETE FROM pwfb_portal_payroll_additions WHERE id=$1 RETURNING id", [id]);
+  if (!result.rowCount) return res.status(404).json({ error: "Payroll row was not found. No record was deleted." });
+  res.set("Cache-Control", "no-store");
+  res.json({ ok: true, deletedId: String(result.rows[0].id) });
+}));
+
 app.get("/api/admin/staff", asyncRoute(async (req, res) => {
   const actor = await authenticatedUser(req);
   if (!actor) return res.status(401).json({ error: "Please sign in again." });
