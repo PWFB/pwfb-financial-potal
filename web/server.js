@@ -561,7 +561,7 @@ app.delete("/api/audit-ledger/:id",asyncRoute(async(req,res)=>{const actor=await
 
 
 function rapidRowPayload(r){return {id:String(r.id),name:r.name,purpose:r.purpose,accountNumber:r.account_number,bank:r.bank,amount:r.amount===null?null:String(r.amount),remark:r.remark}}
-function rapidSummaryPayload(r){return {ob1:r.ob1===null?"":String(r.ob1),atm3:r.atm3===null?"":String(r.atm3),disbursementAmount:r.disbursement_amount===null?"":String(r.disbursement_amount),expenses:r.expenses===null?"":String(r.expenses),totalRapidBalance:r.total_rapid_balance===null?"":String(r.total_rapid_balance),charges:r.charges===null?"":String(r.charges),remark:r.remark||""}}
+function rapidSummaryPayload(r){return {ob1:r.ob1==null?"":String(r.ob1),atm3:r.atm3==null?"":String(r.atm3),disbursementAmount:r.disbursement_amount==null?"":String(r.disbursement_amount),expenses:r.expenses==null?"":String(r.expenses),totalRapidBalance:r.total_rapid_balance==null?"":String(r.total_rapid_balance),charges:r.charges==null?"":String(r.charges),remark:r.remark||""}}
 function rapidAmount(v){if(v===null||v===undefined||v==="")return null;const n=Number(v);if(!Number.isFinite(n)||Math.abs(n)>999999999999.99)throw Object.assign(new Error("Enter a valid amount or leave it blank."),{status:400});return Math.round((n+Number.EPSILON)*100)/100}
 function rapidText(v,max=180){return String(v??"").trim().slice(0,max)}
 function requireRapidAdmin(req,res){return authenticatedUser(req).then(actor=>{if(!actor){res.status(401).json({error:"Please sign in again."});return null}if(actor.role!=="admin"){res.status(403).json({error:"Only a portal administrator can change Rapid records."});return null}return actor})}
