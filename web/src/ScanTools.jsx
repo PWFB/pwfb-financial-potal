@@ -403,22 +403,23 @@ export function DisbursementAnalysisPage() {
         <div>
           <p className="auth-eyebrow">PWFB · FINANCE RECORDS</p>
           <h2>Daily Disbursement Analyses Sheet</h2>
-          <p>Both report cards are together on this page; each scan control is inside its own card.</p>
+          <p>One combined report containing the disbursement and receipts/reconciliation sections.</p>
         </div>
         <span>06 November 2026</span>
       </div>
-      <div className="analysis-card-grid">
-        <article className="analysis-card">
-          <div className="analysis-card-title">
-            <span>REPORT CARD 01</span>
-            <h3>Daily Disbursement Analysis</h3>
-            <p>PERFECT WISDOM FOR BETTER LTD · 06/11/2026</p>
-          </div>
-          <div className="analysis-figures">
-            <div><span>Opening Balance</span><strong>₦12,689,796.53</strong></div>
-            <div><span>Received from POS 75</span><strong>₦5,000,000.00</strong></div>
-          </div>
-          <InlineCameraScan area="Disbursement Analysis Card" />
+      <article className="analysis-card analysis-combined-card">
+        <div className="analysis-card-title">
+          <span>COMBINED DAILY REPORT</span>
+          <h3>Daily Disbursement Analysis &amp; Reconciliation</h3>
+          <p>PERFECT WISDOM FOR BETTER LTD · 06/11/2026</p>
+        </div>
+        <div className="analysis-figures">
+          <div><span>Opening Balance</span><strong>₦12,689,796.53</strong></div>
+          <div><span>Received from POS 75</span><strong>₦5,000,000.00</strong></div>
+        </div>
+        <InlineCameraScan area="Combined Daily Disbursement Analysis and Reconciliation" />
+        <section className="analysis-report-section">
+          <h4>Daily Disbursement Analysis</h4>
           <div className="analysis-table-wrap">
             <table className="analysis-table">
               <thead>
@@ -443,14 +444,9 @@ export function DisbursementAnalysisPage() {
               </tbody>
             </table>
           </div>
-        </article>
-        <article className="analysis-card">
-          <div className="analysis-card-title analysis-card-title-green">
-            <span>REPORT CARD 02</span>
-            <h3>Receipts &amp; Reconciliation</h3>
-            <p>Continuation of the same daily disbursement sheet</p>
-          </div>
-          <InlineCameraScan area="Receipts and Reconciliation Card" />
+        </section>
+        <section className="analysis-report-section">
+          <h4>Receipts &amp; Reconciliation</h4>
           <div className="analysis-table-wrap">
             <table className="analysis-table">
               <thead><tr>{["Received", "Excess Rc", "Shortage Rc", "Disbursement", "Balance", "Remark"].map((value) =>
@@ -474,11 +470,11 @@ export function DisbursementAnalysisPage() {
               </tbody>
             </table>
           </div>
-        </article>
-      </div>
+        </section>
+      </article>
       <p className="analysis-data-note">
-        Figures and blank cells are preserved as supplied. No missing values have been estimated.
-        These displayed source figures are not database-reconciled transactions.
+        Both original report sections are kept together in one report card. Figures and blank cells are preserved as supplied;
+        no missing values have been estimated. These displayed source figures are not database-reconciled transactions.
       </p>
     </div>
   );
