@@ -610,3 +610,10 @@ body[data-theme="dark"] .analysis-figures>div,body[data-theme="dark"] .analysis-
 .analysis-report-section h4{margin:0;color:var(--text,#0f172a);font-size:15px;font-weight:900}
 body[data-theme="dark"] .analysis-report-section{border-color:#374151}
 body[data-theme="dark"] .analysis-report-section h4{color:#e5e7eb}
+
+/* In-app OCR Scan to Text */
+.scan-text-preview{display:block;width:100%;max-height:520px;object-fit:contain;border:1px solid var(--border,#d1d5db);border-radius:12px;background:#f8fafc}
+.scan-text-result textarea{display:block;width:100%;min-height:260px;resize:vertical;padding:14px;border:1px solid var(--border,#cbd5e1);border-radius:10px;background:var(--surface,#fff);color:var(--text,#0f172a);font:inherit;line-height:1.55}
+.scan-text-result textarea:focus{outline:2px solid #16865b;outline-offset:1px}
+.scan-text-page .scan-camera-actions{display:flex;flex-wrap:wrap;gap:10px}
+.scan-text-page .scan-camera-actions button:disabled{opacity:.5;cursor:not-allowed}
