@@ -1,16 +1,18 @@
 import {useCallback,useEffect,useMemo,useRef,useState} from "react";
 import ReportTools from "./ReportTools.jsx";
 const localDate=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")};
+const recentDateRange=(start,end=localDate())=>{const dates=[];const cursor=new Date(start+"T00:00:00");const last=new Date(end+"T00:00:00");while(cursor<=last){dates.push([cursor.getFullYear(),String(cursor.getMonth()+1).padStart(2,"0"),String(cursor.getDate()).padStart(2,"0")].join("-"));cursor.setDate(cursor.getDate()+1)}return dates.reverse()};
 const blankRow={entryDate:localDate(),name:"",purpose:"",accountNumber:"",bank:"",amount:"",remark:""};
 const blankSummary={ob1:"",atm3:"",disbursementAmount:"",expenses:"",totalRapidBalance:"",charges:"",remark:""};
 const money=n=>"₦"+Number(n||0).toLocaleString("en-NG",{minimumFractionDigits:2,maximumFractionDigits:2});
 const dateText=v=>v?new Date(v+"T00:00:00").toLocaleDateString("en-GB"):"Date not assigned";
 export default function RapidDisbursement({canEdit=false}){
- const [rows,setRows]=useState([]),[summary,setSummary]=useState(blankSummary),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[form,setForm]=useState(blankRow),[editing,setEditing]=useState(null),[modal,setModal]=useState(false),[selectedDate,setSelectedDate]=useState("all");
+ const [rows,setRows]=useState([]),[summary,setSummary]=useState(blankSummary),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[form,setForm]=useState(blankRow),[editing,setEditing]=useState(null),[modal,setModal]=useState(false),[selectedDate,setSelectedDate]=useState(localDate());
  const reportRef=useRef(null);
  const load=useCallback(async()=>{setLoading(true);setError("");try{const r=await fetch("/api/rapid-sheet",{credentials:"same-origin",cache:"no-store"});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Unable to load Rapid sheet.");setRows(Array.isArray(d.rows)?d.rows:[]);setSummary({...blankSummary,...(d.summary||{})})}catch(e){setError(e.message||"Unable to load Rapid sheet.")}finally{setLoading(false)}},[]);
  useEffect(()=>{load()},[load]);
- const dateOptions=useMemo(()=>[...new Set(rows.map(r=>r.entryDate).filter(Boolean))].sort((a,b)=>b.localeCompare(a)),[rows]);
+ const today=localDate();
+ const dateOptions=recentDateRange("2026-11-05",today);
  const visibleRows=useMemo(()=>rows.filter(r=>selectedDate==="all"||(selectedDate==="unassigned"?!r.entryDate:r.entryDate===selectedDate)),[rows,selectedDate]);
  const total=useMemo(()=>visibleRows.reduce((n,r)=>n+Number(r.amount||0),0),[visibleRows]);
  const openAdd=()=>{setEditing(null);setForm({...blankRow,entryDate:localDate()});setModal(true);setError("");setNotice("")};
@@ -22,7 +24,7 @@ export default function RapidDisbursement({canEdit=false}){
  const fields=[["entryDate","Work Date","date"],["name","Name","text"],["purpose","Purpose","text"],["accountNumber","Account Number","text"],["bank","Bank","text"],["amount","Amount (₦)","number"],["remark","Remark","text"]];
  const summaries=[["ob1","OB 1 (+ Amount Received from Main Acct 2)"],["atm3","Amount Received by ATM 3"],["disbursementAmount","Disbursement Amount"],["expenses","Expenses"],["totalRapidBalance","Total Rapid Balance"],["charges","Charges"],["remark","Remark"]];
  return <div className="rapid-page daily-report-page">
-  <div className="rapid-heading no-print"><div><span>PERFECT WISDOM FOR BETTER</span><h2>Rapid</h2><p>Daily Disbursement Sheet</p></div><label className="daily-date-filter">Filter by work date<select value={selectedDate} onChange={e=>setSelectedDate(e.target.value)}><option value="all">All dates</option><option value="unassigned">Date not assigned</option>{dateOptions.map(date=><option key={date} value={date}>{dateText(date)}</option>)}</select></label></div>
+  <div className="rapid-heading no-print"><div><span>PERFECT WISDOM FOR BETTER</span><h2>Rapid</h2><p>Daily Disbursement Sheet · Recent-work dates 05/11/2026 through {dateText(today)}. Current date is selected automatically.</p></div><label className="daily-date-filter">Filter by work date<select value={selectedDate} onChange={e=>setSelectedDate(e.target.value)}><option value="all">All dates</option><option value="unassigned">Date not assigned</option>{dateOptions.map(date=><option key={date} value={date}>{dateText(date)}{date===today?" · Today":""}</option>)}</select></label></div>
   <div className="rapid-actions no-print"><button type="button" onClick={exportCsv}>Export CSV</button>{canEdit&&<button type="button" onClick={openAdd}>＋ Add Disbursement Row</button>}</div>
   <ReportTools targetRef={reportRef} filename={selectedDate==="all"?"pwfb-rapid-all-dates":selectedDate==="unassigned"?"pwfb-rapid-date-unassigned":"pwfb-rapid-"+selectedDate}/>
   {error&&<p className="rapid-message error no-print" role="alert">{error}</p>}{notice&&<p className="rapid-message no-print" role="status">{notice}</p>}
