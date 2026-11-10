@@ -1,6 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import ReportTools from "./ReportTools.jsx";
 
+const localDate = () => {
+  const now = new Date();
+  return [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
+};
+const recentDateRange = (start, end = localDate()) => {
+  const dates = [];
+  const cursor = new Date(start + "T00:00:00");
+  const last = new Date(end + "T00:00:00");
+  while (cursor <= last) {
+    dates.push([cursor.getFullYear(), String(cursor.getMonth() + 1).padStart(2, "0"), String(cursor.getDate()).padStart(2, "0")].join("-"));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return dates.reverse();
+};
+const dateLabel = value => new Date(value + "T00:00:00").toLocaleDateString("en-GB");
+
 export function InlineCameraScan({ area }) {
   const [scanUrl, setScanUrl] = useState("");
   const [fileName, setFileName] = useState("");
@@ -359,7 +375,9 @@ export function ScanToTextPage() {
 }
 
 export function DisbursementAnalysisPage() {
-  const [selectedDate,setSelectedDate]=useState("all");
+  const today = localDate();
+  const dateOptions = recentDateRange("2026-11-05", today);
+  const [selectedDate,setSelectedDate]=useState(today);
   const reportRef=useRef(null);
   const dailyReports=[
     {date:"2026-11-05",label:"05/11/2026"},
@@ -374,18 +392,18 @@ export function DisbursementAnalysisPage() {
         <div>
           <p className="auth-eyebrow">PWFB · FINANCE RECORDS</p>
           <h2>Daily Disbursement Analyses Sheet</h2>
-          <p>Choose the actual work date to view its complete daily sheet.</p>
+          <p>Recent-work dates: 05/11/2026 through {dateLabel(today)}. The current date is selected automatically.</p>
         </div>
         <label className="daily-date-filter">Filter by work date
           <select value={selectedDate} onChange={event=>setSelectedDate(event.target.value)}>
             <option value="all">All dates</option>
-            <option value="2026-11-05">05/11/2026</option>
-            <option value="2026-11-06">06/11/2026</option>
+            {dateOptions.map(date=><option key={date} value={date}>{dateLabel(date)}{date===today?" · Today":""}</option>)}
           </select>
         </label>
       </div>
       <ReportTools targetRef={reportRef} filename={selectedDate==="all"?"pwfb-daily-disbursement-all-dates":"pwfb-daily-disbursement-"+selectedDate}/>
       <div ref={reportRef} className="analysis-report-export">
+        {visibleReports.length===0&&<p className="analysis-data-note">No daily disbursement sheet has been saved for {dateLabel(selectedDate)}. No figures have been generated for this date.</p>}
         {visibleReports.map(report=>report.date==="2026-11-05"?(
           <article className="analysis-card analysis-combined-card" key={report.date}>
             <div className="analysis-card-title">
