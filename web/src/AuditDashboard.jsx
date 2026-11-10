@@ -4,8 +4,8 @@ const columns=[["bankBalance","Bank Balance"],["expectingBranch","Expecting Bran
 const numeric=new Set(["bankBalance","openingBalance","expectingAmount","chargesAmount","cashPaidAmount","transferAmount","excessBfAmount","unconfirmedAmount","currentExcessAmount"]);
 const groups=[["Bank balance (1)",1],["Expecting bal. (-) (2)",3],["CHARGES (-) (3)",2],["Cash paid (-) (4)",2],["Transfer to bank (-) (5)",2],["Excess deposit (BF) (NIL) (6)",2],["Excess deposit yet to be confirmed (-) (7)",2],["Current excess deposit (+) (8)",2]];
 const totalsByDate={
- "2026-11-06":["58,255.83","TOTAL","","2,972,800.00","TOTAL","0.00","TOTAL","27,000.00","TOTAL","595,830.00","TOTAL","6,537,633.00","TOTAL","556,980.00","TOTAL","4,299,600.00"],
- "2026-11-05":["58,307.60","TOTAL","","1,339,555.00","TOTAL","14,000.00","TOTAL","14,000.00","TOTAL","55,984,400.00","TOTAL","3,887,300.00","TOTAL","673,980.00","TOTAL","882,099.00"]
+ "2026-11-06":["58,307.60","TOTAL","","1,339,555.00","TOTAL","14,000.00","TOTAL","14,000.00","TOTAL","55,984,400.00","TOTAL","3,887,300.00","TOTAL","673,980.00","TOTAL","882,099.00"],
+ "2026-11-05":["58,255.83","TOTAL","","2,972,800.00","TOTAL","0.00","TOTAL","27,000.00","TOTAL","595,830.00","TOTAL","6,537,633.00","TOTAL","556,980.00","TOTAL","4,299,600.00"]
 };
 const blank=Object.fromEntries(columns.map(([k])=>[k,""]));
 const dateText=v=>v?new Date(v+"T00:00:00").toLocaleDateString("en-GB"):"";
