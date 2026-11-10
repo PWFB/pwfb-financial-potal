@@ -718,3 +718,9 @@ body[data-theme="dark"] .rapid-modal-actions button,body[data-theme="dark"] .rap
  .audit-sheet-footnote,.analysis-data-note{background:#fff!important;color:#222!important}
  .rapid-summary-grid input{border:0!important;padding:0!important;color:#111!important;background:#fff!important}
 }
+.report-exporting .no-print{display:none!important}
+.rapid-export-title{display:grid;gap:4px;margin-bottom:10px;padding:10px 0;border-bottom:2px solid #64748b;color:#172033}
+.rapid-export-title strong{font-size:11px;letter-spacing:1px}
+.rapid-export-title h3{margin:0;font-size:19px;font-weight:900}
+body[data-theme="dark"] .rapid-export-title{color:#f8fafc;border-color:#94a3b8}
+@media print{.rapid-export-title{color:#111!important;border-color:#333!important}.rapid-export-title h3,.rapid-export-title strong{color:#111!important}}
