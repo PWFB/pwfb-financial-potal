@@ -19,7 +19,9 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "@neondatabase/auth": "0.5.0-beta",
-    "jose": "^6.1.0"
+    "jose": "^6.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
