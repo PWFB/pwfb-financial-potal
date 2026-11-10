@@ -559,6 +559,15 @@ app.post("/api/audit-ledger",asyncRoute(async(req,res)=>{const actor=await authe
 app.put("/api/audit-ledger/:id",asyncRoute(async(req,res)=>{const actor=await authenticatedUser(req);if(!actor)return res.status(401).json({error:"Please sign in again."});if(actor.role!=="admin")return res.status(403).json({error:"Only a portal administrator can edit audit entries."});if(!/^\d+$/.test(String(req.params.id||"")))return res.status(400).json({error:"Invalid audit entry ID."});const v=auditInput(req.body);const result=await pool.query("UPDATE pwfb_portal_audit_ledger SET bank_balance=$2,branch=$3,entry_date=$4,amount=$5,charges=$6,cash_paid=$7,transfer_code=$8,excess_bf=$9,unconfirmed=$10,current_excess=$11,updated_by=$12,updated_at=NOW() WHERE id=$1 RETURNING id,bank_balance,branch,entry_date,amount,charges,cash_paid,transfer_code,excess_bf,unconfirmed,current_excess",[req.params.id,v.bankBalance,v.branch,v.entryDate,v.amount,v.charges,v.cashPaid,v.transferCode,v.excessBf,v.unconfirmed,v.currentExcess,actor.id]);if(!result.rowCount)return res.status(404).json({error:"Audit entry not found."});res.set("Cache-Control","no-store");res.json({row:auditPayload(result.rows[0])})}));
 app.delete("/api/audit-ledger/:id",asyncRoute(async(req,res)=>{const actor=await authenticatedUser(req);if(!actor)return res.status(401).json({error:"Please sign in again."});if(actor.role!=="admin")return res.status(403).json({error:"Only a portal administrator can delete audit entries."});if(!/^\d+$/.test(String(req.params.id||"")))return res.status(400).json({error:"Invalid audit entry ID."});const result=await pool.query("DELETE FROM pwfb_portal_audit_ledger WHERE id=$1 RETURNING id",[req.params.id]);if(!result.rowCount)return res.status(404).json({error:"Audit entry not found."});res.set("Cache-Control","no-store");res.json({ok:true,deletedId:String(result.rows[0].id)})}));
 
+
+const auditSheetCols=[["bankBalance","bank_balance","number"],["expectingBranch","expecting_branch","text"],["expectingDate","expecting_date","text"],["expectingAmount","expecting_amount","number"],["chargesBranch","charges_branch","text"],["chargesAmount","charges_amount","number"],["cashPaidBranch","cash_paid_branch","text"],["cashPaidAmount","cash_paid_amount","number"],["transferBankCode","transfer_bank_code","text"],["transferAmount","transfer_amount","number"],["excessBfDate","excess_bf_date","text"],["excessBfAmount","excess_bf_amount","number"],["unconfirmedDate","unconfirmed_date","text"],["unconfirmedAmount","unconfirmed_amount","number"],["currentExcessDate","current_excess_date","text"],["currentExcessAmount","current_excess_amount","number"]];
+function auditSheetPayload(row){const out={id:String(row.id)};for(const [key,col,type] of auditSheetCols)out[key]=type==="number"?(row[col]===null?null:String(row[col])):(row[col]||"");return out}
+function auditSheetInput(body){const out={};for(const [key,,type] of auditSheetCols){const raw=body?.[key];if(type==="number"){if(raw===null||raw===undefined||raw===""){out[key]=null;continue}const n=Number(raw);if(!Number.isFinite(n)||Math.abs(n)>999999999999.99)throw Object.assign(new Error("Enter valid amounts or leave unavailable amounts blank."),{status:400});out[key]=Math.round((n+Number.EPSILON)*100)/100}else out[key]=String(raw??"").trim().slice(0,160)}return out}
+app.get("/api/audit-sheet",asyncRoute(async(_req,res)=>{const q=await pool.query("SELECT * FROM pwfb_portal_audit_sheet_rows ORDER BY COALESCE(source_row,2147483647),id");res.set("Cache-Control","no-store");res.json({rows:q.rows.map(auditSheetPayload)})}));
+app.post("/api/audit-sheet",asyncRoute(async(req,res)=>{const actor=await authenticatedUser(req);if(!actor)return res.status(401).json({error:"Please sign in again."});if(actor.role!=="admin")return res.status(403).json({error:"Only a portal administrator can add audit rows."});const v=auditSheetInput(req.body),names=auditSheetCols.map(x=>x[1]),values=auditSheetCols.map(x=>v[x[0]]),p=values.map((_,i)=>"$"+(i+1));const q=await pool.query("INSERT INTO pwfb_portal_audit_sheet_rows("+names.join(",")+",created_by,updated_by) VALUES("+p.join(",")+",$"+(values.length+1)+",$"+(values.length+1)+") RETURNING *",[...values,actor.id]);res.status(201).json({row:auditSheetPayload(q.rows[0])})}));
+app.put("/api/audit-sheet/:id",asyncRoute(async(req,res)=>{const actor=await authenticatedUser(req);if(!actor)return res.status(401).json({error:"Please sign in again."});if(actor.role!=="admin")return res.status(403).json({error:"Only a portal administrator can edit audit rows."});if(!/^\\d+$/.test(String(req.params.id||"")))return res.status(400).json({error:"Invalid audit row ID."});const v=auditSheetInput(req.body),values=auditSheetCols.map(x=>v[x[0]]),sets=auditSheetCols.map((x,i)=>x[1]+"=$"+(i+2));const q=await pool.query("UPDATE pwfb_portal_audit_sheet_rows SET "+sets.join(",")+",updated_by=$"+(values.length+2)+",updated_at=NOW() WHERE id=$1 RETURNING *",[req.params.id,...values,actor.id]);if(!q.rowCount)return res.status(404).json({error:"Audit row not found."});res.json({row:auditSheetPayload(q.rows[0])})}));
+app.delete("/api/audit-sheet/:id",asyncRoute(async(req,res)=>{const actor=await authenticatedUser(req);if(!actor)return res.status(401).json({error:"Please sign in again."});if(actor.role!=="admin")return res.status(403).json({error:"Only a portal administrator can delete audit rows."});if(!/^\\d+$/.test(String(req.params.id||"")))return res.status(400).json({error:"Invalid audit row ID."});const q=await pool.query("DELETE FROM pwfb_portal_audit_sheet_rows WHERE id=$1 RETURNING id",[req.params.id]);if(!q.rowCount)return res.status(404).json({error:"Audit row not found."});res.json({ok:true,deletedId:String(q.rows[0].id)})}));
+
 app.get("/api/payroll-additions", asyncRoute(async (req, res) => {
   const actor = await authenticatedUser(req);
   if (!actor) return res.status(401).json({ error: "Please sign in to view payroll additions." });
@@ -886,6 +895,40 @@ async function start() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS pwfb_portal_audit_ledger_date_idx ON pwfb_portal_audit_ledger(entry_date,id);
+
+CREATE TABLE IF NOT EXISTS pwfb_portal_audit_sheet_rows (
+ id BIGSERIAL PRIMARY KEY, source_row INTEGER UNIQUE,
+ bank_balance NUMERIC(16,2), expecting_branch TEXT NOT NULL DEFAULT '', expecting_date TEXT NOT NULL DEFAULT '', expecting_amount NUMERIC(16,2),
+ charges_branch TEXT NOT NULL DEFAULT '', charges_amount NUMERIC(16,2), cash_paid_branch TEXT NOT NULL DEFAULT '', cash_paid_amount NUMERIC(16,2),
+ transfer_bank_code TEXT NOT NULL DEFAULT '', transfer_amount NUMERIC(16,2), excess_bf_date TEXT NOT NULL DEFAULT '', excess_bf_amount NUMERIC(16,2),
+ unconfirmed_date TEXT NOT NULL DEFAULT '', unconfirmed_amount NUMERIC(16,2), current_excess_date TEXT NOT NULL DEFAULT '', current_excess_amount NUMERIC(16,2),
+ created_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL, updated_by BIGINT REFERENCES pwfb_portal_users(id) ON DELETE SET NULL,
+ created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+INSERT INTO pwfb_portal_audit_sheet_rows(source_row,bank_balance,expecting_branch,expecting_date,expecting_amount,charges_branch,charges_amount,cash_paid_branch,cash_paid_amount,transfer_bank_code,transfer_amount,excess_bf_date,excess_bf_amount,unconfirmed_date,unconfirmed_amount,current_excess_date,current_excess_amount)
+VALUES (1,58307.6,'Moniya 2','',50000,'Dugbe',9000,'',NULL,'',100800,'',55000,'',64500,'',19500),
+(2,NULL,'Adeoyo','',90000,'Iwo Rd',5000,'',NULL,'',58500,'',126000,'',38800,'',40500),
+(3,NULL,'Moniya 3','',114600,'',NULL,'',14000,'',11000,'',135000,'',990,'',17500),
+(4,NULL,'Olorunsogo','',136200,'',NULL,'',NULL,'',10000000,'',15100,'',990,'',19500),
+(5,NULL,'Ajibode','',15000,'',NULL,'',NULL,'',525100,'',11000,'',90000,'',1000),
+(6,NULL,'Awotan','',158700,'',NULL,'',NULL,'',18536500,'',82000,'',69200,'',150000),
+(7,NULL,'N.I.G','',58700,'',NULL,'',NULL,'',2960500,'',41000,'',98500,'',42000),
+(8,NULL,'Akobo 2','',80115,'',NULL,'',NULL,'',23752000,'',83000,'',90000,'',14900),
+(9,NULL,'Moniya 1','',190000,'',NULL,'',NULL,'',NULL,'',35000,'',3000,'',196100),
+(10,NULL,'Bodija 1','',167000,'',NULL,'',NULL,'',NULL,'',25100,'',150000,'',39100),
+(11,NULL,'Sabo 2','',38440,'',NULL,'',NULL,'',NULL,'',3279100,'',20000,'',17000),
+(12,NULL,'Olugi','',14500,'',NULL,'',NULL,'',NULL,'',NULL,'',48000,'',15400),
+(13,NULL,'Bodija 2','',59900,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',15000),
+(14,NULL,'Tede','',82000,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',16000),
+(15,NULL,'Sango 2','',74500,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',410),
+(16,NULL,'','',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',80000),
+(17,NULL,'','',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',55000),
+(18,NULL,'','',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',9700),
+(19,NULL,'','',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',5100),
+(20,NULL,'','',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',92000),
+(21,NULL,'','',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',32100),
+(22,NULL,'','',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',NULL,'',60899) ON CONFLICT(source_row) DO NOTHING;
+
     CREATE TABLE IF NOT EXISTS pwfb_portal_payroll_additions (
       id BIGSERIAL PRIMARY KEY,
       month TEXT NOT NULL CHECK (month IN ('August 2026','September 2026')),
