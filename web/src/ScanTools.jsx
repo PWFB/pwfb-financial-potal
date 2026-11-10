@@ -163,33 +163,34 @@ async function buildScannedPdf(pages) {
   return new Blob(chunks, { type: "application/pdf" });
 }
 
-export function ScanToPdfPage() {
+export function ScanToTextPage() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const [cameraOn, setCameraOn] = useState(false);
-  const [pages, setPages] = useState([]);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [extractedText, setExtractedText] = useState("");
   const [message, setMessage] = useState("");
+  const [progress, setProgress] = useState(0);
   const [working, setWorking] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState("");
 
   const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
     if (videoRef.current) videoRef.current.srcObject = null;
     setCameraOn(false);
   };
 
   useEffect(() => () => {
-    if (streamRef.current) streamRef.current.getTracks().forEach((track) => track.stop());
-  }, []);
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   const startCamera = async () => {
     setMessage("");
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error("Camera access is unavailable. Use image upload instead.");
+        throw new Error("Camera access is unavailable. Upload an image instead.");
       }
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
@@ -202,33 +203,62 @@ export function ScanToPdfPage() {
       }
       setCameraOn(true);
     } catch (error) {
-      setMessage(error.message || "Could not start the camera. Check browser permission and retry.");
+      setMessage(error.message || "Could not start the camera. Check browser permission.");
     }
   };
 
-  const addImage = (file) => {
-    if (!file || !file.type.startsWith("image/")) return;
-    if (file.size > 20 * 1024 * 1024) {
-      setMessage("A file is larger than 20 MB. Choose a smaller image.");
+  const recognizeImage = async (file) => {
+    if (!file || !file.type.startsWith("image/")) {
+      setMessage("Choose an image from your camera or device.");
       return;
     }
-    setPages((current) => {
-      if (current.length >= 20) {
-        setMessage("A PDF can contain up to 20 pages at a time.");
-        return current;
-      }
-      return [...current, {
-        id: window.crypto?.randomUUID?.() || String(Date.now()) + Math.random(),
-        src: URL.createObjectURL(file),
-        name: file.name || "Scanned page",
-        rotation: 0,
-      }];
-    });
-    if (pdfUrl) {
-      URL.revokeObjectURL(pdfUrl);
-      setPdfUrl("");
+    if (file.size > 20 * 1024 * 1024) {
+      setMessage("The image is larger than 20 MB. Choose a smaller image.");
+      return;
     }
-    setMessage("");
+    setWorking(true);
+    setProgress(0);
+    setMessage("Preparing OCR…");
+    setFileName(file.name || "Camera capture");
+    setExtractedText("");
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(URL.createObjectURL(file));
+    try {
+      const Tesseract = await new Promise((resolve, reject) => {
+        if (window.Tesseract) return resolve(window.Tesseract);
+        const existing = document.querySelector('script[data-pwfb-ocr="true"]');
+        if (existing) {
+          existing.addEventListener("load", () => window.Tesseract ? resolve(window.Tesseract) : reject(new Error("OCR engine failed to start.")), { once: true });
+          existing.addEventListener("error", () => reject(new Error("Could not load OCR. Check your internet connection and retry.")), { once: true });
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+        script.dataset.pwfbOcr = "true";
+        script.onload = () => window.Tesseract ? resolve(window.Tesseract) : reject(new Error("OCR engine failed to start."));
+        script.onerror = () => reject(new Error("Could not load OCR. Check your internet connection and retry."));
+        document.head.appendChild(script);
+      });
+      const result = await Tesseract.recognize(file, "eng", {
+        logger: (event) => {
+          if (event.status === "recognizing text") {
+            const percent = Math.round((event.progress || 0) * 100);
+            setProgress(percent);
+            setMessage("Reading text… " + percent + "%");
+          } else if (event.status) {
+            setMessage(event.status === "loading tesseract core" ? "Loading OCR engine…" : "Preparing text recognition…");
+          }
+        },
+      });
+      const text = result.data?.text?.trim() || "";
+      setExtractedText(text);
+      setProgress(100);
+      setMessage(text ? "Text extraction complete. Review and edit the result below." : "No readable text was detected. Try a clearer, well-lit image.");
+    } catch (error) {
+      setMessage(error.message || "Text extraction failed. Please try again.");
+    } finally {
+      setWorking(false);
+    }
   };
 
   const capturePage = () => {
@@ -238,7 +268,7 @@ export function ScanToPdfPage() {
       return;
     }
     const canvas = document.createElement("canvas");
-    const scale = Math.min(1, 1800 / Math.max(video.videoWidth, video.videoHeight));
+    const scale = Math.min(1, 2200 / Math.max(video.videoWidth, video.videoHeight));
     canvas.width = Math.round(video.videoWidth * scale);
     canvas.height = Math.round(video.videoHeight * scale);
     const context = canvas.getContext("2d");
@@ -248,150 +278,79 @@ export function ScanToPdfPage() {
     }
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     canvas.toBlob((blob) => {
-      if (!blob) {
-        setMessage("The camera image could not be saved. Try again.");
-        return;
-      }
-      addImage(new File([blob], "camera-page-" + (pages.length + 1) + ".jpg", {
-        type: "image/jpeg",
-      }));
-    }, "image/jpeg", 0.9);
+      if (blob) recognizeImage(new File([blob], "PWFB-camera-scan.jpg", { type: "image/jpeg" }));
+      else setMessage("The camera image could not be saved. Try again.");
+    }, "image/jpeg", 0.94);
   };
 
-  const uploadImages = (event) => {
-    const files = Array.from(event.target.files || []);
-    event.target.value = "";
-    files.forEach(addImage);
-  };
-
-  const removePage = (id) => {
-    setPages((current) => {
-      const item = current.find((page) => page.id === id);
-      if (item) URL.revokeObjectURL(item.src);
-      return current.filter((page) => page.id !== id);
-    });
-  };
-
-  const movePage = (id, delta) => {
-    setPages((current) => {
-      const index = current.findIndex((page) => page.id === id);
-      const nextIndex = index + delta;
-      if (index < 0 || nextIndex < 0 || nextIndex >= current.length) return current;
-      const copy = [...current];
-      [copy[index], copy[nextIndex]] = [copy[nextIndex], copy[index]];
-      return copy;
-    });
-  };
-
-  const createPdf = async () => {
-    if (!pages.length) {
-      setMessage("Capture or upload at least one page before creating a PDF.");
-      return;
-    }
-    setWorking(true);
-    setMessage("");
+  const copyText = async () => {
+    if (!extractedText) return;
     try {
-      const blob = await buildScannedPdf(pages);
-      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-      const url = URL.createObjectURL(blob);
-      setPdfUrl(url);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "PWFB-document-scan-" + new Date().toISOString().slice(0, 10) + ".pdf";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setMessage("PDF created successfully from " + pages.length + " page(s).");
-    } catch (error) {
-      setMessage(error.message || "PDF creation failed. Try a smaller image.");
-    } finally {
-      setWorking(false);
+      await navigator.clipboard.writeText(extractedText);
+      setMessage("Extracted text copied to clipboard.");
+    } catch {
+      setMessage("Clipboard access is unavailable. Select the text and copy it manually.");
     }
+  };
+
+  const downloadText = () => {
+    if (!extractedText) return;
+    const blob = new Blob([extractedText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = (fileName.replace(/\.[^.]+$/, "") || "PWFB-scan") + ".txt";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="scan-pdf-page">
+    <div className="scan-pdf-page scan-text-page">
       <div className="scan-pdf-heading">
         <div>
           <p className="auth-eyebrow">DOCUMENT TOOLS</p>
-          <h2>Scan documents to PDF</h2>
-          <p>Standalone page, separate from the daily-analysis cards.</p>
+          <h2>Scan to Text</h2>
+          <p>Capture a document or upload an image to extract editable text directly in PWFB Financial Potal.</p>
         </div>
-        <span className="scan-page-count">{pages.length} / 20 pages</span>
       </div>
       <div className="scan-camera-panel">
-        <video
-          ref={videoRef}
-          className={cameraOn ? "scan-video" : "scan-video scan-video-hidden"}
-          playsInline muted aria-label="Live document camera preview"
-        />
-        {!cameraOn && (
-          <div className="scan-camera-placeholder">
-            <strong>Camera is ready when you are</strong>
-            <span>Allow camera access, or upload images from your device.</span>
-          </div>
-        )}
+        <video ref={videoRef} className={cameraOn ? "scan-video" : "scan-video scan-video-hidden"}
+          playsInline muted aria-label="Live document camera preview" />
+        {!cameraOn && <div className="scan-camera-placeholder">
+          <strong>Scan a document into text</strong>
+          <span>Use your camera or select an image from your device. No WPS or external app is required.</span>
+        </div>}
         <div className="scan-camera-actions">
-          {!cameraOn ? (
-            <button type="button" className="scan-primary-button" onClick={startCamera}>Start camera</button>
-          ) : (
-            <>
-              <button type="button" className="scan-primary-button" onClick={capturePage}>Capture page</button>
-              <button type="button" className="scan-secondary-button" onClick={stopCamera}>Stop camera</button>
-            </>
-          )}
+          {!cameraOn ? <button type="button" className="scan-primary-button" onClick={startCamera}>Open camera</button> : <>
+            <button type="button" className="scan-primary-button" onClick={capturePage} disabled={working}>Capture &amp; extract text</button>
+            <button type="button" className="scan-secondary-button" onClick={stopCamera}>Stop camera</button>
+          </>}
           <label className="scan-secondary-button">
-            Upload image pages
-            <input type="file" accept="image/*" multiple onChange={uploadImages} />
+            Upload image
+            <input type="file" accept="image/*" capture="environment" disabled={working}
+              onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) recognizeImage(file); }} />
           </label>
         </div>
       </div>
-      {pages.length > 0 && (
-        <section className="scan-pages-panel">
-          <div className="scan-pages-heading">
-            <div>
-              <h3>Scanned pages</h3>
-              <p>Rotate, reorder or remove pages before creating the PDF.</p>
-            </div>
-            <button type="button" className="scan-secondary-button" onClick={() => {
-              pages.forEach((page) => URL.revokeObjectURL(page.src));
-              setPages([]);
-              if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-              setPdfUrl("");
-              setMessage("All scanned pages cleared.");
-            }}>Clear all</button>
-          </div>
-          <div className="scan-page-grid">
-            {pages.map((page, index) => (
-              <article className="scan-page-card" key={page.id}>
-                <img
-                  src={page.src}
-                  alt={"Scanned page " + (index + 1)}
-                  style={{ transform: "rotate(" + page.rotation + "deg)" }}
-                />
-                <div><strong>Page {index + 1}</strong><small>{page.name}</small></div>
-                <div className="scan-page-actions">
-                  <button type="button" onClick={() => movePage(page.id, -1)} disabled={index === 0}>↑</button>
-                  <button type="button" onClick={() => movePage(page.id, 1)} disabled={index === pages.length - 1}>↓</button>
-                  <button type="button" onClick={() => setPages((current) => current.map((item) =>
-                    item.id === page.id ? { ...item, rotation: (item.rotation + 90) % 360 } : item
-                  ))}>Rotate</button>
-                  <button type="button" onClick={() => removePage(page.id)}>Remove</button>
-                </div>
-              </article>
-            ))}
-          </div>
-          <button type="button" className="scan-primary-button scan-create-pdf" disabled={working} onClick={createPdf}>
-            {working ? "Creating PDF…" : "Create and download PDF"}
-          </button>
-          {pdfUrl && <a className="scan-download-link" href={pdfUrl} download="PWFB-document-scan.pdf">Download PDF again</a>}
-        </section>
-      )}
+      {previewUrl && <section className="scan-pages-panel">
+        <div className="scan-pages-heading"><div><h3>Original image</h3><p>{fileName}</p></div></div>
+        <img className="scan-text-preview" src={previewUrl} alt="Document being scanned" />
+      </section>}
+      {working && <div className="scan-status" role="status">Extracting text… {progress}%</div>}
+      <section className="scan-pages-panel scan-text-result">
+        <div className="scan-pages-heading"><div><h3>Extracted text</h3><p>Review and correct OCR results before copying or saving.</p></div></div>
+        <textarea value={extractedText} onChange={(event) => setExtractedText(event.target.value)}
+          placeholder="Your extracted document text will appear here…" rows={14} />
+        <div className="scan-camera-actions">
+          <button type="button" className="scan-primary-button" onClick={copyText} disabled={!extractedText}>Copy text</button>
+          <button type="button" className="scan-secondary-button" onClick={downloadText} disabled={!extractedText}>Download .txt</button>
+          <button type="button" className="scan-secondary-button" onClick={() => { setExtractedText(""); setMessage("Extracted text cleared."); }} disabled={!extractedText}>Clear text</button>
+        </div>
+      </section>
       {message && <p className="scan-status" role="status">{message}</p>}
-      <p className="scan-privacy-note">
-        Images are processed in this browser and are not uploaded to the PWFB database by this page.
-        Save the generated PDF to your device.
-      </p>
+      <p className="scan-privacy-note">OCR runs in your browser. The image and extracted text are not uploaded to the PWFB financial database by this page. OCR may misread figures, so verify important amounts against the original document.</p>
     </div>
   );
 }
